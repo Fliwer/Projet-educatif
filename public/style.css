@@ -1,0 +1,498 @@
+/* Lumo · app enfant v3 : ciel doux, Milo luciole, carte de quêtes, récompenses. */
+:root {
+  --encre: #1F2547;
+  --texte: #4A4F6A;
+  --doux: #8A8FA8;
+  --bord: #E7E4F0;
+  --carte: #FFFFFF;
+
+  --violet: #7B65BD;
+  --violet-ombre: #5E4B9E;
+  --violet-moyen: #B3A2E8;
+  --violet-clair: #F0ECFF;
+  --vert: #34C77B;
+  --vert-ombre: #22A062;
+  --vert-clair: #E2F8EC;
+  --orange: #FF9F1C;
+  --orange-ombre: #DB7F00;
+  --orange-clair: #FFF1DC;
+  --or: #FFC83D;
+  --or-ombre: #E5A50A;
+  --or-clair: #FFF6D6;
+  --corail: #FF8A65;
+  --bleu: #4BA3F5;
+  --bleu-ombre: #2F86D6;
+  --bleu-clair: #E6F2FE;
+
+  --ombre-carte: 0 2px 0 rgba(31, 37, 71, 0.05), 0 12px 32px -10px rgba(31, 37, 71, 0.16);
+  --ressort: cubic-bezier(.3, 1.6, .5, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body {
+  background: linear-gradient(180deg, #EEEAFF 0%, #F7F4FF 35%, #FFF7EC 100%) fixed;
+  color: var(--texte);
+  font-family: "Nunito Sans", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+  overflow-x: hidden;
+}
+input { -webkit-user-select: text; user-select: text; }
+#app { overflow-x: clip; max-width: 560px; min-height: 100dvh; margin: 0 auto; padding: 14px 16px 150px; display: flex; flex-direction: column; gap: 16px; }
+#app.plein { padding: 0; max-width: none; }
+
+h1, h2, .titre { font-family: "Fredoka", Arial, sans-serif; font-weight: 600; color: var(--encre); line-height: 1.12; letter-spacing: -0.2px; }
+h1 { font-size: 32px; }
+h2 { font-size: 24px; }
+
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; }
+
+.carte { background: var(--carte); border-radius: 22px; box-shadow: var(--ombre-carte); }
+
+/* ---------- Boutons en relief ---------- */
+.btn {
+  --c: var(--vert); --o: var(--vert-ombre);
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  font: 900 18px/1 "Nunito Sans", Arial, sans-serif; letter-spacing: 1.2px; text-transform: uppercase;
+  color: #fff; background: var(--c);
+  border: none; border-radius: 18px; padding: 18px 20px;
+  box-shadow: 0 5px 0 var(--o), inset 0 2px 0 rgba(255, 255, 255, 0.22);
+  cursor: pointer; touch-action: manipulation; transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+}
+.btn .ic { font-size: 22px; }
+.btn:hover:not(:disabled) { filter: brightness(1.04); }
+.btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--o), inset 0 2px 0 rgba(255, 255, 255, 0.22); }
+.btn:disabled { --c: #E9E7F0; --o: #D6D3E0; color: #A9A7B8; cursor: default; }
+.btn.orange { --c: var(--orange); --o: var(--orange-ombre); }
+.btn.violet { --c: var(--violet); --o: var(--violet-ombre); }
+.btn.bleu { --c: var(--bleu); --o: var(--bleu-ombre); }
+.btn.blanc { --c: #fff; --o: var(--bord); color: var(--violet); border: 2px solid var(--bord); }
+button:focus-visible, input:focus-visible, .noeud:focus-visible { outline: 3px solid var(--bleu); outline-offset: 3px; }
+
+.icone-btn {
+  display: grid; place-items: center; flex: none;
+  width: 46px; height: 46px; border-radius: 15px; font-size: 22px; color: var(--violet);
+  background: #fff; border: 2px solid var(--bord); box-shadow: 0 3px 0 var(--bord);
+  cursor: pointer; transition: transform 0.08s, box-shadow 0.08s;
+}
+.icone-btn:active { transform: translateY(3px); box-shadow: none; }
+.icone-btn.plat { border: none; box-shadow: none; background: none; color: #B4B1C6; font-size: 26px; width: 40px; }
+
+/* ---------- Pastilles ---------- */
+.haut { display: flex; align-items: center; gap: 8px; }
+.haut .espace { flex: 1; }
+.pastille {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px 7px 10px;
+  background: #fff; border-radius: 999px; box-shadow: var(--ombre-carte);
+  font-weight: 900; font-size: 17px; color: var(--encre);
+}
+.pastille .ic { font-size: 22px; }
+.pastille.flamme .ic { color: var(--orange); }
+.pastille.etoiles .ic { color: var(--or); filter: drop-shadow(0 1px 0 var(--or-ombre)); }
+.pastille.bump { animation: bump 0.4s var(--ressort); }
+
+/* ---------- Milo ---------- */
+.pip { flex: none; width: 96px; height: 99px; overflow: visible; animation: flotte 3.2s ease-in-out infinite; transform-origin: 50% 92%; }
+.pip.mini { width: 64px; height: 66px; }
+.pip.grand { width: 150px; height: 155px; }
+.pip.geant { width: 190px; height: 196px; }
+.pip .paupieres { animation: cligne 4.6s infinite; transform-origin: 50% 40%; transform-box: fill-box; }
+.pip .lueur { animation: lueur 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+.pip[data-humeur="joie"] .bras-d { animation: salut 0.5s ease-in-out 3; transform-origin: 0% 100%; transform-box: fill-box; }
+.pip[data-humeur="dort"] { animation-duration: 5s; }
+.pip .zzz { animation: zzz 2.4s ease-in-out infinite; font: 700 14px "Fredoka", sans-serif; fill: var(--violet); }
+.pip.saute { animation: saute 0.65s ease-out; }
+.pip.penche { animation: penche 0.8s ease-in-out; }
+.pip-btn { background: none; border: none; padding: 0; cursor: pointer; flex: none; }
+
+.pip-bloc { display: flex; align-items: flex-end; gap: 10px; }
+.bulle {
+  position: relative; flex: 1;
+  background: #fff; border-radius: 20px; padding: 14px 16px;
+  font-size: 19px; font-weight: 800; color: var(--encre);
+  box-shadow: var(--ombre-carte);
+}
+.bulle::after {
+  content: ""; position: absolute; left: -9px; bottom: 24px;
+  border: 10px solid transparent; border-right-color: #fff; border-left: 0;
+}
+.bulle.consigne { font-family: "Fredoka", Arial, sans-serif; font-weight: 600; font-size: 28px; line-height: 1.18; padding-right: 58px; min-height: 76px; display: flex; align-items: center; }
+.lire {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer;
+  background: var(--bleu-clair); color: var(--bleu); font-size: 22px; display: grid; place-items: center;
+}
+.lire:active { transform: translateY(-50%) scale(0.92); }
+
+/* ---------- Barre de progression ---------- */
+.barre-haut { display: flex; align-items: center; gap: 10px; }
+.progres { flex: 1 1 auto; height: 18px; background: #E9E6F2; border-radius: 999px; overflow: hidden; }
+.progres > div {
+  height: 100%; border-radius: 999px; background: var(--vert); min-width: 18px;
+  position: relative; transition: width 0.6s var(--ressort);
+}
+.progres > div::after {
+  content: ""; position: absolute; left: 8px; right: 8px; top: 4px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.4);
+}
+.progres.or > div { background: linear-gradient(90deg, #FFB800, var(--or)); }
+.progres.vide > div { min-width: 0; }
+
+/* ---------- Écran code ---------- */
+.ecran-code {
+  min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  padding: 32px 16px calc(32px + env(safe-area-inset-bottom));
+  background: radial-gradient(120% 70% at 50% 0%, #6C5BC4 0%, #3B2F7A 55%, #231C52 100%);
+  position: relative; overflow: hidden;
+}
+.ciel-etoiles { position: absolute; inset: 0; pointer-events: none; }
+.ciel-etoiles i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: scintille 3s ease-in-out infinite; }
+.logo-bloc { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; text-align: center; }
+.logo { font: 600 60px/1 "Fredoka", Arial, sans-serif; color: #fff; letter-spacing: 1px; text-shadow: 0 0 28px rgba(255, 224, 102, 0.55); }
+.slogan { color: #D9D1FF; font-weight: 700; font-size: 17px; }
+.code-carte { width: 100%; max-width: 420px; padding: 22px 20px; display: flex; flex-direction: column; gap: 18px; position: relative; }
+.code-titre { text-align: center; font-weight: 800; color: var(--encre); font-size: 19px; }
+.code-titre.erreur { color: var(--violet-ombre); }
+.otp { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; cursor: text; }
+.otp input { position: absolute; inset: 0; opacity: 0; font-size: 16px; border: none; color: transparent; caret-color: transparent; }
+.case {
+  height: 58px; border-radius: 14px; border: 2px solid var(--bord); background: #F8F7FC;
+  display: grid; place-items: center; font: 600 28px "Fredoka", sans-serif; color: var(--encre);
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+.case.pleine { background: #fff; border-color: var(--violet-moyen); animation: bump 0.25s var(--ressort); }
+.case.active { border-color: var(--violet); box-shadow: 0 0 0 4px var(--violet-clair); }
+.demo { color: #B9B0EE; font-weight: 700; font-size: 15px; position: relative; text-align: center; }
+.demo b { color: #fff; letter-spacing: 2px; }
+
+/* ---------- Accueil ---------- */
+.hero {
+  position: relative; overflow: hidden; border-radius: 26px; padding: 18px 16px 18px 8px;
+  background: radial-gradient(130% 110% at 0% 0%, #7E6CD6 0%, #5543A8 60%, #3F3290 100%);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px; box-shadow: 0 14px 30px -12px rgba(63, 50, 144, 0.55);
+}
+.hero .ciel-etoiles i { width: 3px; height: 3px; opacity: 0.7; }
+.hero .bulle { box-shadow: none; }
+.hero .bulle::after { bottom: 28px; }
+.salut { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 15px; color: var(--violet); text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 2px; }
+
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mini-carte {
+  display: flex; flex-direction: column; gap: 8px; padding: 14px; text-align: left; border: none;
+  font: inherit; color: var(--encre); cursor: default;
+}
+button.mini-carte { cursor: pointer; transition: transform 0.1s; }
+button.mini-carte:active { transform: scale(0.97); }
+.mini-carte .entete { display: flex; align-items: center; gap: 10px; }
+.mini-carte strong { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 19px; display: block; line-height: 1.1; }
+.mini-carte small { color: var(--doux); font-weight: 800; font-size: 14px; }
+.badge-niveau { width: 42px; height: 46px; flex: none; }
+.maison-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; font-size: 26px; color: #fff; background: linear-gradient(135deg, #FFB547, var(--orange)); box-shadow: 0 3px 0 var(--orange-ombre); }
+.maison-barre { display: flex; gap: 3px; }
+.maison-barre i { flex: 1; height: 8px; border-radius: 4px; background: #EEEAF6; }
+.maison-barre i.on { background: var(--orange); }
+
+.section-titre { display: flex; align-items: baseline; justify-content: space-between; margin-top: 4px; }
+.section-titre h2 { font-size: 22px; }
+.section-titre span { color: var(--doux); font-weight: 800; font-size: 15px; }
+
+/* Carte de quêtes */
+.carte-quetes { position: relative; width: 100%; }
+.carte-quetes .route { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.etape { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; }
+.noeud {
+  position: relative; width: 78px; height: 74px; border-radius: 50%; border: none; cursor: pointer; flex: none;
+  display: grid; place-items: center; font-size: 34px; color: var(--violet);
+  background: #fff; box-shadow: 0 7px 0 #DCD6EE, 0 12px 20px -8px rgba(31, 37, 71, 0.25);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.noeud:active { transform: translateY(6px); box-shadow: 0 1px 0 #DCD6EE; }
+.noeud.fait { background: linear-gradient(180deg, #FFD45E, var(--or)); color: #fff; box-shadow: 0 7px 0 var(--or-ombre); cursor: default; font-size: 38px; }
+.noeud.fait .ic { filter: drop-shadow(0 2px 0 rgba(176, 120, 0, 0.5)); }
+.noeud.actuel { width: 92px; height: 88px; font-size: 42px; color: #fff; background: linear-gradient(180deg, #48D68C, var(--vert)); box-shadow: 0 8px 0 var(--vert-ombre), 0 16px 26px -8px rgba(34, 160, 98, 0.55); }
+.noeud.actuel::before {
+  content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 4px solid rgba(52, 199, 123, 0.35);
+  animation: onde 1.8s ease-out infinite;
+}
+.noeud.coffre { background: #fff; width: 96px; height: 92px; }
+.noeud.coffre.ouvert { background: radial-gradient(circle at 50% 45%, #FFF6D6, #FFE7A0); box-shadow: 0 8px 0 var(--or-ombre), 0 0 30px rgba(255, 200, 61, 0.7); animation: pulse 1.8s ease-in-out infinite; }
+.noeud.coffre svg { width: 66px; height: 66px; }
+.noeud.gigote { animation: gigote 0.5s ease-in-out; }
+.etiquette {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 150px;
+  font-family: "Fredoka", Arial, sans-serif; font-weight: 600; font-size: 17px; line-height: 1.15; color: var(--encre);
+}
+.etiquette.droite { left: calc(100% + 12px); text-align: left; }
+.etiquette.gauche { right: calc(100% + 12px); text-align: right; }
+.etiquette small { display: block; font-family: "Nunito Sans", Arial, sans-serif; font-weight: 900; font-size: 12px; color: var(--violet); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 2px; }
+.etape.fait .etiquette { color: var(--doux); }
+.etape.fait .etiquette small { color: var(--or-ombre); }
+.commencer {
+  position: absolute; bottom: calc(100% + 16px); left: 50%; transform: translateX(-50%); white-space: nowrap;
+  background: #fff; border-radius: 14px; padding: 8px 14px; box-shadow: var(--ombre-carte);
+  font-weight: 900; color: var(--vert-ombre); text-transform: uppercase; letter-spacing: 1.2px; font-size: 14px;
+  animation: rebond 1.6s ease-in-out infinite; pointer-events: none;
+}
+.commencer::after { content: ""; position: absolute; left: 50%; bottom: -8px; margin-left: -8px; border: 8px solid transparent; border-top-color: #fff; border-bottom: 0; }
+
+.vide { text-align: center; color: var(--doux); font-weight: 700; }
+.lien { background: none; border: none; color: #A9A5C2; font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 15px; align-self: center; margin-top: 8px; }
+
+/* ---------- Mission ---------- */
+.scene { position: relative; border-radius: 24px; overflow: hidden; height: 168px; display: flex; justify-content: center; align-items: center; box-shadow: var(--ombre-carte); }
+.scene.espace { background: radial-gradient(circle at 30% 20%, #34457E, #151D3B 72%); }
+.scene.nature { background: linear-gradient(#BFE6FF, #EAF8FF 70%); }
+.scene > svg { height: 100%; width: auto; }
+.scene .serie {
+  position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255, 255, 255, 0.95); color: var(--orange-ombre); font-weight: 900; font-size: 14px;
+  padding: 5px 10px; border-radius: 999px; animation: pop 0.4s var(--ressort);
+}
+.scene .serie .ic { color: var(--orange); font-size: 17px; }
+.piece { transform-box: fill-box; transform-origin: 50% 50%; }
+.piece.nouvelle { animation: pop 0.55s var(--ressort); }
+.etoile-scintille { animation: scintille 2.4s ease-in-out infinite; }
+.flammes { opacity: 0; }
+.fusee-decolle .flammes { opacity: 1; }
+.flamme-anim { animation: flamme 0.18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0%; }
+
+.choix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choix.un { grid-template-columns: 1fr; }
+.choix.trois .tuile:last-child { grid-column: span 2; }
+.tuile {
+  font: 800 24px "Nunito Sans", Arial, sans-serif; color: var(--encre);
+  background: #fff; border: 2px solid var(--bord); border-radius: 18px; padding: 20px 12px; min-height: 72px;
+  box-shadow: 0 4px 0 var(--bord); cursor: pointer; touch-action: manipulation;
+  transition: transform 0.08s, box-shadow 0.08s, background 0.15s, border-color 0.15s;
+}
+.choix.un .tuile { font-size: 21px; }
+.tuile:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 var(--bord); }
+.tuile:disabled { cursor: default; }
+.tuile.choisie { border-color: var(--bleu); background: var(--bleu-clair); color: #1C6FC0; box-shadow: 0 4px 0 #9CCAF5; transform: translateY(-2px); }
+.tuile.bonne { border-color: var(--vert); background: var(--vert-clair); color: var(--vert-ombre); box-shadow: 0 4px 0 var(--vert); animation: bump 0.4s var(--ressort); }
+.tuile.mauvaise { border-color: var(--violet-moyen); background: var(--violet-clair); color: var(--violet-ombre); box-shadow: 0 4px 0 var(--violet-moyen); animation: secoue 0.4s; }
+.tuile.revelee { border-color: var(--vert); border-style: dashed; color: var(--vert-ombre); }
+.saisie {
+  width: 100%; font: 600 30px "Fredoka", Arial, sans-serif; text-align: center; color: var(--encre);
+  border: 2px solid var(--bord); border-radius: 18px; padding: 16px; background: #fff; box-shadow: 0 4px 0 var(--bord);
+}
+.saisie:focus { border-color: var(--bleu); outline: none; box-shadow: 0 4px 0 #9CCAF5; }
+.saisie.bonne { border-color: var(--vert); background: var(--vert-clair); color: var(--vert-ombre); }
+.saisie.mauvaise { border-color: var(--violet-moyen); background: var(--violet-clair); animation: secoue 0.4s; }
+
+/* ---------- Bandeau du bas ---------- */
+.pied {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px);
+  box-shadow: 0 -10px 30px -12px rgba(31, 37, 71, 0.18);
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.pied-int { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.pied.bravo { background: var(--vert-clair); animation: monte 0.28s ease-out; }
+.pied.doux { background: var(--violet-clair); animation: monte 0.28s ease-out; }
+.resultat { display: flex; align-items: center; gap: 12px; }
+.resultat .rond { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; color: #fff; flex: none; animation: pop 0.4s var(--ressort); }
+.bravo .rond { background: var(--vert); box-shadow: 0 3px 0 var(--vert-ombre); }
+.doux .rond { background: var(--violet); box-shadow: 0 3px 0 var(--violet-ombre); }
+.resultat strong { font-family: "Fredoka", Arial, sans-serif; font-weight: 600; font-size: 26px; display: block; line-height: 1.1; }
+.bravo .resultat { color: var(--vert-ombre); }
+.doux .resultat { color: var(--violet-ombre); }
+.resultat p { font-weight: 800; font-size: 17px; }
+
+/* ---------- Cinématique de fin ---------- */
+.cinematique { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; overflow: hidden; cursor: pointer; }
+.cine-sol { align-self: stretch; height: 24vh; flex: none; margin-top: -2px; }
+.espace .cine-sol { background: #26325C; }
+.nature .cine-sol { background: #7ED389; }
+.cinematique.espace { background: radial-gradient(120% 80% at 50% 30%, #34457E, #121933 75%); }
+.cinematique.nature { background: linear-gradient(#A9DCFF, #E9F8FF 70%); }
+.cine-scene { width: min(100vw, 520px); flex: none; }
+.cine-scene svg { width: 100%; height: auto; overflow: visible; }
+.compte { position: absolute; top: 14%; left: 0; right: 0; text-align: center; font: 600 64px/1.1 "Fredoka", sans-serif; color: #fff; text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3); padding: 0 16px; }
+.nature .compte { color: var(--encre); text-shadow: 0 4px 24px rgba(255, 255, 255, 0.8); font-size: 44px; }
+.compte.pop { animation: grossit 0.6s var(--ressort); }
+.passer { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 0; right: 0; text-align: center; color: rgba(255, 255, 255, 0.5); font-weight: 700; font-size: 14px; }
+.nature .passer { color: rgba(31, 37, 71, 0.4); }
+.papillon { animation: papillon 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+/* ---------- Victoire ---------- */
+.victoire { position: relative; display: grid; place-items: center; height: 240px; margin: 4px -16px 0; overflow: hidden; }
+.rayons {
+  position: absolute; width: 420px; height: 420px; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 200, 61, 0.32) 0 9deg, transparent 9deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 62%); mask: radial-gradient(circle, #000 18%, transparent 62%);
+  animation: tourne 22s linear infinite;
+}
+.victoire .pip { position: relative; }
+.victoire-texte { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.victoire-texte p { font-weight: 800; color: var(--doux); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { padding: 14px 6px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; animation: pop 0.45s var(--ressort) backwards; }
+.stat:nth-child(2) { animation-delay: 0.12s; }
+.stat:nth-child(3) { animation-delay: 0.24s; }
+.stat .ic { font-size: 30px; color: var(--c); }
+.stat .val { font: 600 30px/1.1 "Fredoka", sans-serif; color: var(--encre); }
+.stat .lbl { font-weight: 800; font-size: 13px; color: var(--doux); text-transform: uppercase; letter-spacing: 0.8px; }
+.niveau-ligne { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.niveau-ligne .milieu { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.niveau-ligne strong { font-family: "Fredoka", sans-serif; font-weight: 600; color: var(--encre); }
+.niveau-ligne small { color: var(--doux); font-weight: 800; font-size: 14px; }
+
+/* ---------- Modales (pause, cadeau, niveau) ---------- */
+.modale-fond {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px;
+  background: rgba(31, 26, 70, 0.55); backdrop-filter: blur(4px); animation: fondu 0.2s ease-out;
+}
+.modale-fond.sort { animation: fondu 0.2s ease-in reverse forwards; }
+.modale {
+  width: 100%; max-width: 400px; background: #fff; border-radius: 28px; padding: 24px 20px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4); animation: pop 0.4s var(--ressort);
+}
+.modale p { font-weight: 700; color: var(--texte); }
+.modale .boutons { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+.modale-fond.cadeau { background: radial-gradient(circle at 50% 40%, rgba(108, 91, 196, 0.85), rgba(31, 26, 70, 0.92)); }
+.modale-fond.cadeau .modale { background: none; box-shadow: none; color: #fff; }
+.modale-fond.cadeau h2, .modale-fond.cadeau p { color: #fff; }
+.surtitre { font: 600 30px "Fredoka", sans-serif; color: #fff; }
+.aide { color: #D9D1FF !important; font-size: 16px; }
+.boite { background: none; border: none; cursor: pointer; width: 190px; height: 190px; animation: secoue-boite 1.6s ease-in-out infinite; }
+.boite svg { width: 100%; height: 100%; overflow: visible; }
+.boite .couvercle { transition: transform 0.45s cubic-bezier(.4, -0.3, .6, 1.4), opacity 0.45s; transform-box: fill-box; transform-origin: 50% 100%; }
+.boite.ouvre { animation: none; }
+.boite.ouvre .couvercle { transform: translateY(-90px) rotate(-25deg); opacity: 0; }
+.revele { position: relative; display: grid; place-items: center; width: 240px; height: 220px; overflow: visible; }
+.modale-fond { overflow: hidden; }
+.revele .rayons { width: 360px; height: 360px; }
+.objet-grand { position: relative; width: 190px; height: 170px; overflow: visible; animation: grossit 0.7s var(--ressort); filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25)); }
+.badge-grand { position: relative; width: 150px; height: 165px; animation: grossit 0.7s var(--ressort); }
+
+/* ---------- Chez Milo ---------- */
+.chambre { position: relative; border-radius: 26px; overflow: hidden; box-shadow: var(--ombre-carte); }
+.chambre svg { display: block; width: 100%; height: auto; }
+.pip-maison { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); width: 30%; background: none; border: none; cursor: pointer; padding: 0; }
+.pip-maison .pip { width: 100%; height: auto; }
+.objet { cursor: pointer; transform-box: fill-box; transform-origin: 50% 100%; }
+.objet.cache { opacity: 0; }
+.objet.nouveau { animation: apparait 0.9s var(--ressort) backwards, brille 1.4s ease-in-out 0.9s 3; }
+.objet.touche { animation: gigote 0.5s ease-in-out; }
+.silhouette { opacity: 0.09; pointer-events: none; }
+.collection { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; }
+.collection i { height: 10px; border-radius: 5px; background: #EAE6F4; }
+.collection i.on { background: linear-gradient(90deg, #FFB547, var(--orange)); }
+
+/* ---------- Effets ---------- */
+.confetti { position: fixed; top: -14px; width: 10px; height: 14px; border-radius: 3px; pointer-events: none; z-index: 30; animation: tombe linear forwards; }
+.etincelle { position: fixed; width: 10px; height: 10px; border-radius: 50%; pointer-events: none; z-index: 30; }
+.etoile-vol { position: fixed; z-index: 31; font-size: 34px; color: var(--or); pointer-events: none; filter: drop-shadow(0 2px 0 var(--or-ombre)) drop-shadow(0 0 10px rgba(255, 200, 61, 0.8)); }
+
+/* ---------- Animations ---------- */
+@keyframes flotte { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes cligne { 0%, 93%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
+@keyframes lueur { 0%, 100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.35); opacity: 1; } }
+@keyframes salut { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-22deg); } }
+@keyframes zzz { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -14px); } }
+@keyframes saute { 0% { transform: translateY(0) scale(1); } 30% { transform: translateY(-28px) scale(1.06, 0.96); } 65% { transform: translateY(0) scale(1.08, 0.9); } 100% { transform: translateY(0) scale(1); } }
+@keyframes penche { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-9deg); } 65% { transform: rotate(6deg); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes onde { 0% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes rebond { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -6px); } }
+@keyframes pop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes grossit { 0% { transform: scale(0.2); opacity: 0; } 60% { opacity: 1; } 100% { transform: scale(1); } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes scintille { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@keyframes secoue { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+@keyframes secoue-boite { 0%, 70%, 100% { transform: rotate(0) scale(1); } 76% { transform: rotate(-6deg) scale(1.04); } 84% { transform: rotate(6deg) scale(1.04); } 92% { transform: rotate(-3deg); } }
+@keyframes monte { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes fondu { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tombe { to { transform: translate(var(--dx, 0), 105vh) rotate(var(--rot, 720deg)); } }
+@keyframes decolle { 0% { transform: translateY(0); } 12% { transform: translate(2px, 3px); } 18% { transform: translate(-2px, 2px); } 100% { transform: translateY(-640px); } }
+@keyframes flamme { from { transform: scaleY(0.85); } to { transform: scaleY(1.2); } }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@keyframes papillon { 0%, 100% { transform: translate(0, 0) scaleX(1); } 25% { transform: translate(10px, -12px) scaleX(0.6); } 50% { transform: translate(18px, -4px) scaleX(1); } 75% { transform: translate(6px, -16px) scaleX(0.6); } }
+@keyframes apparait { 0% { transform: translateY(-40px) scale(0); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+@keyframes brille { 0%, 100% { filter: none; } 50% { filter: drop-shadow(0 0 8px #FFC83D) brightness(1.15); } }
+@keyframes gigote { 0%, 100% { transform: rotate(0) scale(1); } 30% { transform: rotate(-6deg) scale(1.08); } 65% { transform: rotate(5deg) scale(1.04); } }
+.fusee-decolle { animation: decolle 2.2s cubic-bezier(.55, 0, .85, .35) forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.bulle.libre::after { display: none; }
+
+/* ---------- Barre de navigation du bas ---------- */
+.nav-bas {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; justify-content: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(8px);
+  box-shadow: 0 -10px 30px -12px rgba(31, 37, 71, 0.18);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+}
+.onglet {
+  flex: 1; max-width: 220px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: 2px solid transparent; border-radius: 16px; padding: 6px 8px; cursor: pointer;
+  font: 900 13px "Nunito Sans", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; color: #A9A5C2;
+}
+.onglet .ic { font-size: 28px; }
+.onglet.actif { color: var(--violet); background: var(--violet-clair); border-color: #DDD5FA; }
+.onglet:active { transform: scale(0.95); }
+.hero .bulle { flex: 1 1 180px; }
+.hero .jouer { margin: 12px 0 0 8px; flex: 1 1 100%; position: relative; text-transform: none; letter-spacing: 0; font-size: 19px; }
+
+/* ---------- Lèvres de Milo quand il parle ---------- */
+.pip .bouche-parle { display: none; transform-box: fill-box; transform-origin: 50% 25%; transform: scaleY(var(--bouche, 0.12)); }
+.pip.parle .bouche-parle { display: inline; }
+.pip.parle .bouche-repos { display: none; }
+
+/* ---------- Jeu : vrai ou faux ---------- */
+.choix.vf .tuile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 12px; font-size: 22px; }
+.choix.vf .tuile .ic { font-size: 40px; }
+.choix.vf .tuile.vrai .ic { color: var(--vert); }
+.choix.vf .tuile.faux .ic { color: var(--corail); }
+
+/* ---------- Jeu : remettre dans l'ordre ---------- */
+.ordre { display: flex; flex-direction: column; gap: 14px; }
+.ligne-ordre {
+  min-height: 78px; padding: 10px; border-radius: 18px; background: #fff;
+  border: 2px dashed var(--violet-moyen); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; align-content: center;
+  transition: border-color .2s, background .2s;
+}
+.ligne-ordre .indice { color: var(--doux); font-weight: 800; font-size: 15px; width: 100%; text-align: center; }
+.ligne-ordre:not(.vide) .indice { display: none; }
+.ligne-ordre.bonne { border: 2px solid var(--vert); background: var(--vert-clair); }
+.ligne-ordre.mauvaise { border: 2px solid var(--violet-moyen); background: var(--violet-clair); animation: secoue .4s; }
+.reserve { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 56px; }
+.morceau {
+  font: 600 22px "Fredoka", sans-serif; color: var(--encre); background: #fff; cursor: pointer;
+  border: 2px solid var(--bord); border-radius: 14px; padding: 10px 16px; box-shadow: 0 4px 0 var(--bord);
+  touch-action: manipulation;
+}
+.morceau:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--bord); }
+.ligne-ordre .morceau { background: var(--bleu-clair); border-color: #9CCAF5; box-shadow: 0 4px 0 #9CCAF5; color: #1C6FC0; }
+
+/* ---------- Jeu : relier les paires ---------- */
+.associer { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; border-radius: 20px; }
+.associer .colonne { display: flex; flex-direction: column; gap: 10px; }
+.tuile.lien-paire { font-size: 20px; padding: 14px 8px; min-height: 60px; }
+.tuile.lien-paire.relie {
+  border-color: var(--paire); background: color-mix(in srgb, var(--paire) 14%, #fff);
+  box-shadow: 0 4px 0 var(--paire); color: var(--encre);
+}
+.associer.bonne { outline: 3px solid var(--vert); outline-offset: 6px; }
+.associer.mauvaise { animation: secoue .4s; }
+
+/* ---------- Jeu : dictée ---------- */
+.dictee { display: flex; flex-direction: column; gap: 14px; }
+.ecouter {
+  display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+  font: 900 18px "Nunito Sans", sans-serif; color: var(--bleu-ombre); background: var(--bleu-clair);
+  border: 2px solid #9CCAF5; border-radius: 18px; padding: 16px; box-shadow: 0 4px 0 #9CCAF5;
+}
+.ecouter .ic { font-size: 30px; }
+.ecouter:active { transform: translateY(3px); box-shadow: 0 1px 0 #9CCAF5; }
+.tuile.lien-paire.choisie {
+  border-color: var(--violet); background: var(--violet-clair); color: var(--violet-ombre);
+  box-shadow: 0 4px 0 var(--violet-moyen); animation: pulse 1.2s ease-in-out infinite;
+}

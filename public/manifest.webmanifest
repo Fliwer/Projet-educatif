@@ -1,0 +1,10 @@
+{
+  "name": "Lumo",
+  "short_name": "Lumo",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#3B2F7A",
+  "theme_color": "#5543A8",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

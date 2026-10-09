@@ -1,0 +1,9 @@
+node_modules/
+data/
+data-test/
+.env
+.env.*
+!.env.example
+*.log
+test-lancement-*/
+.claude/

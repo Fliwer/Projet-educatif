@@ -1,0 +1,30 @@
+{
+  "name": "lumo-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lumo P1 de test : connecteur MCP + app enfant (données fictives, usage local)",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/web.ts",
+    "mcp": "node src/mcp.ts",
+    "test": "node scripts/test-metier.ts && node scripts/test-monde.ts && node scripts/test-mcp.ts && node scripts/test-voix.ts && node scripts/test-mcp-distant.ts && node scripts/test-sauvegarde.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run format:check && node --check public/app.js && node --check public/monde.js && node --check public/monde-art.js && node --check public/monde-jeux.js && node --check public/milo.js && node --check public/monde-potager.js && node --check public/potager-art.js && node --check public/monde-gestes.js && node --check public/monde-mouvement.js && node --check public/espace-personnel.js",
+    "verify": "npm run check && npm test",
+    "backup": "node scripts/sauvegarder.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.ts\" \"public/*.js\" \"*.json\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\" \"public/*.js\" \"*.json\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  }
+}

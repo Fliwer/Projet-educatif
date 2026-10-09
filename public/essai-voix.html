@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Essai voix de Milo</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Nunito+Sans:wght@700;900&display=swap">
+  <style>
+    body { margin: 0; font-family: "Nunito Sans", Arial, sans-serif; background: linear-gradient(#EEEAFF, #FFF7EC); color: #1F2547; min-height: 100vh; }
+    main { max-width: 520px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 14px; }
+    h1 { font-family: Fredoka, sans-serif; margin: 0; }
+    p { margin: 0; color: #4A4F6A; }
+    textarea { font: 700 17px "Nunito Sans", sans-serif; border-radius: 14px; border: 2px solid #E7E4F0; padding: 12px; min-height: 90px; }
+    button { font: 900 18px "Nunito Sans", sans-serif; border: none; border-radius: 16px; padding: 16px; cursor: pointer; color: #fff; background: #7B65BD; box-shadow: 0 4px 0 #5E4B9E; text-align: left; display: flex; justify-content: space-between; }
+    button small { font-weight: 700; opacity: .85; }
+    button:active { transform: translateY(4px); box-shadow: none; }
+    .choix-voix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .choix-voix label { background: #fff; border: 2px solid #E7E4F0; border-radius: 14px; padding: 14px; font-weight: 900; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+    .choix-voix label:has(input:checked) { border-color: #7B65BD; background: #F0ECFF; color: #5E4B9E; }
+    #etat { font-weight: 800; color: #7B65BD; min-height: 1.4em; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Quelle voix pour Milo ?</h1>
+  <p>Choisis une voix, puis écoute chaque réglage. Dis à Claude la voix et la lettre qui te plaisent.</p>
+  <div class="choix-voix">
+    <label><input type="radio" name="voix" value="W1ou7G9XfVBPXpeVMKAw" checked> Nouvelle voix</label>
+    <label><input type="radio" name="voix" value="0BUmW33oChqaz7OBQhhO"> Première voix</label>
+  </div>
+  <textarea id="texte">Coucou ! C'est moi, Milo ! Ce soir, on a deux super quêtes à faire ensemble. Si tu te trompes, c'est pas grave : on réessaie tout à l'heure. Allez, on y va ?</textarea>
+  <div id="boutons" style="display:flex;flex-direction:column;gap:12px"></div>
+  <p id="etat"></p>
+</main>
+<script>
+  const REGLAGES = [
+    ["A", 1.0, "Voix naturelle"],
+    ["B", 1.05, "Un peu plus vive"],
+    ["C", 1.1, "Petit personnage"],
+    ["D", 1.15, "Petite créature"],
+    ["E", 1.22, "Très cartoon"],
+  ];
+  const etat = document.getElementById("etat");
+  let lecteur = null;
+  const cache = {};
+  async function jouer(vitesse, nom) {
+    const texte = document.getElementById("texte").value.trim();
+    const voix = document.querySelector('input[name="voix"]:checked').value;
+    const cle = voix + "|" + texte;
+    lecteur?.pause();
+    etat.textContent = "Milo prépare sa voix…";
+    try {
+      if (!cache[cle]) {
+        const r = await fetch("/api/voix", { method: "POST", headers: { "Content-Type": "application/json", "X-Lumo-Code": "LUMO01" }, body: JSON.stringify({ texte, voix }) });
+        if (!r.ok) throw new Error((await r.text()));
+        cache[cle] = URL.createObjectURL(await r.blob());
+      }
+      lecteur = new Audio(cache[cle]);
+      lecteur.preservesPitch = false; // la voix monte un peu, comme un petit personnage
+      lecteur.playbackRate = vitesse;
+      await lecteur.play();
+      etat.textContent = `▶ ${voix === "W1ou7G9XfVBPXpeVMKAw" ? "Nouvelle voix" : "Première voix"}, réglage ${nom}`;
+    } catch (e) {
+      etat.textContent = "La voix ne répond pas : " + e.message;
+    }
+  }
+  for (const [nom, vitesse, texte] of REGLAGES) {
+    const b = document.createElement("button");
+    b.innerHTML = `<span>${nom} · ${texte}</span><small>${Math.round((vitesse - 1) * 100) ? "+" + Math.round((vitesse - 1) * 100) + " %" : "réglage d'origine"}</small>`;
+    b.addEventListener("click", () => jouer(vitesse, nom));
+    document.getElementById("boutons").appendChild(b);
+  }
+</script>
+</body>
+</html>

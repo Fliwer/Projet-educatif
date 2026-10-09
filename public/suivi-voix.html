@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suivi de la voix · Lumo</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3efff; color: #292341; font: 18px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: auto; padding: 28px 20px; }
+  h1 { line-height: 1.2; }
+  #bilan { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  article { background: white; padding: 20px; border-radius: 18px; }
+  strong { display: block; font-size: 32px; color: #7054b4; }
+  button, a { font: inherit; color: #65449c; }
+  button { padding: 12px 18px; border: 2px solid #7b65bd; border-radius: 12px; background: white; cursor: pointer; }
+  button:focus-visible, a:focus-visible { outline: 3px solid #7b65bd; outline-offset: 4px; }
+</style>
+<main>
+  <h1>Suivi de la voix de Milo</h1>
+  <p>Les phrases déjà enregistrées sont réutilisées sur ce PC. Les nouvelles phrases demandent une génération à ElevenLabs.</p>
+  <p id="periode" role="status">Chargement du suivi…</p>
+  <div id="bilan"></div>
+  <p><button id="actualiser">Actualiser</button></p>
+  <p>Les caractères envoyés incluent les nouvelles tentatives après une erreur. Ce suivi mesure les demandes de l’app : le solde et les crédits réellement facturés se consultent dans ton compte ElevenLabs.</p>
+  <p>Les lectures réutilisées directement par le navigateur ne sont pas comptées ici. Aucun texte prononcé n’est conservé dans le journal. Ouvrir cette page ne génère aucune voix.</p>
+  <p><a href="/">Retour au jeu</a></p>
+</main>
+<script>
+  async function actualiser() {
+    const bouton = document.getElementById('actualiser');
+    bouton.disabled = true;
+    try {
+      const reponse = await fetch('/api/suivi-voix', { cache: 'no-store' });
+      if (!reponse.ok) throw new Error('Suivi disponible uniquement sur le PC qui lance Lumo.');
+      const suivi = await reponse.json();
+      document.getElementById('periode').textContent = suivi.debut
+        ? `Suivi depuis le ${new Date(suivi.debut).toLocaleString('fr-BE')}.`
+        : 'Le suivi commence avec les prochaines demandes de voix. Les anciens appels ne sont pas comptés.';
+      const cartes = [ ['cache', 'Réutilisations du cache'], ['fichiers', 'Fichiers audio enregistrés'], ['appels', 'Demandes à ElevenLabs'], ['generations', 'Nouvelles voix enregistrées'], ['caracteres', 'Caractères envoyés'], ['erreurs', 'Générations en échec'] ];
+      document.getElementById('bilan').replaceChildren(...cartes.map(([cle, titre]) => {
+        const carte = document.createElement('article');
+        const nombre = document.createElement('strong');
+        nombre.textContent = suivi[cle].toLocaleString('fr-BE');
+        carte.append(nombre, titre);
+        return carte;
+      }));
+    } catch (erreur) { document.getElementById('periode').textContent = erreur.message; }
+    finally { bouton.disabled = false; }
+  }
+  document.getElementById('actualiser').addEventListener('click', actualiser);
+  actualiser();
+</script>
+</html>
