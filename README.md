@@ -1,5 +1,3 @@
-> Parcours actif (9 octobre 2026) : jardin et cuisine mis en pause, sans suppression des données. L’entrée « Mon espace » ouvre désormais un avatar (4 couleurs et écusson), une collection de 3 écussons et un carnet des missions. Les créations et objets précédents sont conservés en souvenirs. Les descriptions des ateliers ci-dessous documentent le module conservé, hors navigation.
-
 # Lumo — prototype renforcé
 
 Jeu éducatif avec Milo, connecteur MCP et validation parentale. **Données fictives uniquement** : les vrais comptes, les accès professionnels et l'hébergement de production restent à construire.
@@ -9,7 +7,7 @@ Jeu éducatif avec Milo, connecteur MCP et validation parentale. **Données fict
 - [Audit du 9 octobre 2026](docs/AUDIT-2026-10-09.md) : défauts corrigés, preuves et risques ouverts.
 - [Architecture](docs/ARCHITECTURE.md) : parents, enfants, professionnels du soin puis enseignants/écoles, offres indépendantes des permissions.
 - [Exploitation](docs/EXPLOITATION.md) : configuration, sauvegarde, restauration et démarrage.
-- [Monde enfant](docs/MONDE-ENFANT.md) : jardin, cuisine, cadeaux, sauvegarde et vérifications.
+- [Monde enfant](docs/MONDE-ENFANT.md) : avatar, collection, progrès et archives.
 
 ## Parcours
 
@@ -17,7 +15,7 @@ Jeu éducatif avec Milo, connecteur MCP et validation parentale. **Données fict
 2. L'assistant prépare un brouillon de 1 à 3 quêtes, chacune de 5 à 8 questions, avec notion et extrait de leçon.
 3. Le parent ouvre l'aperçu, vérifie et valide. Les transports MCP local et distant suivent ce même circuit.
 4. L'enfant joue. Les essais et la progression sont conservés côté serveur ; après deux essais, Milo aide à avancer.
-5. Chaque mission terminée donne un cadeau au choix pour le jardin et la cuisine. L'enfant peut planter, récolter, cuisiner et conserver ses créations.
+5. Chaque mission terminée donne un crédit cadeau : avatar personnalisable, écussons et carnet de progrès.
 6. Le parent consulte le bilan via le connecteur.
 
 La photo reste dans l'assistant. Lumo reçoit le contenu des exercices et l'extrait proposé ; il ne vérifie pas automatiquement la fidélité à la photo.
@@ -47,7 +45,7 @@ npm start
 - `node scripts/preparer-parent.ts demo https://adresse-du-jeu` : crée une connexion fictive séparée et écrit sa clé dans un fichier privé sous le dossier de données.
 - `node scripts/revoquer-parent.ts ID` : révoque une connexion distante et ses brouillons en attente dans la base sélectionnée.
 
-Les installateurs Claude préservent la configuration existante ; fermer Claude complètement avant de les lancer. Codex dispose d'une entrée `lumo` dans sa propre configuration locale. Le relais distant dépend du serveur et du tunnel ; l'existence d'une entrée ne garantit pas leur disponibilité.
+Les installateurs Claude préservent la configuration existante ; fermer Claude complètement avant de les lancer. Chaque client MCP nécessite sa configuration locale. Le relais distant dépend du serveur et du tunnel ; l'existence d'une entrée ne garantit pas leur disponibilité.
 
 ## Voix
 
@@ -60,6 +58,3 @@ La voix de l'appareil peut varier et être fournie par un service distant. Aucun
 `Partager le jeu.cmd` expose une base fictive indépendante via un tunnel temporaire. `Arrêter le partage.cmd` coupe ce partage. Le PC doit rester allumé ; un nouveau tunnel change d'adresse. Les visiteurs utilisant `LUMO01` partagent le profil fictif.
 
 Ne pas partager `.env`, `data/` ou les fichiers de connexion. Avant un pilote réel, traiter les points bloquants de l'audit : authentification et sessions, invitations et droits professionnels, données personnelles, hébergement permanent, sauvegardes externes et surveillance.
-
-
-Mise à jour potager (9 octobre 2026) : scène directe de 12 emplacements, sachets et arrosoir au clic ou glisser-déposer, croissance persistante de 8 minutes après arrosage, récolte vers le panier, mouvements calmes. Les anciennes cultures sont conservées. Voir `docs/MONDE-ENFANT.md` pour les règles et les modules.

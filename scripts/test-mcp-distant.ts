@@ -91,9 +91,8 @@ try {
     await fetch(adresse + "/api/monde", { headers: entetesEnfant })
   ).json()) as any;
   const actionMonde = {
-    action: "planter",
-    parcelle: 0,
-    culture: "fraise",
+    action: "avatar",
+    avatar: { couleur: "bleu", badge: "aucun" },
     version: initialMonde.version,
     requete_id: randomUUID(),
   };
@@ -110,23 +109,32 @@ try {
   );
   const etatsMonde = (await Promise.all(doublonsMonde.map((r) => r.json()))) as any[];
   assert.equal(etatsMonde[0].monde.version, initialMonde.version + 1);
-  assert.ok(etatsMonde.every((r) => Number.isSafeInteger(r.monde.heure_serveur)));
-  const sansHorloge = (r: any) => {
-    const { heure_serveur, ...monde } = r.monde;
-    return { ...r, monde };
-  };
-  assert.deepEqual(
-    sansHorloge(etatsMonde[0]),
-    sansHorloge(etatsMonde[1]),
-    "Un double clic HTTP plante une seule fois",
+  assert.deepEqual(etatsMonde[0], etatsMonde[1], "Un double clic HTTP modifie une seule fois le profil");
+  assert.equal(
+    (
+      await posterMonde({
+        ...actionMonde,
+        requete_id: randomUUID(),
+        avatar: { couleur: "rose", badge: "aucun" },
+      })
+    ).status,
+    409,
   );
-  assert.equal((await posterMonde({ ...actionMonde, requete_id: randomUUID(), parcelle: 1 })).status, 409);
+  assert.equal(
+    (await posterMonde({ ...actionMonde, action: "planter", parcelle: 0, culture: "fraise" })).status,
+    400,
+  );
+  assert.equal((await fetch(adresse + "/monde-potager.js")).status, 404);
   assert.equal((await posterMonde({ ...actionMonde, enfant_id: enfantB.id })).status, 400);
   assert.equal((await posterMonde({ action: "inventaire", quantite: 1000 })).status, 400);
   const mondeB = (await (
     await fetch(adresse + "/api/monde", { headers: { "X-Lumo-Code": enfantB.code } })
   ).json()) as any;
-  assert.deepEqual(mondeB.parcelles, Array(12).fill(null), "Le jardin d'une autre famille reste intact");
+  assert.deepEqual(
+    mondeB.avatar,
+    { couleur: "violet", badge: "aucun" },
+    "L’avatar d’une autre famille reste intact",
+  );
   for (const body of ["null", "[]", "{", JSON.stringify({ question_id: "1", valeur: "42" })]) {
     assert.equal(
       (await fetch(`${adresse}/api/reponses`, { method: "POST", headers: entetesEnfant, body })).status,

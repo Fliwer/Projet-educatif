@@ -102,12 +102,12 @@ Ne pas supposer qu'une bonne consigne pour six ans convient à douze ans. Niveau
 
 Le code actuel garantit des tentatives persistées, une étoile au plus par question réussie et une fin de quête atomique. Une question se termine après une réussite ou deux essais avec aide. Une reconnexion reprend les questions restantes. Une même requête ne compte pas deux fois.
 
-Le premier espace jardin/cuisine est implémenté dans `src/monde.ts` avec une connexion SQLite passée explicitement et un frontend isolé. Son fonctionnement est décrit dans [MONDE-ENFANT.md](MONDE-ENFANT.md). Il comprend :
+L’espace personnel est implémenté dans `src/monde.ts` avec une connexion SQLite passée explicitement et un frontend isolé. Son fonctionnement est décrit dans [MONDE-ENFANT.md](MONDE-ENFANT.md). Il comprend :
 
 - catalogue d'objets avec identifiants stables ;
 - inventaire persistant par enfant ;
 - événement d'attribution unique associé à une quête ;
-- préférences de décor et ambiance validées côté serveur (positions libres futures) ;
+- couleur d’avatar et écusson validés côté serveur ;
 - déblocage contre une attribution gagnée, avec contrôle du solde dans la même transaction ;
 - synchronisation entre appareils avec numéro de version pour détecter les conflits ;
 - suppression/archivage d'un exercice sans retrait des objets déjà gagnés.
@@ -128,7 +128,7 @@ Actuel : `config` et `migrations` pour l'infrastructure ; `formats` pour le cont
 
 Prochaine séparation, au moment d'implémenter les espaces adultes : `identites`, `acces`, `familles`, `professionnels`, `exercices`, `progression`, `recompenses`, `offres`, `audio`. Les transports appellent ces services ; ils ne contiennent pas leurs propres variantes des règles. Les requêtes SQL seront regroupées par domaine, avec une connexion passée explicitement, plutôt que de multiplier les imports du singleton global.
 
-L'espace personnel et son catalogue visuel sont séparés dans `public/monde.js`, `monde-art.js` et `monde.css`. Les écrans d'exercices, l'audio et les helpers historiques restent dans `public/app.js` et pourront être extraits progressivement. Une réécriture de framework n'est pas nécessaire.
+L'espace personnel et son catalogue visuel sont séparés dans `public/espace-personnel.js`, `monde-art.js` et `monde.css`. Les écrans d'exercices, l'audio et les helpers historiques restent dans `public/app.js` et pourront être extraits progressivement. Une réécriture de framework n'est pas nécessaire.
 
 ## 9. Conditions pour un pilote réel
 
@@ -145,4 +145,4 @@ Les droits scolaires, les consentements et les données éventuellement sensible
 
 ## Espace personnel simplifié — 9 octobre 2026
 
-`public/espace-personnel.js` remplace l’entrée UI de `monde.js`. Les routes historiques jardin/cuisine ouvrent l’avatar ; cadeau/carnet ouvrent collection/progrès. Les ateliers restent dans leurs fichiers et leurs données sont conservées. L’avatar est un champ JSON avec défaut compatible, validé côté serveur ; le port d’un écusson exige sa possession. Les achats réutilisent le registre, la transaction, la version et l’UUID existants. Le carnet compte les questions distinctes essayées des missions conservées et affiche les 20 dernières missions ; le total historique des missions terminées vient du compteur enfant. Aucune nouvelle dépendance, aucune nouvelle API payante.
+`public/espace-personnel.js` remplace l’entrée UI de `monde.js`. Les routes historiques jardin/cuisine ouvrent l’avatar ; cadeau/carnet ouvrent collection/progrès. Les ateliers sont retirés du code actif et archivés dans le tag archive/avant-nettoyage-ateliers-2026-10-09 ; leurs données sont conservées. L’avatar est un champ JSON avec défaut compatible, validé côté serveur ; le port d’un écusson exige sa possession. Les achats réutilisent le registre, la transaction, la version et l’UUID existants. Le carnet compte les questions distinctes essayées des missions conservées et affiche les 20 dernières missions ; le total historique des missions terminées vient du compteur enfant. Aucune nouvelle dépendance, aucune nouvelle API payante.

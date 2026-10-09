@@ -33,57 +33,6 @@ export function illustration(id, classe = "") {
   );
 }
 
-/** Même langage visuel que le jardin des missions : fleurs, nuages et formes arrondies. */
-export function decorJardinSvg(soir = false) {
-  const fleurs = [
-    [32, 300, "#FF9F1C"],
-    [74, 312, "#FF8A65"],
-    [132, 292, "#7B65BD"],
-    [782, 307, "#4BA3F5"],
-    [854, 280, "#FF9F1C"],
-    [821, 322, "#FF8A65"],
-  ]
-    .map(
-      ([x, y, c]) =>
-        `<g transform="translate(${x} ${y})"><path d="M0 40V0" stroke="#2EAE6B" stroke-width="6" stroke-linecap="round"/><ellipse cx="-9" cy="23" rx="11" ry="6" fill="#34C77B" transform="rotate(-30 -9 23)"/>${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-12" rx="7" ry="12" fill="${c}" transform="rotate(${a})"/>`).join("")}<circle r="7" fill="#FFF3C4"/></g>`,
-    )
-    .join("");
-  const cloture = Array.from(
-    { length: 14 },
-    (_, i) =>
-      `<path d="M${i * 70 - 10} 230v-49q8-12 16 0v49" fill="#FFF3DC" stroke="#EFCFA5" stroke-width="3"/>`,
-  ).join("");
-  return `<svg class="m-jardin-decor" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <rect width="900" height="420" fill="${soir ? "#BBC9F4" : "#DDF4FF"}"/>
-    <circle cx="99" cy="65" r="38" fill="#FFC83D" opacity=".24"/><circle cx="99" cy="65" r="25" fill="${soir ? "#FFF3C4" : "#FFC83D"}"/>
-    <g fill="#fff" opacity=".95"><ellipse cx="265" cy="54" rx="45" ry="17"/><ellipse cx="290" cy="43" rx="26" ry="18"/><ellipse cx="470" cy="89" rx="36" ry="15"/><ellipse cx="495" cy="79" rx="24" ry="17"/></g>
-    <path d="M0 201Q100 133 235 198T460 182T700 192T900 160V420H0" fill="#B7EBCB"/>
-    <path d="M0 222Q210 169 430 224T900 191V420H0" fill="#9FE0AE"/>
-    <path d="M0 204h900" stroke="#FFF3DC" stroke-width="10"/>${cloture}
-    <path d="M0 264Q180 218 430 265T900 237V420H0" fill="#7ED389"/>
-    <path d="M577 231Q455 282 590 420h112Q528 300 640 231" fill="#EDE5B5"/>
-    <path d="M582 295q19-7 39 0m-43 34q18-7 36 0m-18 42q18-6 37 0" stroke="#D7CEA7" stroke-width="7" stroke-linecap="round"/>
-    <g class="m-maison-jardin" transform="translate(530 28)"><rect x="28" y="115" width="179" height="104" rx="13" fill="#FFEDC1"/><path d="M12 116 115 39 222 116Z" fill="#7B65BD" stroke="#5E4B9E" stroke-width="5" stroke-linejoin="round"/><path d="m39 105 75-54 74 54" fill="none" stroke="#B3A2E8" stroke-width="7" stroke-linecap="round"/><rect x="49" y="139" width="133" height="57" rx="8" fill="#BEE5F2" stroke="#E9C181" stroke-width="6"/><rect x="38" y="193" width="157" height="13" rx="6" fill="#D9B58F"/><path d="M48 144h136" stroke="#fff" stroke-width="5"/><rect x="94" y="159" width="28" height="31" rx="7" fill="#FF8A65"/><ellipse cx="108" cy="158" rx="14" ry="5" fill="#FFC83D"/><path d="M122 165q19 2 7 16" fill="none" stroke="#FF8A65" stroke-width="6"/><circle cx="154" cy="183" r="9" fill="#FF9F1C"/><circle cx="172" cy="183" r="9" fill="#FF8A65"/><path d="M136 187h52q-4 17-26 17t-26-17" fill="#B3A2E8"/></g>
-    <g transform="translate(12 133)"><rect x="47" y="4" width="16" height="102" rx="6" fill="#D9B58F"/><circle cx="57" cy="4" r="39" fill="#62D298"/><circle cx="30" cy="27" r="27" fill="#85DCAA"/><circle cx="83" cy="23" r="29" fill="#62D298"/><circle cx="37" cy="5" r="8" fill="#FFC83D"/><circle cx="77" cy="22" r="8" fill="#FF8A65"/></g>
-    ${fleurs}
-    <g class="m-papillon" transform="translate(375 157)"><ellipse cx="-7" rx="8" ry="12" fill="#B3A2E8"/><ellipse cx="7" rx="8" ry="12" fill="#7B65BD"/><rect x="-2" y="-9" width="4" height="18" rx="2" fill="#5E4B9E"/></g>
-    <g fill="#B7EBCB"><ellipse cx="59" cy="408" rx="61" ry="24"/><ellipse cx="839" cy="413" rx="80" ry="29"/></g>
-  </svg>`;
-}
-export function parcelleSvg(p) {
-  const plante = !p
-    ? '<g fill="#d8af7b"><ellipse cx="42" cy="62" rx="3" ry="2"/><ellipse cx="61" cy="54" rx="3" ry="2"/><ellipse cx="80" cy="63" rx="3" ry="2"/></g>'
-    : p.etape === 0
-      ? '<path d="M58 57v-9" stroke="#739257" stroke-width="3"/><path d="M58 50q-14-1-12-9 13-2 14 7 1-12 12-10 2 10-14 12" fill="#85a763"/>'
-      : '<g transform="translate(12 -9) scale(.78)">' +
-        (p.etape === 1 ? dessins.pousse : dessins[p.culture]) +
-        "</g>";
-  return (
-    '<svg class="m-parcelle-art" viewBox="0 0 120 130" aria-hidden="true"><ellipse cx="60" cy="113" rx="49" ry="8" fill="#d3dbc2" opacity=".65"/><path d="m10 70 50-22 50 22-50 25Z" fill="#AB704B"/><path d="m10 70 50 23 50-23v25l-50 25-50-25" fill="#E6AE78"/><path d="m60 93 50-23v25l-50 25" fill="#C88D55"/><path d="m16 70 44 20 44-20M60 95v20" fill="none" stroke="#F5D2A7" stroke-width="3"/>' +
-    plante +
-    "</svg>"
-  );
-}
 export function motifSvg(forme, x = 60, y = 50) {
   const formes = {
     etoiles:
@@ -125,18 +74,6 @@ export function platSvg(id, deco = "", motifs) {
     (motifs ? motifs.map((m) => motifSvg(m.forme, m.x, m.y)).join("") : marque) +
     "</svg>"
   );
-}
-export function outilSvg(id, culture = "fraise") {
-  if (id === "graines")
-    return `<svg viewBox="0 0 120 140" class="j-outil-art" aria-hidden="true"><rect x="18" y="14" width="84" height="112" rx="12" fill="#FFF3C4" stroke="#E5BD72" stroke-width="3"/><path d="M18 30h84M18 110h84" stroke="#E5BD72" stroke-width="3" stroke-dasharray="5 4"/><g transform="translate(18 26) scale(.7)">${dessins[culture]}</g><circle cx="60" cy="18" r="4" fill="#fff"/></svg>`;
-  if (id === "arrosoir")
-    return '<svg viewBox="0 0 160 140" class="j-outil-art" aria-hidden="true"><path d="M106 56c55-50 65 20 18 24" fill="none" stroke="#7B65BD" stroke-width="12"/><path d="m57 68-39-23-8 12 43 42" fill="#7B65BD"/><path d="m13 40-12 25 12 6 13-26" fill="#B3A2E8"/><rect x="44" y="48" width="82" height="72" rx="22" fill="#9F8BD5"/><ellipse cx="85" cy="50" rx="40" ry="10" fill="#C6B7EC"/><ellipse cx="85" cy="50" rx="29" ry="5" fill="#5E4B9E"/><path d="M58 68v28q0 9 9 9" fill="none" stroke="#DCD3F7" stroke-width="7" stroke-linecap="round"/><path d="m89 74 4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1Z" fill="#FFC83D"/></svg>';
-  if (id === "nuage")
-    return '<svg viewBox="0 0 180 100" class="j-outil-art" aria-hidden="true"><path d="M33 85C-2 85 0 40 31 40 25 1 85-7 101 25 133 3 157 29 151 48 185 42 190 85 156 85Z" fill="#fff" stroke="#CFDDF1" stroke-width="3"/><path d="M45 65q14 8 29 1" fill="none" stroke="#E5EEF9" stroke-width="6" stroke-linecap="round"/></svg>';
-  return illustration(id);
-}
-export function bolSvg() {
-  return '<svg class="m-art m-bol" viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="108" rx="44" ry="7" fill="#1F2547" opacity=".08"/><g class="m-cuillere"><path d="m72 63 28-49" stroke="#D9B58F" stroke-width="8" stroke-linecap="round"/><ellipse cx="69" cy="67" rx="9" ry="14" fill="#D9B58F" transform="rotate(30 69 67)"/></g><ellipse cx="60" cy="61" rx="42" ry="13" fill="#F9E7BB"/><path d="M18 61h84q-5 45-42 45T18 61" fill="#B3A2E8"/><path d="M24 67q4 25 21 29" fill="none" stroke="#DCD3F7" stroke-width="5" stroke-linecap="round"/><ellipse cx="60" cy="61" rx="34" ry="8" fill="#FFF3C4"/><circle cx="51" cy="59" r="4" fill="#FF8A65"/><circle cx="70" cy="62" r="4" fill="#FFC83D"/><circle cx="84" cy="60" r="3" fill="#FF8A65"/></svg>';
 }
 export function icone(id) {
   const d = {

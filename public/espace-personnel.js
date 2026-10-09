@@ -29,7 +29,7 @@ function ecusson(id) {
   return `<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="54" fill="#FFF5D7"/>${dessins[id] || ""}</svg>`;
 }
 
-/** Parcours personnel actif. Les anciens ateliers sont conservés dans monde.js, hors navigation. */
+/** Parcours personnel actif. Les anciens ateliers sont archivés dans Git. */
 export async function ouvrirMonde(
   { app, afficher, appel, identifiantReponse, retour, souvenirs, pipSvg, son },
   debut,
