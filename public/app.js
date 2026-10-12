@@ -6,7 +6,7 @@ import { miloSvg as pipSvg } from "./milo.js";
 import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
 import { attendreVoixFrancaise, nombreFrancais } from "./voix-appareil.js";
 import { finMissionVue } from "./fin-mission.js";
-import { fusee, jardin } from "./scenes-mission.js";
+import { themeMission, decorMission, classeDecor, phraseProgres } from "./decors-mission.js";
 import { celebrerMission } from "./finale-mission.js";
 const app = document.getElementById("app");
 app.dataset.voixVersion = "fr-20261012-2";
@@ -639,11 +639,9 @@ function boiteCadeauSvg() {
 function scene(nouvelles = 0) {
   const { quete, faites, total, serie } = mission;
   const badge = serie >= 2 ? `<span class="serie">${ic("flamme")} ${serie} d'affilée !</span>` : "";
-  if (quete.univers === "nature")
-    return `<div class="scene nature">${jardin(faites, total, nouvelles)}${badge}</div>`;
-  const pieces = Math.round((faites / total) * 6);
-  const avant = Math.round(((faites - nouvelles) / total) * 6);
-  return `<div class="scene espace">${fusee(pieces, pieces - avant)}${badge}</div>`;
+  const theme = themeMission(quete);
+  const calme = mouvementReduit || lire("lumo-mouvements-calmes") === "oui";
+  return `<div class="scene ${classeDecor(theme)}${calme ? " decor-calme" : ""}">${decorMission(theme, faites, total, nouvelles)}${badge}</div>`;
 }
 
 // ---------- Écran : code ----------
@@ -1218,11 +1216,10 @@ const JEUX = {
 
 function demanderPause() {
   son("clic");
-  const nature = mission.quete.univers === "nature";
   const fond = modale(`
     ${pipSvg("encourage", "grand")}
     <h2>Une petite pause ?</h2>
-    <p>${nature ? "Ton jardin t'attend" : "Ta fusée t'attend"} : tu as déjà fait ${mission.faites} sur ${mission.total}.</p>
+    <p>Ta mission t’attend : tu as déjà fait ${mission.faites} sur ${mission.total}.</p>
     <div class="boutons">
       <button class="btn" id="reprendre">Je continue</button>
       <button class="btn blanc" id="pause">Faire une pause</button>
@@ -1291,7 +1288,6 @@ async function verifier(q) {
 
   const pied = $("#pied");
   const el = mission.choisi.el;
-  const nature = mission.quete.univers === "nature";
   let titre, detail, bouton, rond;
 
   if (r.correcte) {
@@ -1302,7 +1298,7 @@ async function verifier(q) {
     el?.classList.remove("choisie");
     el?.classList.add("bonne");
     titre = mission.serie >= 3 ? `${mission.serie} d'affilée !` : auHasard(BRAVOS);
-    detail = nature ? "Une fleur de plus dans ton jardin !" : "Une pièce de plus pour ta fusée !";
+    detail = phraseProgres(themeMission(mission.quete));
     pied.className = "pied bravo";
     rond = ic("check");
     bouton = '<button class="btn" id="continuer">Continuer</button>';
@@ -1382,6 +1378,7 @@ async function finirMission() {
     app,
     afficher,
     univers: mission.quete.univers,
+    theme: themeMission(mission.quete),
     total: mission.total,
     calme: matchMedia("(prefers-reduced-motion: reduce)").matches || lire("lumo-mouvements-calmes") === "oui",
   });

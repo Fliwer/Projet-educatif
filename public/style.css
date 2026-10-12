@@ -444,6 +444,17 @@ button.mini-carte:active { transform: scale(0.97); }
 .finale-mission .scene svg {width:100%;height:100%}
 .finale-mission .etoile-scintille,.finale-mission .flamme-anim {animation:none}
 .finale-mission .lien {align-self:center;color:var(--violet-ombre);min-height:48px}
+.scene.decor-robot{background:linear-gradient(145deg,#f4edff,#e7f2ff)}
+.scene.decor-ballon,.scene.decor-chateau{background:linear-gradient(#eaf5ff,#fff7e5)}
+.robot-danse{transform-box:fill-box;transform-origin:50% 100%;animation:robot-danse 2.2s ease-in-out forwards}
+.ballon-envole{animation:ballon-envole 2.2s ease-in forwards}
+.bloc-tombe{animation:bloc-tombe .7s ease-in forwards;pointer-events:none}
+.lumo-calme .bloc-tombe,.decor-calme .bloc-tombe{animation:none;opacity:0}
+.decor-calme *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){.bloc-tombe{opacity:0}}
+@keyframes robot-danse{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-3px)}65%{transform:rotate(8deg) translateY(-3px)}}
+@keyframes ballon-envole{0%{transform:translateY(0)}100%{transform:translateY(-200px)}}
+@keyframes bloc-tombe{to{transform:translateY(35px) rotate(7deg);opacity:0}}
 @media(max-width:380px){.finale-mission .scene{height:260px}.finale-mission h1{font-size:26px}}
 
 @media (prefers-reduced-motion: reduce) {

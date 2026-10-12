@@ -1,13 +1,24 @@
-import { fusee, jardin } from "./scenes-mission.js";
+import { decorMission, classeDecor } from "./decors-mission.js";
 
 /** Célébration visuelle après l'enregistrement de la mission. Aucun appel réseau. */
-export async function celebrerMission({ app, afficher, univers, calme, total = 5 }) {
+export async function celebrerMission({
+  app,
+  afficher,
+  univers,
+  theme = univers === "nature" ? "fleurs" : "fusee",
+  calme,
+  total = 5,
+}) {
   if (calme) return;
-  const nature = univers === "nature";
+  const anime = {
+    fusee: [".groupe-fusee", "fusee-decolle", "decolle"],
+    robot: [".groupe-robot", "robot-danse", "robot-danse"],
+    ballon: [".groupe-ballon", "ballon-envole", "ballon-envole"],
+  }[theme];
   afficher(
-    `<section class="finale-mission"><h1>Mission terminée !</h1><div class="scene ${nature ? "nature" : "espace"}">${nature ? jardin(total, total, total, true) : fusee(6)}</div><button class="lien" id="passer-animation">Continuer</button></section>`,
+    `<section class="finale-mission"><h1>Mission terminée !</h1><div class="scene ${classeDecor(theme)}">${decorMission(theme, total, total, theme === "chateau" ? 0 : total, true)}</div><button class="lien" id="passer-animation">Continuer</button></section>`,
   );
-  const cible = app.querySelector(nature ? ".scene" : ".groupe-fusee");
+  const cible = app.querySelector(anime ? anime[0] : ".scene");
   const bouton = app.querySelector("#passer-animation");
   bouton.focus({ preventScroll: true });
   await new Promise((resolve) => {
@@ -22,11 +33,11 @@ export async function celebrerMission({ app, afficher, univers, calme, total = 5
       resolve();
     };
     const finAnimation = (event) => {
-      if (!nature && event.target === cible && event.animationName === "decolle") terminer();
+      if (anime && event.target === cible && event.animationName === anime[2]) terminer();
     };
     bouton.addEventListener("click", terminer);
     cible.addEventListener("animationend", finAnimation);
     minuterie = setTimeout(terminer, 2400);
-    if (!nature) cible.classList.add("fusee-decolle");
+    if (anime) cible.classList.add(anime[1]);
   });
 }
