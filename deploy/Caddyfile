@@ -1,0 +1,3 @@
+{$LUMO_DOMAINE} {
+    reverse_proxy lumo:4321
+}

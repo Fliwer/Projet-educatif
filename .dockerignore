@@ -1,0 +1,13 @@
+# Liste fermée : aucun profil, audio privé, secret ou historique Git dans l'image.
+*
+!Dockerfile
+!package.json
+!package-lock.json
+!src/
+!src/**
+!public/
+!public/**
+!scripts/
+!scripts/inviter-parent.ts
+!scripts/sauvegarder.ts
+!scripts/revoquer-parent.ts

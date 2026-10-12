@@ -1,0 +1,41 @@
+name: lumo-pilote
+services:
+  lumo:
+    build:
+      context: ..
+    restart: unless-stopped
+    environment:
+      LUMO_URL: https://${LUMO_DOMAINE:?Renseigner un nom DNS pointant vers le serveur}
+      LUMO_VOIX_GENERATION: "0"
+    volumes:
+      - lumo-donnees:/var/lib/lumo
+    # Port interne seulement : accès public via HTTPS/Caddy.
+    expose:
+      - "4321"
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "2"
+  https:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      lumo:
+        condition: service_healthy
+    environment:
+      LUMO_DOMAINE: ${LUMO_DOMAINE:?Renseigner un nom DNS pointant vers le serveur}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-donnees:/data
+      - caddy-config:/config
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "2"
+volumes:
+  lumo-donnees:
+  caddy-donnees:
+  caddy-config:
