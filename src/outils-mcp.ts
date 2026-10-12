@@ -32,6 +32,7 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
     "lister_enfants",
     {
       title: "Lister les enfants",
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       description:
         "Liste les enfants du parent dans Lumo, avec leur code de connexion, leur niveau et leur univers.",
       inputSchema: {},
@@ -53,6 +54,12 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
     "ajouter_enfant",
     {
       title: "Ajouter un enfant",
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
       description:
         "Ajoute un profil enfant (prénom ou pseudonyme uniquement, jamais de nom de famille). " +
         "Renvoie un code à 6 caractères que l'enfant tape sur sa tablette pour se connecter.",
@@ -73,6 +80,12 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
     "creer_quetes",
     {
       title: "Préparer des quêtes à valider",
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
       description:
         CONSIGNES_PEDAGOGIQUES +
         "\nRenvoie le lien privé du brouillon au parent. Rien n’est publié avant sa validation.",
@@ -102,6 +115,7 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
     "voir_progression",
     {
       title: "Voir la progression",
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       description:
         "Résume la soirée (ou les derniers jours) d'un enfant : quêtes faites, questions réussies du premier coup, " +
         "questions difficiles, niveau et soirs d'affilée. Présente le résultat au parent de façon positive et brève, " +
