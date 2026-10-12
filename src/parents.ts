@@ -1,4 +1,5 @@
 // Comptes du prototype et brouillons : aucune dépendance au fournisseur d'IA.
+import { supportAbsent } from "./pedagogie.ts";
 import { createHash, randomBytes } from "node:crypto";
 import { db } from "./db.ts";
 import { schemaQuetesPedagogiques } from "./formats.ts";
@@ -27,6 +28,18 @@ export function preparerBrouillon(parentId: number, enfant: Enfant, quetes: unkn
       "Chaque quête doit préciser la notion, un extrait de la leçon et contenir 5 à 8 questions.",
     );
   const erreurs = verifierQuetes(resultat.data);
+  resultat.data.forEach((q, i) =>
+    q.questions.forEach((question, j) => {
+      if (supportAbsent(question))
+        erreurs.push(
+          "Mission " +
+            (i + 1) +
+            ", question " +
+            (j + 1) +
+            " : support visuel absent. Rendre la consigne autonome.",
+        );
+    }),
+  );
   if (erreurs.length) throw new Error(erreurs.join("\n"));
   const jeton = randomBytes(32).toString("base64url");
   db.prepare(
@@ -62,7 +75,7 @@ export function lireBrouillon(jeton: string) {
   if (!enfant) return undefined;
   return { ...ligne, enfant, quetes: schemaQuetesPedagogiques.parse(JSON.parse(ligne.contenu)) };
 }
-export function validerBrouillon(jeton: string, nonce: string) {
+export function validerBrouillon(jeton: string, nonce: string, selection?: string[]) {
   db.exec("BEGIN IMMEDIATE");
   try {
     const brouillon = lireBrouillon(jeton);
@@ -74,9 +87,24 @@ export function validerBrouillon(jeton: string, nonce: string) {
     }
     const enfant = trouverEnfant(brouillon.enfant.code, brouillon.parent_id);
     if (!enfant) throw new Error("Profil introuvable.");
-    const erreurs = verifierQuetes(brouillon.quetes);
+    let quetes = brouillon.quetes;
+    if (selection !== undefined) {
+      const autorises = new Set(quetes.flatMap((q, i) => q.questions.map((_, j) => i + ":" + j)));
+      if (
+        !selection.length ||
+        selection.length > 24 ||
+        new Set(selection).size !== selection.length ||
+        selection.some((id) => !autorises.has(id))
+      )
+        throw new Error("Sélection invalide : conserve au moins une question.");
+      const retenus = new Set(selection);
+      quetes = quetes
+        .map((q, i) => ({ ...q, questions: q.questions.filter((_, j) => retenus.has(i + ":" + j)) }))
+        .filter((q) => q.questions.length > 0);
+    }
+    const erreurs = verifierQuetes(quetes);
     if (erreurs.length) throw new Error(erreurs.join("\n"));
-    creerQuetes(enfant, brouillon.quetes);
+    creerQuetes(enfant, quetes);
     db.prepare("UPDATE brouillons SET publie = 1 WHERE id = ?").run(brouillon.id);
     db.exec("COMMIT");
     return { dejaPublie: false, enfant };

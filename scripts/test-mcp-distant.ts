@@ -202,6 +202,7 @@ try {
   );
   const apercu = await pageApercu.text();
   assert.ok(apercu.includes("La table de 7"));
+  assert.equal((apercu.match(/name="question"/g) || []).length, 5);
   const nonce = apercu.match(/name="nonce" value="([A-Za-z0-9_-]+)"/)![1];
   const autreSite = await fetch(lien, {
     method: "POST",
@@ -219,7 +220,14 @@ try {
     fetch(lien, {
       method: "POST",
       headers: { Origin: adresse, "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ confirme: "oui", nonce }),
+      body: new URLSearchParams([
+        ["confirme", "oui"],
+        ["nonce", nonce],
+        ["selection_presente", "oui"],
+        ["question", "0:0"],
+        ["question", "0:1"],
+        ["question", "0:2"],
+      ]),
     });
   assert.equal((await valider()).status, 200);
   assert.equal((await valider()).status, 200);
@@ -246,6 +254,7 @@ try {
   const questions = await (
     await fetch(`${adresse}/api/quetes/${apres.quetes[0].id}`, { headers: { "X-Lumo-Code": enfantA.code } })
   ).json();
+  assert.equal(questions.questions.length, 3, "Seules les questions gardées sont publiées via HTTP");
   assert.ok(!JSON.stringify(questions).includes('"bonne_reponse"'));
   assert.ok(!JSON.stringify(questions).includes('"extrait_lecon"'));
   const requeteId = crypto.randomUUID();

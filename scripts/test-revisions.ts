@@ -9,7 +9,7 @@ process.env.LUMO_ENV_IGNORE = "1";
 const l = await import("../src/logic.ts");
 const { db } = await import("../src/db.ts");
 const { reprendreQuete, questionsARevoir } = await import("../src/revisions.ts");
-const { archiverQuete } = await import("../src/parcours.ts");
+const { archiverQuete, lireParcours } = await import("../src/parcours.ts");
 try {
   const enfant = l.trouverEnfant("LUMO01")!;
   const autre = l.ajouterEnfant("Autre", "espace", 1);
@@ -52,6 +52,10 @@ try {
   const fin = l.terminerQuete(enfant, reprise.id)!;
   l.terminerQuete(enfant, reprise.id);
   assert.equal(fin.revision, true);
+  const comparaison = lireParcours(db, enfant.id).find((q) => q.id === reprise.id)!;
+  assert.equal(comparaison.total, 2);
+  assert.equal(comparaison.initial_premier_essai, 0);
+  assert.equal(comparaison.premier_essai, 2);
   assert.equal(l.enfantParCode(enfant.code)!.quetes_finies, 1);
   assert.equal(l.etatEnfant(enfant).etoiles, etoiles);
   assert.equal(JSON.stringify(db.prepare("SELECT * FROM monde_attributions").all()), credits);

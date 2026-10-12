@@ -136,6 +136,14 @@ Pas d'inscription publique avant : authentification adulte/enfant et sessions te
 
 Les droits scolaires, les consentements et les données éventuellement sensibles devront être précisés pour le contexte réel de déploiement. Ce document est un choix d'architecture technique, pas une validation juridique ou clinique.
 
+## Brouillons et révisions — 12 octobre 2026
+
+`src/pedagogie.ts` centralise les consignes du connecteur et les alertes éditoriales. Les références explicites à certains supports absents sont refusées lors de la création du brouillon. Ce contrôle est heuristique : il ne certifie ni l'exactitude ni l'adaptation de chaque exercice. Le niveau scolaire et l'origine (leçon ou découverte) sont des métadonnées facultatives du brouillon, distinctes du niveau de progression du jeu.
+
+Le formulaire parent transmet les indices des questions gardées. La transaction de publication vérifie la sélection, le nonce et l'expiration ; une sélection vide, inconnue ou dupliquée est refusée. Les missions entièrement décochées ne sont pas créées. Les anciens clients sans champ de sélection conservent toutes les questions. Une nouvelle soumission ne republie jamais un brouillon déjà validé.
+
+Le carnet compare les réussites au premier essai du passage initial et d'une révision terminée sur les mêmes questions, grâce à `questions.source_id`. Il ne compare pas le total d'une mission entière à celui d'une révision partielle et ne déduit pas une maîtrise scolaire d'un score.
+
 ## Références techniques
 
 - [SQLite : cas d'usage et limites de concurrence](https://www.sqlite.org/whentouse.html)

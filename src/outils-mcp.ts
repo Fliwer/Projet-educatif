@@ -1,5 +1,6 @@
 // Connecteur MCP de Lumo : les outils que l'assistant IA du parent (Claude) peut utiliser.
 // Lancé par Claude Desktop en local (transport stdio). Ne rien écrire sur stdout : réservé au protocole.
+import { CONSIGNES_PEDAGOGIQUES } from "./pedagogie.ts";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { schemaQuetesPedagogiques } from "./formats.ts";
 import { preparerBrouillon } from "./parents.ts";
@@ -41,6 +42,7 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
         code: e.code,
         univers: e.univers,
         niveau: niveau(e).niveau,
+        precision_niveau: "Progression dans le jeu, pas niveau scolaire",
         soirs_d_affilee: e.soirs,
       }));
       return texte(JSON.stringify({ enfants, app_enfant: ADRESSE_APP }, null, 2));
@@ -72,17 +74,8 @@ export function creerServeurMcp(parentId = 1, adresseApp = process.env.LUMO_URL 
     {
       title: "Préparer des quêtes à valider",
       description:
-        "Cet outil prépare uniquement un brouillon. Renvoie le lien privé au parent pour qu'il vérifie et valide dans son navigateur. Fournis la notion et un extrait exact de la leçon pour chaque quête. Ne prétends jamais que les jeux sont publiés avant cette validation. " +
-        "Crée des quêtes (séries d'exercices-jeux) pour un enfant avec un TDAH, à partir des devoirs ou d'une leçon " +
-        "photographiés par le parent.\n" +
-        "La validation finale se fait uniquement dans le formulaire parent. Ne valide jamais ce formulaire à sa place.\n" +
-        "Règles pédagogiques : 1 à 3 quêtes ; 5 à 8 questions par quête ; une seule notion par quête ; " +
-        "VARIE les types de jeux dans une même quête (au moins 3 types différents quand c'est possible : par exemple " +
-        "associer pour démarrer, puis choix, ordre, vrai_faux, et texte ou dictee pour finir), pour garder l'attention ; " +
-        "consignes très courtes et concrètes, adaptées à un enfant de 6 à 12 ans ; " +
-        "s'entraîner sur la même notion que les devoirs, sans recopier les réponses des devoirs ; " +
-        "ne jamais mettre la réponse dans la consigne. Titres ludiques liés à l'univers de l'enfant " +
-        "(espace : « Fusée des ×7 » ; nature : « Jardin du texte »).",
+        CONSIGNES_PEDAGOGIQUES +
+        "\nRenvoie le lien privé du brouillon au parent. Rien n’est publié avant sa validation.",
       inputSchema: {
         enfant: z.string().describe("Prénom ou code de l'enfant"),
         quetes: schemaQuetesPedagogiques,

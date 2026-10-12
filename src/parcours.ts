@@ -7,6 +7,7 @@ export function lireParcours(db: DatabaseSync, enfantId: number) {
       `
     SELECT q.id, q.titre, q.matiere, q.notion, q.statut, q.archivee, q.finie_le, q.origine_id, q.reprise_mode,
       COUNT(qu.id) AS total,
+      SUM(CASE WHEN qu.source_id IS NOT NULL AND (SELECT r.correcte FROM reponses r WHERE r.question_id=qu.source_id ORDER BY r.id LIMIT 1)=1 THEN 1 ELSE 0 END) AS initial_premier_essai,
       SUM(CASE WHEN EXISTS(SELECT 1 FROM reponses r WHERE r.question_id=qu.id) THEN 1 ELSE 0 END) AS essayees,
       SUM(CASE WHEN (SELECT r.correcte FROM reponses r WHERE r.question_id=qu.id ORDER BY r.id LIMIT 1)=1 THEN 1 ELSE 0 END) AS premier_essai,
       SUM(CASE WHEN EXISTS(SELECT 1 FROM reponses r WHERE r.question_id=qu.id AND r.correcte=1) THEN 1 ELSE 0 END) AS reussies
@@ -28,6 +29,7 @@ export function lireParcours(db: DatabaseSync, enfantId: number) {
     total: number;
     essayees: number;
     premier_essai: number;
+    initial_premier_essai: number;
     reussies: number;
   }[];
 }

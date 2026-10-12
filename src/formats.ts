@@ -45,6 +45,17 @@ export const schemaQuete = z.object({
   titre: z.string().trim().min(1).max(60),
   matiere: z.string().trim().min(1).max(40),
   notion: z.string().trim().min(1).max(120).optional(),
+  niveau_scolaire: z
+    .string()
+    .trim()
+    .min(1)
+    .max(60)
+    .optional()
+    .describe("Niveau scolaire communiqué par le parent, jamais déduit du niveau du jeu."),
+  origine_contenu: z
+    .enum(["lecon", "decouverte"])
+    .optional()
+    .describe("lecon si extrait fourni ; decouverte pour une fiche créée sans devoir source."),
   extrait_lecon: z.string().trim().min(1).max(1200).optional(),
   questions: z.array(schemaQuestion).min(1).max(12),
 });
