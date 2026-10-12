@@ -75,6 +75,8 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | R35 | Voix française gratuite de l’appareil | Lire les consignes sans génération ElevenLabs | Repli présent ; sélection française et chargement différé vérifiés | La voix dépend de l’appareil ; elle ne reproduit pas la voix personnalisée |
 | R36 | Préparer les mots et phrases fréquents en une fois | Réutiliser une banque audio à faible coût | Idée discutée ; morceaux de calculs et inventaire présents | Préparer les éléments utiles plutôt que toutes les phrases possibles ; vérifier leur prononciation |
 | R37 | Voix française locale Windows pour comparaison | Isoler un problème de prononciation sans dépenser de crédits | Exemple audio et diagnostic de voix française préparés | Essai de diagnostic, pas un service vocal complet déployé dans Lumo |
+| R38 | Ancienne chambre de Milo qui se remplissait de cadeaux | Montrer les récompenses dans une pièce personnelle | Ancien parcours principal remplacé par Mon espace ; dessin et fonction de souvenirs encore présents dans le code | Réévaluer son intérêt ; vérifier le parcours de compatibilité avant de le présenter comme fonctionnel |
+| R39 | Trophées exposés dans la chambre | Donner une représentation concrète des accomplissements | Un trophée de champion est retrouvé dans l’ancien catalogue archivé ; pas dans la collection principale actuelle | Décider s’il faut retrouver une petite étagère de trophées, sans recréer tous les ateliers |
 
 ## 3. Historique des essais et changements
 
@@ -115,6 +117,21 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | 12 octobre | Nouvelles illustrations de mission | Robot pour maths, fleurs pour sciences, ballon pour géographie, forteresse pour histoire | Commit e8c6de4 ; missions nommées « Fusée » conservées ; SVG originaux, pas d’images générées par un service externe |
 | 12 octobre | Détruire un château ennemi en tant que héros | Remparts retirés progressivement, Milo avec bouclier, ruines et étoile finale | Cinq étapes et remise à zéro vérifiées dans l’aperçu ; construction principale vs aventure reste à décider |
 | 12 octobre | Pouvoirs limités obtenus par les quêtes ou créatures | Discussion sur leurs usages, fréquence et séparation avec les aides | Idées uniquement, aucun inventaire ni consommation de pouvoir codé |
+| Ancien parcours, date exacte à confirmer | Chambre illustrée contenant les cadeaux et un trophée de champion | Remplacée dans le parcours principal par avatar, écussons et carnet | Ancien catalogue dans le tag d’archive ; code de souvenirs conditionnel encore présent |
+| 12 octobre, vérification de l’historique | Absence de la chambre et des trophées signalée par l’utilisateur | Ajout au registre des fonctions à réévaluer | Le code de souvenirs référence encore OBJETS, dont la déclaration n’est pas retrouvée dans app.js actuel ; ne pas déclarer ce parcours restauré sans correction et test |
+| Prévu le 13 octobre | Première présentation à Totof, maître de stage | Présentation d’un prototype pédagogique, pas d’un produit commercial terminé | Priorité suggérée : démo propre, quelques missions courtes, parcours stable et limites clairement expliquées |
+
+## 3 bis. Ce qui a disparu, été remplacé ou est devenu moins visible
+
+| Ancien élément | Situation actuelle | Ce qui est conservé | Décision encore nécessaire |
+|---|---|---|---|
+| Chambre personnelle illustrée | Plus l’entrée principale de Mon espace | Dessin de chambre, fonction de souvenirs et code archivé | Garder uniquement une collection ou réintroduire une petite chambre ? |
+| Trophées / cadeaux visibles dans la pièce | Collection principale recentrée sur les écussons | Ancien catalogue archivé, souvenirs historiques selon le profil | Choisir les anciens objets intéressants et tester leur réintégration |
+| Parcours « souvenirs de la chambre » | Lien conditionnel prévu dans Ma collection ; fonctionnement non confirmé | Traces actives du code de compatibilité | Corriger ou retirer proprement les références au catalogue manquant avant utilisation |
+| Jardin, potager et cuisine complets | Retirés du code actif | Archive Git et données historiques | Restent mis de côté ; les fleurs des missions ne constituent pas le retour de l’atelier |
+| Longue fin de mission et modale de niveau | Remplacées par un écran court | Résultats, niveau et cadeaux persistés | Décollage court rétabli ; conserver une fin simple |
+| Statistiques et rendez-vous affichés en fin de mission | Retirés de cet écran | Carnet, bilan MCP et ciel hebdomadaire à l’accueil | Approfondir le suivi adulte sans recharger la vue enfant |
+| Informations de connexion et réglages visibles à l’accueil | Repliés dans les zones parent | Même profil, commandes et paramètres | Tester que les adultes les retrouvent facilement |
 
 ## 4. Bases techniques vues, renforcées ou encore à construire
 
