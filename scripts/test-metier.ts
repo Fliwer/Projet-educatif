@@ -94,8 +94,17 @@ try {
     l.questionsQuete(enfant, quete.id)!.questions.every((q) => q.terminee),
     "Une reprise connaît les questions terminées",
   );
-  l.terminerQuete(enfant, quete.id);
-  l.terminerQuete(enfant, quete.id);
+  const fin = l.terminerQuete(enfant, quete.id)!;
+  assert.deepEqual(
+    fin.bilan,
+    { total: 6, reussies: 5, premier_essai: 4 },
+    "Le bilan distingue premier essai, correction et réussite après nouvel essai",
+  );
+  assert.deepEqual(
+    l.terminerQuete(enfant, quete.id)!.bilan,
+    fin.bilan,
+    "Une reprise du bilan garde les mêmes observations",
+  );
   assert.equal(l.enfantParCode(enfant.code)!.quetes_finies, 1, "Une seule récompense par quête");
   // Panne simulée entre les deux écritures : rien ne doit rester à moitié validé.
   const [suivante] = l.creerQuetes(enfant, [{ ...entree, questions: [questions[1]] }]);

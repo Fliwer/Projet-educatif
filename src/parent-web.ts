@@ -16,6 +16,9 @@ const nomsJeux: Record<string, string> = {
   ordre: "Remettre dans l’ordre",
   dictee: "Dictée",
 };
+function accesProfil(enfant: { prenom: string; code: string }) {
+  return `<section><p>Profil destinataire : <strong>${echapper(enfant.prenom)}</strong></p><p>Code enfant : <strong>${echapper(enfant.code)}</strong></p><p><a href="/#profil=${echapper(enfant.code)}">Ouvrir les missions de ${echapper(enfant.prenom)}</a></p><p>Le code sera déjà rempli. Confirme-le pour ouvrir ce profil, même si un autre était utilisé sur cet appareil.</p></section>`;
+}
 function page(res: ServerResponse, statut: number, contenu: string, assistant = false) {
   res.writeHead(statut, {
     "Content-Type": "text/html; charset=utf-8",
@@ -101,7 +104,7 @@ Respecte les consignes pédagogiques de Lumo. Signale ce qui est illisible et ne
       page(
         res,
         200,
-        `<h1>${resultat.dejaPublie ? "Déjà envoyé" : "Les jeux sont prêts !"}</h1><section><p>${echapper(resultat.enfant.prenom)} peut retrouver les quêtes dans le jeu.</p><p>Code enfant : <strong>${echapper(resultat.enfant.code)}</strong></p></section><a href="/">Ouvrir le jeu</a>`,
+        `<h1>${resultat.dejaPublie ? "Déjà envoyé" : "Les jeux sont prêts !"}</h1><p>Les missions sont disponibles dans le jeu de cet enfant.</p>${accesProfil(resultat.enfant)}`,
       );
     } catch {
       page(
@@ -117,7 +120,7 @@ Respecte les consignes pédagogiques de Lumo. Signale ce qui est illisible et ne
     return true;
   }
   if (brouillon.publie) {
-    page(res, 200, '<h1>Ces jeux ont déjà été envoyés.</h1><a href="/">Ouvrir le jeu</a>');
+    page(res, 200, `<h1>Ces jeux ont déjà été envoyés.</h1>${accesProfil(brouillon.enfant)}`);
     return true;
   }
   const quetes = brouillon.quetes

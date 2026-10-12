@@ -230,6 +230,10 @@ try {
       ]),
     });
   assert.equal((await valider()).status, 200);
+  assert.ok(
+    (await (await fetch(lien)).text()).includes(`/#profil=${enfantA.code}`),
+    "Le brouillon publié ouvre le profil destinataire",
+  );
   assert.equal((await valider()).status, 200);
   const apres = await (
     await fetch(`${adresse}/api/moi`, { headers: { "X-Lumo-Code": enfantA.code } })

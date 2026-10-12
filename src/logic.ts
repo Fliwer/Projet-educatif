@@ -450,8 +450,21 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
       }
     }
     const apres = enfantParCode(actuel.code)!;
+    const bilan = db
+      .prepare(
+        `SELECT COUNT(*) AS total,
+      COALESCE(SUM(EXISTS(SELECT 1 FROM reponses r WHERE r.question_id=q.id AND r.correcte=1)),0) AS reussies,
+      COALESCE(SUM((SELECT r.correcte FROM reponses r WHERE r.question_id=q.id ORDER BY r.id LIMIT 1)=1),0) AS premier_essai
+      FROM questions q WHERE q.quete_id=?`,
+      )
+      .get(queteId)!;
     return {
       revision: quete.origine_id !== null,
+      bilan: {
+        total: Number(bilan.total),
+        reussies: Number(bilan.reussies),
+        premier_essai: Number(bilan.premier_essai),
+      },
       ...niveau(apres),
       soirs: apres.soirs,
       nouveau_niveau: niveau(apres).niveau > avant,

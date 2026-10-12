@@ -52,6 +52,11 @@ try {
   const fin = l.terminerQuete(enfant, reprise.id)!;
   l.terminerQuete(enfant, reprise.id);
   assert.equal(fin.revision, true);
+  assert.deepEqual(
+    fin.bilan,
+    { total: 2, reussies: 2, premier_essai: 2 },
+    "Le bilan porte uniquement sur les questions de cette révision",
+  );
   const comparaison = lireParcours(db, enfant.id).find((q) => q.id === reprise.id)!;
   assert.equal(comparaison.total, 2);
   assert.equal(comparaison.initial_premier_essai, 0);

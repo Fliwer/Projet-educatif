@@ -318,6 +318,32 @@ button.mini-carte:active { transform: scale(0.97); }
 .papillon { animation: papillon 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
 /* ---------- Victoire ---------- */
+.profil-actif {display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px;border:1px solid var(--bord);border-radius:18px;background:rgba(255,255,255,.75);font-size:15px;color:var(--texte)}
+.profil-code {font-family:monospace;letter-spacing:1px}
+.profil-actif .lien {color:var(--violet-ombre);margin:0;min-height:44px}
+.fin-seance {display:flex;flex-direction:column;gap:18px;max-width:520px;width:100%;margin:auto;text-align:center;padding:12px 0}
+.fin-seance .victoire {height:220px;margin:0;isolation:isolate}
+.fin-seance .rayons {background:radial-gradient(circle,rgba(179,162,232,.3),transparent 65%);animation:none}
+.fin-surtexte {font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--violet-ombre)!important}
+.fin-seance h1 {font-size:32px;color:var(--violet-ombre)}
+.fin-seance .victoire-texte p {color:var(--texte)}
+.fin-etincelle {position:absolute;font-size:35px;color:var(--or);z-index:1}
+.fin-etincelle.une {top:28px;left:18%;transform:rotate(-12deg)}
+.fin-etincelle.deux {top:22px;right:15%;color:var(--violet);font-size:42px}
+.fin-etincelle.trois {bottom:24px;right:22%;color:var(--vert);font-size:24px}
+.fin-bilan {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fin-resultat {overflow:hidden;border:2px solid var(--bord);border-radius:22px;background:var(--carte);display:flex;align-items:center;flex-direction:column;padding:0 0 16px;gap:10px}
+.fin-label {font-size:13px;font-weight:900;background:var(--violet-clair);color:var(--violet-ombre);width:100%;padding:12px 8px}
+.fin-resultat.cadeau .fin-label {background:var(--orange-clair);color:#89521b}
+.fin-resultat strong {font:600 30px/1.2 "Fredoka",sans-serif;color:var(--violet-ombre);display:flex;align-items:center;gap:8px}
+.fin-resultat.cadeau strong {color:#89521b}
+.fin-resultat>span:last-child {font-size:14px;padding:0 12px}
+.fin-resultat strong .ic {font-size:28px}
+.fin-observation,.fin-note {font-size:16px;color:var(--texte)}
+.fin-actions {display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.fin-actions .lien {color:var(--violet-ombre);min-height:44px}
+@media(max-width:380px){.fin-seance .victoire{height:180px}.fin-seance h1{font-size:28px}.fin-resultat strong{font-size:25px}.fin-bilan{gap:8px}}
+.lumo-calme .fin-seance *, .lumo-calme .confetti {animation:none!important;transition:none!important}
 .victoire { position: relative; display: grid; place-items: center; height: 240px; margin: 4px -16px 0; overflow: hidden; }
 .rayons {
   position: absolute; width: 420px; height: 420px; border-radius: 50%; pointer-events: none;

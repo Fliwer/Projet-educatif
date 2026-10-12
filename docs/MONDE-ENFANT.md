@@ -38,6 +38,12 @@ Le service src/parcours.ts est partagé par l’espace enfant et le bilan MCP pa
 
 ## Carte et révisions (12 octobre 2026)
 
+Avant test famille : après publication, le lien parent propose le code destinataire dans un fragment URL et le retire aussitôt de la barre d'adresse. L'enfant ou le parent confirme le code ; un lien ne remplace pas automatiquement le profil mémorisé. Le code est vérifié avant stockage, et une annulation ou erreur conserve l'ancien profil. La carte indique le prénom et le code actif pour distinguer les profils homonymes.
+
+La fin de séance utilise Milo et une illustration originale. Elle montre les questions travaillées et le crédit cadeau attribué (ou la conservation du résultat d'un entraînement), puis les réussites au premier essai. Le bilan vient des réponses enregistrées côté serveur, y compris après interruption ; il ne s'agit pas d'un score de maîtrise. La longue cinématique et la modale automatique de niveau sont retirées. Un retour aux missions permet de terminer la séance ; le choix du cadeau est facultatif.
+
+Ordre des prochains essais : vérifier une photo et son niveau scolaire avec le parent ; suivre la validation et l'accès au bon profil ; observer une petite mission sans aider immédiatement ; vérifier la compréhension du bilan et la possibilité d'arrêter ; noter les difficultés avant d'ajouter des fonctionnalités. Le tutoriel, les droits adultes, l'hébergement stable et la confidentialité restent à finaliser avant un pilote avec données réelles.
+
 La carte principale conserve toutes les missions initiales non archivées, terminées comprises. Toucher une étape terminée ouvre « Tout refaire » ou une révision ciblée sur les questions non réussies au premier essai au dernier passage terminé. Si le dernier passage était ciblé, ce choix porte sur ce passage partiel, pas sur une évaluation complète de la notion.
 
 Migration 7 : les passages de révision sont liés à la mission initiale, avec leurs propres questions et réponses. Un seul passage actif par mission ; les UUID de démarrage restent idempotents après la fin. Une révision peut être interrompue puis reprise. Les étoiles globales, cadeaux, niveaux et compteurs de missions ne sont pas augmentés. Le suivi distingue premier passage et entraînements. Les missions retirées et leurs révisions restent inaccessibles au jeu.

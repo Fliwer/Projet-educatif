@@ -562,21 +562,6 @@ function bump(el) {
   el.classList.add("bump");
 }
 
-function compter(el, de, a, duree = 800) {
-  if (!el) return;
-  if (mouvementReduit || de === a) {
-    el.textContent = a;
-    return;
-  }
-  const t0 = performance.now();
-  const pas = (t) => {
-    const p = Math.min(1, (t - t0) / duree);
-    el.textContent = Math.round(de + (a - de) * (1 - Math.pow(1 - p, 3)));
-    if (p < 1) requestAnimationFrame(pas);
-  };
-  requestAnimationFrame(pas);
-}
-
 function cielEtoile(nombre = 24) {
   let html = "";
   for (let i = 0; i < nombre; i++) {
@@ -751,7 +736,7 @@ function scene(nouvelles = 0) {
 
 // ---------- Écran : code ----------
 
-function ecranCode(message = "") {
+function ecranCode(message = "", codePropose = "") {
   afficher(
     `
     <div class="ecran-code">
@@ -763,7 +748,8 @@ function ecranCode(message = "") {
           <input id="champ-code" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ton code secret">
           ${'<span class="case"></span>'.repeat(6)}
         </label>
-        <button class="btn" type="submit" id="valider-code" disabled>C'est parti ! ${ic("fleche")}</button>
+        <button class="btn" type="submit" id="valider-code" disabled>${codePropose ? "Ouvrir ce profil" : "C'est parti !"} ${ic("fleche")}</button>
+        ${codePropose && code ? '<button class="lien" type="button" id="garder-profil">Garder mon profil actuel</button>' : ""}
       </form>
       <p class="demo">Démo : code <b>LUMO01</b> (Arthur, fictif)</p>
     </div>`,
@@ -790,14 +776,43 @@ function ecranCode(message = "") {
   });
   champ.addEventListener("focus", maj);
   champ.addEventListener("blur", maj);
-  $("#form-code").addEventListener("submit", (ev) => {
+  $("#form-code").addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    if (champ.value.length !== 6) return;
+    if (champ.value.length !== 6 || bouton.disabled) return;
+    const candidat = champ.value;
+    const ecranCourant = revisionEcran;
+    bouton.disabled = true;
+    champ.disabled = true;
+    try {
+      const verification = await fetch("/api/moi", {
+        headers: { "X-Lumo-Code": candidat },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!verification.ok)
+        throw new Error(
+          verification.status === 401
+            ? "Code inconnu. Vérifie-le avec tes parents."
+            : "La connexion ne répond pas. Réessaie dans un instant.",
+        );
+    } catch (erreur) {
+      if (revisionEcran !== ecranCourant) return;
+      $(".code-titre").textContent =
+        erreur.name === "TimeoutError" || erreur.name === "TypeError"
+          ? "La connexion ne répond pas. Réessaie dans un instant."
+          : erreur.message;
+      bouton.disabled = false;
+      champ.disabled = false;
+      return;
+    }
+    if (revisionEcran !== ecranCourant) return;
     son("bravo");
-    code = champ.value;
+    code = candidat;
     ecrire(CLE_CODE, code);
     ecranAccueil();
   });
+  $("#garder-profil")?.addEventListener("click", ecranAccueil);
+  champ.value = codePropose;
+  maj();
   if (message) pipHumeur("encourage", "penche");
   champ.focus();
 }
@@ -851,7 +866,7 @@ async function ecranAccueil() {
     ${aFaire.length ? '<button class="lien" id="voir-etape">Voir ma prochaine étape ↓</button>' : ""}
     <p class="carte-aide">Touche une étape avec une coche pour refaire la mission.</p>
     <div class="carte-quetes" id="chemin"></div>
-    <button class="lien" id="changer">Changer de code</button>
+    <div class="profil-actif"><span>Profil de <strong>${echapper(etat.prenom)}</strong> · <span class="profil-code">${echapper(code)}</span></span><button class="lien" id="changer">Changer de profil</button></div>
     ${barreNav("quetes")}`);
 
   // Les missions initiales restent sur la carte ; les révisions ont leurs propres résultats.
@@ -1447,207 +1462,39 @@ async function finirMission() {
     proposerReessai(erreur, finirMission);
     return;
   }
-  await cinematique();
   ecranVictoire(r);
 }
 
-/** Compte à rebours et décollage (ou jardin qui fleurit). Un toucher pour passer. */
-function cinematique() {
-  return new Promise((fini) => {
-    const nature = mission.quete.univers === "nature";
-    afficher(
-      `
-      <div class="cinematique ${nature ? "nature" : "espace"}" id="cine">
-        <div class="cine-scene">${nature ? jardin(mission.total, mission.total, 0, true) : fusee(6)}</div>
-        <div class="cine-sol"></div>
-        <div class="compte" id="compte"></div>
-        <p class="passer">Touche l'écran pour passer</p>
-      </div>`,
-      "plein",
-    );
-    let termine = false;
-    const terminer = () => {
-      if (!termine) {
-        termine = true;
-        fini();
-      }
-    };
-    $("#cine").addEventListener("click", terminer);
-    const compte = $("#compte");
-    const montrer = (texte) => {
-      compte.textContent = texte;
-      compte.classList.remove("pop");
-      void compte.offsetWidth;
-      compte.classList.add("pop");
-    };
-    (async () => {
-      if (!nature) {
-        for (const n of ["3", "2", "1"]) {
-          if (termine) return;
-          montrer(n);
-          son("tic");
-          await pause(700);
-        }
-      }
-      if (termine) return;
-      const titre = nature ? "Ton jardin a fleuri !" : "Décollage !";
-      montrer(titre);
-      son("fin");
-      vibrer([30, 40, 60]);
-      confettis(50);
-      $(".groupe-fusee")?.classList.add("fusee-decolle");
-      parler(titre);
-      await pause(2400);
-      terminer();
-    })();
-  });
-}
-
 function ecranVictoire(r) {
-  if (r.revision) {
-    afficher(
-      `<div class="victoire">${pipSvg("joie", "grand")}</div><div class="victoire-texte"><h1>Entraînement terminé !</h1><p>Tu as pris le temps de revoir cette mission.</p><p>Ce passage est gardé dans ton suivi. Ton cadeau initial reste dans ta collection.</p></div><button class="btn" id="retour-revision">Revenir à mon parcours</button>`,
-    );
-    $("#retour-revision").onclick = ecranAccueil;
-    return;
+  const bilan = r.bilan;
+  const titre = r.revision ? "Entraînement terminé !" : "Mission terminée !";
+  const progression = r.nouveau_niveau
+    ? `Tu découvres le niveau ${r.niveau} !`
+    : `Une nouvelle étape dans ton parcours.`;
+  const finies = (r.niveau - 1) * r.quetes_par_niveau + r.vers_suivant;
+  afficher(`<section class="fin-seance">
+    <div class="victoire fin-illustration"><div class="rayons"></div><span class="fin-etincelle une" aria-hidden="true">✦</span><span class="fin-etincelle deux" aria-hidden="true">✧</span><span class="fin-etincelle trois" aria-hidden="true">✦</span>${pipSvg("joie", "geant")}</div>
+    <div class="victoire-texte"><p class="fin-surtexte">Une étape de plus avec Milo</p><h1>${titre}</h1><p>${echapper(mission.quete.titre)}</p></div>
+    <div class="fin-bilan">
+      <div class="fin-resultat questions"><span class="fin-label">Questions travaillées</span><strong>${ic("check")} ${bilan.total}</strong><span>Tu as exploré toute la mission.</span></div>
+      <div class="fin-resultat cadeau"><span class="fin-label">${r.revision ? "Ton entraînement" : "Ta collection"}</span><strong>${ic(r.revision ? "check" : "cadeau")} ${r.revision ? "Enregistré" : "+1"}</strong><span>${r.revision ? "Tes résultats précédents sont gardés." : "Crédit cadeau à utiliser quand tu veux."}</span></div>
+    </div>
+    <p class="fin-observation">${bilan.premier_essai} sur ${bilan.total} réponses trouvées dès le premier essai.</p>
+    <p class="fin-note">${r.revision ? "Revoir une mission t’aide à progresser. Ton cadeau initial reste dans ta collection." : progression}</p>
+    <div class="fin-actions"><button class="btn" id="continuer-fin">Revenir à mes missions ${ic("fleche")}</button>${r.revision ? "" : '<button class="lien" id="cadeau">Choisir mon cadeau</button>'}</div>
+  </section>`);
+  if (!mouvementReduit && lire("lumo-mouvements-calmes") !== "oui") {
+    confettis(24);
+    animerPip("saute");
   }
-  const qpn = r.quetes_par_niveau;
-  const niveauAvant = r.nouveau_niveau ? r.niveau - 1 : r.niveau;
-  const avant = r.nouveau_niveau ? (qpn - 1) / qpn : Math.max(0, r.vers_suivant - 1) / qpn;
-  const apres = r.nouveau_niveau ? 1 : r.vers_suivant / qpn;
-  const reste = qpn - r.vers_suivant;
-  const finies = (r.niveau - 1) * qpn + r.vers_suivant;
-  const message = r.nouveau_niveau
-    ? "Tu passes au niveau supérieur !"
-    : `Encore ${pluriel(reste, "quête")} avant le niveau ${r.niveau + 1}.`;
-
-  afficher(`
-    <div class="victoire"><div class="rayons"></div>${pipSvg("joie", "geant")}</div>
-    <div class="victoire-texte"><h1>Mission réussie !</h1><p>${echapper(mission.quete.titre)}</p></div>
-    <div class="stats">
-      <div class="carte stat" style="--c:var(--or)">${ic("etoile")}<span class="val" id="val-etoiles">0</span><span class="lbl">Étoiles</span></div>
-      <div class="carte stat" style="--c:var(--orange)">${ic("flamme")}<span class="val">${r.soirs}</span><span class="lbl">${r.soirs > 1 ? "Soirs de suite" : "Soir"}</span></div>
-      <div class="carte stat" style="--c:var(--violet)">${ic("cadeau")}<span class="val">+1</span><span class="lbl">Cadeau</span></div>
-    </div>
-    <div class="carte niveau-ligne">
-      ${badgeNiveau(niveauAvant)}
-      <div class="milieu"><strong>Niveau ${niveauAvant}</strong><div class="progres or"><div id="barre-niveau" style="width:${Math.round(avant * 100)}%"></div></div><small>${message}</small></div>
-    </div>
-    <div class="pied"><div class="pied-int"><button class="btn orange" id="cadeau">${ic("cadeau")} Choisir mon cadeau</button></div></div>`);
-
-  confettis(60);
-  animerPip("saute");
-  parler(["Mission réussie !", `Tu as gagné ${pluriel(mission.etoiles, "étoile")}.`, message]);
-  setTimeout(() => {
-    compter($("#val-etoiles"), 0, mission.etoiles);
-    son("etoile");
-  }, 400);
-  setTimeout(() => {
-    const b = $("#barre-niveau");
-    if (b) b.style.width = `${Math.round(apres * 100)}%`;
-  }, 900);
-  if (r.nouveau_niveau) setTimeout(() => $("#barre-niveau") && modaleNiveau(r.niveau), 1700);
-  $("#cadeau").addEventListener("click", () => {
+  parler([titre, "Tu as pris le temps de travailler cette mission."]);
+  $("#continuer-fin").onclick = ecranAccueil;
+  $("#continuer-fin").focus({ preventScroll: true });
+  $("#cadeau")?.addEventListener("click", () => {
     son("clic");
     ecranChezPip(finies, "cadeau");
   });
 }
-
-function modaleNiveau(n) {
-  const fond = modale(
-    `
-    <p class="surtitre">Nouveau niveau !</p>
-    <div class="revele"><div class="rayons"></div>${badgeNiveau(n, "badge-grand")}</div>
-    <h2>Niveau ${n}</h2>
-    <p class="aide">Tu grandis, et Milo aussi. Continue comme ça !</p>
-    <div class="boutons"><button class="btn orange" id="super">Super !</button></div>`,
-    "cadeau",
-  );
-  son("niveau");
-  vibrer([40, 60, 80]);
-  confettis(70);
-  parler(`Bravo ! Tu passes au niveau ${n} !`);
-  fond.querySelector("#super").addEventListener("click", () => {
-    son("clic");
-    fermerModale(fond);
-  });
-}
-
-// ---------- Écran : Ma chambre (la chambre qui se remplit avec les quêtes) ----------
-
-/** Un objet de plus dans la chambre de Milo à chaque quête terminée. */
-const OBJETS = [
-  {
-    nom: "le tapis",
-    phrase: "Un tapis tout doux pour jouer par terre !",
-    svg: '<ellipse cx="180" cy="268" rx="116" ry="22" fill="#B3A2E8"/><ellipse cx="180" cy="268" rx="96" ry="15" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="8 6"/><ellipse cx="180" cy="268" rx="60" ry="8" fill="#C9BCF2"/>',
-  },
-  {
-    nom: "la plante",
-    phrase: "Ta plante ! Elle pousse en même temps que toi.",
-    svg: '<path d="M302 230 h34 l-4 30 h-26 Z" fill="#FF8A65"/><rect x="300" y="226" width="38" height="8" rx="3" fill="#FF7A50"/><ellipse cx="310" cy="208" rx="9" ry="20" fill="#34C77B" transform="rotate(-28 310 208)"/><ellipse cx="330" cy="206" rx="9" ry="22" fill="#22A062" transform="rotate(22 330 206)"/><ellipse cx="319" cy="198" rx="8" ry="25" fill="#34C77B"/>',
-  },
-  {
-    nom: "la lampe",
-    phrase: "La lampe, pour lire le soir !",
-    svg: '<ellipse cx="40" cy="160" rx="34" ry="12" fill="#FFF3B0" opacity=".55"/><rect x="38" y="150" width="5" height="98" fill="#5B6684"/><ellipse cx="40" cy="250" rx="18" ry="5" fill="#5B6684"/><path d="M16 152 L64 152 L53 120 L27 120 Z" fill="#FFC83D"/><path d="M27 120 L53 120 L55 126 L25 126 Z" fill="#FFD866"/>',
-  },
-  {
-    nom: "l'étagère",
-    phrase: "Une étagère pleine de livres. Tu en as lu combien ?",
-    svg: '<rect x="20" y="78" width="100" height="8" rx="3" fill="#B07A4F"/><rect x="28" y="88" width="6" height="8" fill="#9A6842"/><rect x="106" y="88" width="6" height="8" fill="#9A6842"/><rect x="50" y="48" width="12" height="30" rx="2" fill="#4BA3F5"/><rect x="64" y="54" width="10" height="24" rx="2" fill="#FF9F1C"/><rect x="76" y="46" width="13" height="32" rx="2" fill="#34C77B"/><rect x="91" y="56" width="9" height="22" rx="2" fill="#FF8A65" transform="rotate(12 95 67)"/>',
-  },
-  {
-    nom: "le poster de fusée",
-    phrase: "Un poster de fusée, comme celle que tu construis !",
-    svg: '<rect x="248" y="52" width="58" height="74" rx="4" fill="#26325C" stroke="#fff" stroke-width="4"/><path d="M277 64 C 285 70, 288 80, 288 90 L266 90 C 266 80, 269 70, 277 64 Z" fill="#FF8A65"/><rect x="266" y="90" width="22" height="20" rx="3" fill="#fff"/><circle cx="277" cy="98" r="4" fill="#4BA3F5"/><path d="M266 100 L258 114 L266 110 Z M288 100 L296 114 L288 110 Z" fill="#FF9F1C"/><circle cx="256" cy="62" r="1.5" fill="#fff"/><circle cx="298" cy="72" r="1.5" fill="#fff"/><circle cx="260" cy="118" r="1.2" fill="#fff"/>',
-  },
-  {
-    nom: "le poisson rouge",
-    phrase: "Voici Bulle, ton poisson rouge !",
-    svg: '<ellipse cx="100" cy="64" rx="16" ry="14" fill="#BFE6FF" opacity=".9" stroke="#9CCAF5" stroke-width="2"/><rect x="88" y="50" width="24" height="4" rx="2" fill="#9CCAF5"/><ellipse cx="98" cy="67" rx="6" ry="4" fill="#FF8A65"/><path d="M103 67 L110 62 L110 72 Z" fill="#FF8A65"/><circle cx="95.5" cy="66" r="1" fill="#1F2547"/><circle cx="92" cy="58" r="1.5" fill="#fff"/>',
-  },
-  {
-    nom: "la guirlande",
-    phrase: "Une guirlande lumineuse, comme une fête !",
-    svg:
-      '<path d="M0 20 Q90 44 180 20 T360 20" fill="none" stroke="#5B6684" stroke-width="2"/>' +
-      [24, 62, 100, 138, 222, 260, 298, 336]
-        .map((x, i) => {
-          const y = 20 + 22 * Math.sin(((x % 180) / 180) * Math.PI) * 0.75 + 4;
-          const c = ["#FFC83D", "#FF8A65", "#4BA3F5", "#34C77B"][i % 4];
-          return `<circle cx="${x}" cy="${y}" r="9" fill="${c}" opacity=".3"/><circle cx="${x}" cy="${y}" r="5" fill="${c}"/>`;
-        })
-        .join(""),
-  },
-  {
-    nom: "le ballon",
-    phrase: "Un ballon pour se défouler après les devoirs !",
-    svg: '<ellipse cx="112" cy="276" rx="14" ry="3" fill="#000" opacity=".12"/><circle cx="112" cy="262" r="14" fill="#fff" stroke="#1F2547" stroke-width="1.8"/><path d="M112 256.5 L117.2 260.3 L115.2 266.4 L108.8 266.4 L106.8 260.3 Z" fill="#1F2547"/><path d="M112 256.5 V249 M117.2 260.3 L124.5 258 M115.2 266.4 L119.5 273 M108.8 266.4 L104.5 273 M106.8 260.3 L99.5 258" stroke="#1F2547" stroke-width="1.5"/><path d="M107 249.5 L112 248 L117 249.5 L115 252 L109 252 Z M124 255 L126 261 L123.5 262 L122 257 Z M100 255 L98 261 L100.5 262 L102 257 Z" fill="#1F2547"/>',
-  },
-  {
-    nom: "le télescope",
-    phrase: "Le télescope, pour regarder les étoiles !",
-    svg: '<path d="M240 160 L226 248 M240 160 L254 248 M240 160 L240 248" stroke="#5B6684" stroke-width="3.5" stroke-linecap="round"/><rect x="218" y="146" width="48" height="13" rx="6" fill="#4BA3F5" transform="rotate(-30 242 152)"/><rect x="256" y="128" width="10" height="17" rx="3" fill="#2F86D6" transform="rotate(-30 261 136)"/>',
-  },
-  {
-    nom: "le trophée",
-    phrase: "Le trophée du champion des quêtes !",
-    svg: '<path d="M30 56 L46 56 L44 69 Q38 73 32 69 Z" fill="#FFC83D"/><path d="M30 58 Q24 58 25 63 Q26 67 31 66 M46 58 Q52 58 51 63 Q50 67 45 66" fill="none" stroke="#FFC83D" stroke-width="2"/><rect x="35" y="70" width="6" height="4" fill="#E5A50A"/><rect x="31" y="73" width="14" height="5" rx="1" fill="#E5A50A"/>',
-  },
-  {
-    nom: "le pouf",
-    phrase: "Un pouf tout moelleux pour se reposer.",
-    svg: '<ellipse cx="262" cy="260" rx="27" ry="15" fill="#FF9F1C"/><ellipse cx="262" cy="251" rx="25" ry="10" fill="#FFB547"/><path d="M246 251 Q262 258 278 251" fill="none" stroke="#FF9F1C" stroke-width="2"/>',
-  },
-  {
-    nom: "le mobile des planètes",
-    phrase: "Le mobile des planètes ! Tu as tout débloqué, bravo !",
-    svg: '<path d="M330 0 V18 M314 18 H346 M314 18 V34 M346 18 V44 M330 18 V54" stroke="#5B6684" stroke-width="1.5"/><circle cx="314" cy="40" r="7" fill="#FF8A65"/><circle cx="346" cy="50" r="6" fill="#4BA3F5"/><circle cx="330" cy="60" r="8" fill="#FFC83D"/><ellipse cx="330" cy="60" rx="13" ry="3" fill="none" stroke="#E5A50A" stroke-width="2"/>',
-  },
-];
-
-const DUREE_VISITE_MS = 3 * 60 * 1000; // la visite reste courte : c'est une récompense, pas une distraction
 
 function quetesFinies(etat) {
   return (etat.niveau - 1) * etat.quetes_par_niveau + etat.vers_suivant;
@@ -1820,4 +1667,18 @@ window.lumoPhrasesFixes = () => [...new Set(phrasesFixes().map(nettoyer))];
 
 // ---------- Démarrage ----------
 
-code ? (location.hash.startsWith("#mon-monde") ? ecranChezPip() : ecranAccueil()) : ecranCode();
+function ouvrirProfilPropose() {
+  if (!location.hash.startsWith("#profil=")) return false;
+  const propose = location.hash.slice(8);
+  history.replaceState(null, "", location.pathname + location.search);
+  if (!/^[A-Z0-9]{6}$/.test(propose)) {
+    ecranCode("Ce lien de profil est invalide. Demande le code à tes parents.");
+    return true;
+  }
+  taire();
+  ecranCode(`Tes exercices sont pour le profil ${propose}. Confirme le code pour les retrouver.`, propose);
+  return true;
+}
+window.addEventListener("hashchange", ouvrirProfilPropose);
+if (!ouvrirProfilPropose())
+  code ? (location.hash.startsWith("#mon-monde") ? ecranChezPip() : ecranAccueil()) : ecranCode();
