@@ -1,0 +1,164 @@
+# Lumo — idées potentielles et historique du projet
+
+Dernière mise à jour : 12 octobre 2026.
+
+Ce fichier sert de mémoire du projet. Il rassemble les idées, essais, décisions et travaux retrouvés dans notre conversation, les documents du dépôt et Git. Ajouter une idée ici ne demande pas de la coder. Une fonctionnalité présente dans le prototype n’est pas nécessairement validée avec des enfants ni prête pour le marché.
+
+Les premières discussions avec Claude précèdent l’historique Git disponible. Leur date exacte et certains résultats ne sont pas confirmés : ils sont signalés comme tels. Les clés, liens privés, codes de connexion et données personnelles ne sont pas reproduits ici.
+
+## 1. Idées produit et pédagogie
+
+| ID | Idée ou direction | Intérêt pour Lumo | Statut au 12/10/2026 | Question ou suite possible |
+|---|---|---|---|---|
+| P01 | Transformer une photo de devoir ou de leçon en exercices | Relier les missions aux apprentissages réels | Parcours de prototype essayé avec Claude sur téléphone | Vérifier la fidélité à chaque photo et les passages illisibles |
+| P02 | Utiliser l’assistant personnel du parent via MCP | Limiter les dépenses de génération à la charge de Lumo | MCP local et distant présents ; essai Claude mobile réalisé | Simplifier l’installation de chaque nouvelle famille |
+| P03 | Envoyer une photo avec un message court « Pour Lumo » | Réduire les manipulations répétées | Message prédéfini et guide disponibles | Le connecteur doit être installé et activé ; la phrase seule ne le connecte pas |
+| P04 | Une future génération intégrée par API | Permettre l’usage sans assistant externe | Envisagé, non implémenté | Définir les coûts, quotas et la validation parent |
+| P05 | Deux offres : assistant du parent et API fournie par Lumo | Proposer des tarifs adaptés aux coûts | Idée de modèle économique, aucun tarif validé | Évaluer les coûts réels avant de fixer les prix |
+| P06 | Lumo pour les enfants du primaire de 6 à 12 ans | Définir clairement le public | Direction confirmée | Adapter lecture, difficulté et goûts ; ne pas confondre âge, année scolaire et niveau du jeu |
+| P07 | Concevoir pour des besoins neuroatypiques | Rendre les consignes et interactions plus accessibles | Direction confirmée ; simplifications effectuées | À tester avec les enfants et des professionnels ; aucune efficacité clinique démontrée |
+| P08 | Une consigne courte, une action à la fois | Réduire la charge de lecture et de manipulation | Appliqué à plusieurs missions récentes | Revoir progressivement les exercices plus anciens |
+| P09 | Petites séances et deux formats familiers | Varier sans multiplier les changements de règle | Brouillons simplifiés et recommandations pédagogiques présents | Ajuster avec le parent selon la leçon et l’enfant |
+| P10 | Diversifier : maths, français, histoire, géographie, sciences | Éviter une application limitée à une matière | Missions de plusieurs matières créées | Constituer une bibliothèque vérifiée par niveau scolaire |
+| P11 | Retirer les maths trop difficiles pour le public visé | Éviter les séances inadaptées | Retraits/archives et révisions du parcours effectués | Confirmer le niveau scolaire avant de juger chaque nouvelle mission |
+| P12 | Six formats : choix, réponse courte, vrai/faux, ordre, associations, dictée | Adapter le jeu à la notion travaillée | Présents dans le prototype | Choisir le format utile, sans forcer leur diversité |
+| P13 | Rejouer les missions précédentes depuis la carte | Donner accès au chemin accompli | Présent | Observer si les enfants comprennent les coches et les reprises |
+| P14 | Réviser uniquement les questions difficiles | Cibler le travail utile | Présent, avec passages distincts et historique conservé | Ne pas présenter une réussite ponctuelle comme une maîtrise acquise |
+| P15 | Tableau des difficultés et notions à retravailler | Aider le parent à accompagner l’enfant | Observations par mission dans le carnet et bilan MCP | Construire un véritable tableau parent, sans diagnostic automatique |
+| P16 | Espace enfant, espace parent et espace professionnel | Séparer les usages et les responsabilités | Architecture cible documentée ; interfaces adultes complètes à construire | Comptes, sessions, consentement et permissions avant ouverture réelle |
+| P17 | Logopèdes et professionnels du soin en premier | Préparer l’accompagnement spécialisé | Priorité confirmée, espace non construit | Partage limité, révocable et accepté par les familles |
+| P18 | Enseignants, écoles, classes et groupes ensuite | Permettre une extension scolaire | Envisagé, non construit | Réutiliser le modèle d’organisations et de droits |
+| P19 | Tarifs professionnels différents, éventuellement gratuits | Adapter l’offre à leurs usages | Idée ouverte | Séparer tarifs et autorisations d’accès aux enfants |
+| P20 | PWA / accès pratique depuis le téléphone | Faciliter l’accès à Lumo | Application Web et manifeste présents ; expérience PWA complète non confirmée | Installation, reprise et éventuel hors-ligne à tester séparément |
+| P21 | Tester avec quelques familles avant d’élargir | Vérifier compréhension, plaisir et fiabilité | Préparation en cours | Essai d’une personne invitée prévu le 13 octobre ; pas encore réalisé |
+| P22 | Messages et suggestions prédéfinis pour les parents | Éviter de réécrire les mêmes demandes à l’assistant | Message photo copiable présent ; suggestions de suite utilisées dans notre conversation | Distinguer les boutons de Lumo des capacités de l’application d’assistant |
+| P23 | Faire de Lumo un produit largement utilisé | Donner une ambition au projet | Objectif exprimé, aucun succès de marché démontré | Mesurer d’abord l’utilité, la compréhension et le retour des familles |
+
+## 2. Milo, récompenses, illustrations et aventures
+
+| ID | Idée ou essai | Intérêt | Statut | Décision ou suite possible |
+|---|---|---|---|---|
+| R01 | Renommer Pip en Milo | Donner une identité au compagnon | Milo choisi et utilisé dans l’interface | Quelques anciens noms internes subsistent ; ils ne sont pas tous des fonctions obsolètes |
+| R02 | Avatar personnalisable | Donner un espace personnel à l’enfant | Présent, personnalisation simple | Ajouter des choix selon les retours des enfants |
+| R03 | Objets à collectionner et écussons | Matérialiser les efforts | Collection simple présente | Évaluer l’attrait sans transformer les récompenses en obligation |
+| R04 | Carnet montrant le parcours et les progrès | Garder une mémoire des séances | Présent | Simplifier la vue enfant et approfondir la vue adulte |
+| R05 | Crédit cadeau pour une mission terminée | Récompenser l’effort, même après des erreurs | Présent | Les révisions ne créent pas de nouveau cadeau |
+| R06 | Construire un observatoire et découvrir son ciel | Aventure et collection | Idée évoquée ; atelier d’observatoire non confirmé dans le code | En réserve, distinct du ciel hebdomadaire actuel |
+| R07 | Refuge de créatures imaginaires | Attachement à un petit univers | Idée évoquée, non construite | En réserve |
+| R08 | Robot personnalisable avec apparence et mouvements | Création et choix personnels | Illustration de mission présente ; personnalisation du robot non construite | Explorer une petite surprise finale et des variantes |
+| R09 | Jardin et potager avec graines et arrosage | Construction, observation et patience | Ateliers essayés puis retirés du code actif | Mis de côté ; archives et souvenirs conservés |
+| R10 | Plantes qui poussent avec le temps | Éviter de tout débloquer d’un coup | Idée discutée ; résultat complet non confirmé | En réserve, sans pression de connexion quotidienne |
+| R11 | Cuisine à partir des récoltes | Relier plusieurs activités créatives | Atelier essayé puis retiré du code actif | Mis de côté pour privilégier les exercices |
+| R12 | Une identité ludique cohérente avec les couleurs existantes | Éviter un univers trop sérieux ou réaliste | Direction confirmée après plusieurs essais de jardin | Garder Milo, les formes rondes et la palette actuelle |
+| R13 | Animations de mission à la manière d’un petit jeu vivant | Donner envie de finir la séance | Fusée, fleurs et nouveaux décors présents | Tester l’intérêt auprès des 6–12 ans |
+| R14 | Fusée assemblée puis décollage | Progression visible et conclusion plaisante | Présente ; décollage retiré puis rétabli le 12 octobre | Conserver les missions portant déjà le nom de fusée |
+| R15 | Fleurs qui éclosent | Récompense visuelle douce | Illustration existante réutilisée pour les sciences et l’univers nature | Ne réintroduit pas l’ancien atelier de jardin |
+| R16 | Ballon qui se colore puis s’envole | Exploration et progression | Illustration et animation présentes pour la géographie | Idée future : découvrir une île ou une destination |
+| R17 | Château construit au fil des réponses | Récompense créative | Idée et premier dessin envisagés, avant changement demandé | Construction recommandée comme possibilité principale, choix final non tranché |
+| R18 | Forteresse ennemie détruite par un héros | Variante d’aventure | Illustration avec remparts retirés progressivement et Milo héros présente | Variante occasionnelle ; intérêt à comparer avec la construction |
+| R19 | Libérer un passage, un personnage ou révéler un trésor | Donner un sens à la victoire sur la forteresse | Idée discutée, non construite | Préférer une conclusion positive à la destruction seule |
+| R20 | Œuf mystérieux qui révèle une créature | Surprise finale | Idée discutée, non construite | En réserve |
+| R21 | Exploration sous-marine et découverte d’animaux | Autre univers visuel | Idée discutée, non construite | En réserve |
+| R22 | Pouvoir acquis grâce à une quête ou une créature | Donner des décisions à l’enfant | Idée discutée, aucun système de pouvoirs codé | Commencer éventuellement avec trois pouvoirs maximum |
+| R23 | Bouclier, vol, clé magique, passage secret | Donner des usages concrets aux pouvoirs | Suggestions, non construites | Définir l’effet dans l’aventure avant l’implémentation |
+| R24 | Pouvoir utilisable une fois par mission, récupéré à la suivante | Limiter l’usage sans attente quotidienne | Proposition, non validée ni codée | Éviter les achats et pénalités pour restaurer un pouvoir |
+| R25 | Aides pédagogiques toujours disponibles | Ne pas conditionner l’apprentissage à une récompense | Principe proposé pour les futurs pouvoirs | Indice, relecture et exemple ne doivent pas exiger un pouvoir gagné |
+| R26 | Fin de mission inspirée d’un écran de célébration | Reconnaître l’effort accompli | Plusieurs versions essayées | Réalisation originale de Lumo, sans reprendre les assets d’une référence |
+| R27 | Fin de mission très simple | Réduire la lecture après l’effort | Milo, titre court, cadeau et bouton Continuer présents | Les détails ont été déplacés vers le carnet ; le rendez-vous reste à l’accueil |
+| R28 | Séries de jours et objectifs de type 7/14/30/50 jours | Motivation par régularité | Référence discutée, non retenue comme mécanique principale | Remplacée par un rendez-vous hebdomadaire sans perte liée à une absence |
+| R29 | Rendez-vous avec Milo : 2, 3 ou 4 jours par semaine | Encourager un rythme choisi | Présent, une séance comptée au maximum par jour | Pas de cadeau hebdomadaire supplémentaire ; anciennes semaines conservées |
+| R30 | Mode calme et animations courtes/passables | Laisser le choix du mouvement | Préférence calme et animations finales présentes | Accessibilité à poursuivre ; pas de garantie d’adaptation à tous les profils |
+| R31 | S’inspirer de Duolingo, Adibou ou de jeux de société | Identifier des mécanismes intéressants | Références discutées | Créer les textes, écrans, illustrations et règles propres à Lumo |
+| R32 | Expédition coopérative / course inspirée d’une mécanique de cartes | Faire avancer un véhicule avec les exercices | Idée discutée, nouveau mini-jeu non construit | Sans chronomètre obligatoire ; aide après l’erreur |
+| R33 | Illustrations définitives avec Firefly ou Recraft | Améliorer la qualité visuelle du produit | Outils examinés ; aucune production externe confirmée | Les SVG actuels servent à tester les scènes ; vérifier les droits des futurs assets |
+| R34 | Rive pour les animations interactives | Donner vie à des illustrations professionnelles | Outil examiné, non intégré | À évaluer lorsque les scènes retenues seront connues |
+| R35 | Voix française gratuite de l’appareil | Lire les consignes sans génération ElevenLabs | Repli présent ; sélection française et chargement différé vérifiés | La voix dépend de l’appareil ; elle ne reproduit pas la voix personnalisée |
+| R36 | Préparer les mots et phrases fréquents en une fois | Réutiliser une banque audio à faible coût | Idée discutée ; morceaux de calculs et inventaire présents | Préparer les éléments utiles plutôt que toutes les phrases possibles ; vérifier leur prononciation |
+| R37 | Voix française locale Windows pour comparaison | Isoler un problème de prononciation sans dépenser de crédits | Exemple audio et diagnostic de voix française préparés | Essai de diagnostic, pas un service vocal complet déployé dans Lumo |
+
+## 3. Historique des essais et changements
+
+| Période | Ce qui a été vu ou essayé | Résultat ou décision retrouvée | Source / limite |
+|---|---|---|---|
+| Début du projet, avant le premier commit conservé | Projet commencé avec Claude ; jeu et connecteur Lumo déjà existants | Reprise du prototype et lecture du contexte | Conversation ; chronologie précise du travail initial non disponible dans Git |
+| Début du projet | Lancement par terminal, autorisations fréquentes et accès complet | Questions sur le fonctionnement ; lanceurs Windows ensuite renforcés | Conversation et audit ; pas de garantie que toutes les demandes d’autorisation de l’app hôte soient supprimées |
+| Début du projet | Partage du jeu à distance par lien | Tunnel temporaire Cloudflare utilisé | Le PC et le tunnel doivent fonctionner ; l’adresse change lors d’un nouveau tunnel |
+| Discussions initiales | Coût de génération pour beaucoup de parents ; MCP plutôt qu’API centralisée | Assistant du parent privilégié ; API conservée comme possibilité future | Choix produit, sans budget commercial validé |
+| Discussions initiales | Voix Milo créée avec ElevenLabs, phrases et mots réutilisables | Cache audio utilisé ; lecture sans nouvelle génération quand le fichier existe | Les phrases absentes utilisent une voix de remplacement |
+| Discussions initiales | Exercice « le loup et la clé » sans image, jugé trop facile | Retrait demandé par l’utilisateur | Demande retrouvée ; date et état précis de son retrait non confirmés par les documents consultés |
+| Avant le 9 octobre | Demande d’audit approfondi de l’architecture | Audit et architecture cible rédigés ; corrections techniques appliquées | docs/AUDIT-2026-10-09.md et docs/ARCHITECTURE.md |
+| Avant le 9 octobre | Jardin, potager, arrosage et cuisine ; essais de style plus réaliste | Plusieurs essais jugés trop sérieux ou peu cohérents avec Lumo | Conversation ; les anciennes variantes ne sont pas toutes datées |
+| 9 octobre | Mise de côté des ateliers pour concentrer le produit sur les devoirs | Code actif nettoyé ; données et souvenirs conservés | Commits 886adc9 et dbed3d8 ; tag d’archive existant |
+| Avant / autour du 9 octobre | Avatar, collection et carnet | Espace personnel simple retenu | CONTEXTE.md et docs/MONDE-ENFANT.md |
+| Discussions puis 12 octobre | Photo d’une fiche d’additions avec grands nombres | Exemple de génération à partir d’une image ; difficulté ensuite discutée | Conversation ; ne pas déduire l’année scolaire de la taille des nombres ou du niveau du jeu |
+| 12 octobre | Carte montrant les missions terminées et celles à venir | Parcours conservé, missions retirées archivées sans supprimer les réponses | Commit 05cc378 |
+| 12 octobre | Refaire toute une mission ou cibler les difficultés | Révisions distinctes, reprises possibles, historique et récompenses initiales conservés | Commits 335969b et 50c4569 |
+| 12 octobre | Qualité des consignes, contexte de leçon et comparaison des passages | Contrat pédagogique renforcé ; sélection des questions dans le brouillon | Commit 922643d |
+| 12 octobre | Connecteur Lumo local dans Codex | Liste d’enfants obtenue après configuration/rechargement | Essai confirmé dans la conversation ; connexion locale différente de celle du téléphone |
+| 12 octobre | ChatGPT Enterprise et accès mobile aux connecteurs | Possibilité étudiée ; pas de parcours ChatGPT mobile Lumo opérationnel confirmé | Guide parent et docs d’exploitation ; capacités à vérifier à nouveau avant installation |
+| 12 octobre | Claude Pro sur téléphone avec connecteur distant | Liste du profil de test, réception du brouillon et validation effectuées par l’utilisateur | Essai utilisateur confirmé ; pas une preuve d’installation sur le compte de toutes les familles |
+| 12 octobre | Exercices validés qui n’apparaissaient pas dans le profil affiché | Passage au bon profil fiabilisé ; code proposé puis confirmé | Commit 9bcea14 et retour utilisateur confirmant le fonctionnement |
+| 12 octobre | Exercices de conjugaison du verbe devoir | Première version publiée ; nouveau brouillon simplifié, cinq questions et deux formats par mission | Basé sur l’extrait enregistré ; photo originale non vérifiée directement lors de cette révision |
+| 12 octobre | Rendez-vous hebdomadaire testé avec deux missions le même jour | Une seule journée de pratique comptée ; deux cadeaux ordinaires, aucun bonus hebdomadaire | Commit bc1236b et essai sur profil fictif |
+| 12 octobre | Voix des calculs disant des nombres en anglais | Nombres passés en lettres françaises ; choix explicite d’une voix française de remplacement | Commit 5f596ff ; l’utilisateur a ensuite confirmé le français, mais une voix différente |
+| 12 octobre | Retour de la voix personnalisée sur « sept fois huit » | Deux fichiers « sept » et « huit » générés ; huit caractères envoyés à ElevenLabs | Essai limité ; qualité auditive de cette voix personnalisée encore à confirmer par l’utilisateur |
+| 12 octobre | Inventaire des fichiers audio manquants | Budgets indicatifs : 8 caractères pour l’essai, 30 pour les calculs alors présents, 48 pour les tables 1–12 | Lots qui se recouvrent ; pas un solde de compte ni une facture ; inventaire à refaire si les missions changent |
+| 12 octobre | Écran de réussite avec plusieurs cartes, statistiques et rendez-vous | Jugé trop chargé ; remplacé par Milo, cadeau et Continuer | Commit 6d6646e ; les données de résultats restent conservées |
+| 12 octobre | Nouvelle famille invitée depuis son propre compte Claude | Lien privé d’installation, profil fictif séparé, expiration et révocation vérifiées | Commit e36db6e ; test réel de cette personne pas encore réalisé |
+| 12 octobre | Décollage de la fusée apprécié, puis disparu de la fin de mission | Décollage et floraison rétablis ; animation courte, passable, sans mouvement en mode calme | Commit 0cdccaa ; aperçu navigateur vérifié |
+| 12 octobre | Ajout de missions autres que français | Trois missions de découverte : petits calculs, plantes, paysages ; cinq questions chacune | Ajout vérifié dans le profil de test affiché à distance ; pas dans tous les profils |
+| 12 octobre | Accueil enfant trop chargé | Texte réduit, prochaine mission mise en avant, ciel compact, informations parent repliées | Commit fbe6e96 ; affichage téléphone et accès aux réglages vérifiés |
+| 12 octobre | Test avec l’ami reporté au lendemain | Invitation prolongée jusqu’au 13 octobre au soir | Testeur non encore connecté ; les liens privés ne sont pas recopiés ici |
+| 12 octobre | Éteindre le PC puis relancer le partage | Données locales conservées ; adresse du tunnel à renouveler après arrêt | Pas d’hébergement indépendant opérationnel à ce stade |
+| 12 octobre | Hébergement gratuit Oracle Always Free | Docker, Compose, HTTPS et volume persistant préparés ; configuration Compose validée | Commit 3f513cd ; moteur Docker local arrêté, image non construite/testée, compte Oracle non créé |
+| 12 octobre | Préférence pour une autre solution d’hébergement que l’inscription Oracle immédiate | Cloudflare Workers + D1 évoqués | Offre à quotas ; adaptation de Lumo non réalisée. Aucun hébergement gratuit permanent déployé |
+| 12 octobre | Nouvelles illustrations de mission | Robot pour maths, fleurs pour sciences, ballon pour géographie, forteresse pour histoire | Commit e8c6de4 ; missions nommées « Fusée » conservées ; SVG originaux, pas d’images générées par un service externe |
+| 12 octobre | Détruire un château ennemi en tant que héros | Remparts retirés progressivement, Milo avec bouclier, ruines et étoile finale | Cinq étapes et remise à zéro vérifiées dans l’aperçu ; construction principale vs aventure reste à décider |
+| 12 octobre | Pouvoirs limités obtenus par les quêtes ou créatures | Discussion sur leurs usages, fréquence et séparation avec les aides | Idées uniquement, aucun inventaire ni consommation de pouvoir codé |
+
+## 4. Bases techniques vues, renforcées ou encore à construire
+
+| Sujet | Travaux ou constats retrouvés | État actuel / limite |
+|---|---|---|
+| Serveur et stockage | Node.js / TypeScript, SQLite, navigateur JavaScript, règles partagées entre Web et MCP | Prototype serveur unique ; charge importante et plusieurs instances à étudier |
+| Validation des entrées | Schémas, taille des requêtes, contrôles serveur de fin de mission | Présents ; ne garantissent pas la qualité pédagogique du contenu généré |
+| Réponses et récompenses | Transactions, identifiants de requête, reprise, doubles envois et cadeaux testés | Données persistées côté serveur ; pas de progression simplement décidée par le navigateur |
+| Sécurité des profils | Recherche stricte par code, isolation des familles MCP, révocation | Les codes enfants et clés privées de prototype ne remplacent pas de vrais comptes et sessions |
+| Révisions et archives | Mission initiale conservée, passages distincts, retrait réversible | Anciennes réponses conservées ; ne pas inventer des résultats supprimés avant ce mécanisme |
+| Réseau | Délais, messages de reprise, contrôles réactivés après erreur | Scénarios de prototype testés ; supervision de production à construire |
+| Migrations | Schéma SQLite versionné et tests sur bases historiques | Migrations historiques conservées ; ne pas les effacer avec un ancien écran |
+| Sauvegardes | Copie SQLite cohérente avec WAL, intégrité et restauration testées | Audio, secrets et connexions à sauvegarder séparément ; sauvegarde externe à organiser |
+| Coûts audio | Génération désactivée par défaut, plafond persistant et cache | Aucun mécanisme ne garantit une voix identique pour tous les textes absents du cache |
+| Comptes et consentement | Modèle cible familles / organisations / autorisations / sessions | Non implémenté comme authentification complète de produit |
+| Commercialisation | Confidentialité, suppression/export, rétention, licences, suivi et tests de charge | Chantiers ouverts ; les essais réussis ne certifient pas une mise sur le marché |
+| Git et anciennes versions | Code enregistré sur GitHub ; ateliers conservés dans un tag d’archive | Données privées et audio hors Git ; l’historique avant les commits reste partiel |
+
+## 5. Décisions à garder en mémoire
+
+| Décision | Conséquence |
+|---|---|
+| Priorité aux exercices liés aux leçons | Jardin complet, potager et cuisine restent mis de côté |
+| Milo et un espace personnel simple sont conservés | Avatar, petite collection et carnet constituent l’identité personnelle actuelle |
+| Aucun pouvoir codé pour le moment | Les pouvoirs ci-dessus restent dans ce tableau jusqu’à une décision explicite |
+| Illustrations définitives après validation des mécaniques | Les scènes actuelles sont des premières propositions à tester |
+| Pas de pénalité pour une journée manquée | Rendez-vous hebdomadaire choisi, progrès et souvenirs conservés |
+| Aides disponibles sans récompense préalable | Un enfant ne devrait pas devoir gagner un pouvoir pour comprendre la consigne |
+| Ne pas confondre jeu, âge et apprentissage | Le niveau du jeu n’est pas une année scolaire ni une mesure de maîtrise |
+| Pas de copie des réalisations de jeux existants | Les références servent à discuter les besoins ; identité et assets propres à Lumo |
+| Hébergement permanent non encore en service | Pour le test distant actuel, le PC et le tunnel doivent rester disponibles |
+
+## 6. Références locales
+
+| Référence | Ce qu’elle permet de retrouver |
+|---|---|
+| CONTEXTE.md | État de référence du 9 octobre ; certaines indications ont évolué depuis |
+| docs/AUDIT-2026-10-09.md | Audit daté, corrections et limites à cette date |
+| docs/ARCHITECTURE.md | Architecture actuelle et cible parents/professionnels |
+| docs/MONDE-ENFANT.md | Espace personnel, ateliers archivés, parcours, révisions et rendez-vous ; descriptions historiques à lire avec leur date |
+| docs/EXPLOITATION.md | Sauvegardes, paramètres et connecteurs |
+| deploy/README.md | Préparation du déploiement ; ne prouve pas qu’un serveur est en ligne |
+| Tag archive/avant-nettoyage-ateliers-2026-10-09 | Ancien code des ateliers avant nettoyage |
+| Historique Git de la branche main | Changements enregistrés à partir du 9 octobre |
+| Conversation du projet | Préférences, retours utilisateur et idées non encore implémentées |
+
+Pour ajouter une idée : lui donner un ID, décrire son intérêt, indiquer « Idée » ou « À explorer » et noter la décision attendue. Pour un essai : noter ce qui a réellement été testé, le résultat observé et ses limites. Ne pas remplacer une proposition par « Terminé » sans preuve.
