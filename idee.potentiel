@@ -20,7 +20,7 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | P08 | Une consigne courte, une action à la fois | Réduire la charge de lecture et de manipulation | Appliqué à plusieurs missions récentes | Revoir progressivement les exercices plus anciens |
 | P09 | Petites séances et deux formats familiers | Varier sans multiplier les changements de règle | Brouillons simplifiés et recommandations pédagogiques présents | Ajuster avec le parent selon la leçon et l’enfant |
 | P10 | Diversifier : maths, français, histoire, géographie, sciences | Éviter une application limitée à une matière | Missions de plusieurs matières créées | Constituer une bibliothèque vérifiée par niveau scolaire |
-| P11 | Retirer les maths trop difficiles pour le public visé | Éviter les séances inadaptées | Retraits/archives et révisions du parcours effectués | Confirmer le niveau scolaire avant de juger chaque nouvelle mission |
+| P11 | Retirer du parcours primaire les maths trop difficiles pour ce public | Éviter les séances inadaptées sans exclure des essais exploratoires | Retraits/archives et révisions du parcours effectués | Le parent précise qu’une photo de maths de 4ᵉ secondaire servait à tester le LLM et une extension future ; ce test ne devait pas définir le niveau du parcours primaire |
 | P12 | Six formats : choix, réponse courte, vrai/faux, ordre, associations, dictée | Adapter le jeu à la notion travaillée | Présents dans le prototype | Choisir le format utile, sans forcer leur diversité |
 | P13 | Rejouer les missions précédentes depuis la carte | Donner accès au chemin accompli | Présent | Observer si les enfants comprennent les coches et les reprises |
 | P14 | Réviser uniquement les questions difficiles | Cibler le travail utile | Présent, avec passages distincts et historique conservé | Ne pas présenter une réussite ponctuelle comme une maîtrise acquise |
@@ -33,6 +33,7 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | P21 | Tester avec quelques familles avant d’élargir | Vérifier compréhension, plaisir et fiabilité | Préparation en cours | Essai d’une personne invitée prévu le 13 octobre ; pas encore réalisé |
 | P22 | Messages et suggestions prédéfinis pour les parents | Éviter de réécrire les mêmes demandes à l’assistant | Message photo copiable présent ; suggestions de suite utilisées dans notre conversation | Distinguer les boutons de Lumo des capacités de l’application d’assistant |
 | P23 | Faire de Lumo un produit largement utilisé | Donner une ambition au projet | Objectif exprimé, aucun succès de marché démontré | Mesurer d’abord l’utilité, la compréhension et le retour des familles |
+| P24 | Étendre plus tard Lumo aux élèves neuroatypiques du secondaire | Explorer l’aide à des leçons plus avancées | Piste exploratoire ; une photo d’exercice de maths de 4ᵉ secondaire a été utilisée pour voir comment le LLM la traiterait | Primaire 6–12 ans reste le périmètre actuel ; évaluer séparément contenus, interactions et besoins du secondaire |
 
 ## 2. Milo, récompenses, illustrations et aventures
 
@@ -93,6 +94,7 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | 9 octobre | Mise de côté des ateliers pour concentrer le produit sur les devoirs | Code actif nettoyé ; données et souvenirs conservés | Commits 886adc9 et dbed3d8 ; tag d’archive existant |
 | Avant / autour du 9 octobre | Avatar, collection et carnet | Espace personnel simple retenu | CONTEXTE.md et docs/MONDE-ENFANT.md |
 | Discussions puis 12 octobre | Photo d’une fiche d’additions avec grands nombres | Exemple de génération à partir d’une image ; difficulté ensuite discutée | Conversation ; ne pas déduire l’année scolaire de la taille des nombres ou du niveau du jeu |
+| Essai antérieur, précisé le 12 octobre | Photo d’un exercice de maths de 4ᵉ secondaire pour tester le traitement par le LLM | Exploration d’une aide future aux élèves neuroatypiques du secondaire, distincte des exercices destinés au primaire | Précision donnée par l’utilisateur dans un commentaire sur P11 ; résultat pédagogique de l’essai non certifié. Ne pas assimiler automatiquement cette photo à la fiche d’additions mentionnée ci-dessus |
 | 12 octobre | Carte montrant les missions terminées et celles à venir | Parcours conservé, missions retirées archivées sans supprimer les réponses | Commit 05cc378 |
 | 12 octobre | Refaire toute une mission ou cibler les difficultés | Révisions distinctes, reprises possibles, historique et récompenses initiales conservés | Commits 335969b et 50c4569 |
 | 12 octobre | Qualité des consignes, contexte de leçon et comparaison des passages | Contrat pédagogique renforcé ; sélection des questions dans le brouillon | Commit 922643d |
@@ -163,6 +165,23 @@ Les premières discussions avec Claude précèdent l’historique Git disponible
 | Ne pas confondre jeu, âge et apprentissage | Le niveau du jeu n’est pas une année scolaire ni une mesure de maîtrise |
 | Pas de copie des réalisations de jeux existants | Les références servent à discuter les besoins ; identité et assets propres à Lumo |
 | Hébergement permanent non encore en service | Pour le test distant actuel, le PC et le tunnel doivent rester disponibles |
+
+## 5 bis. Journal des décisions et évolution des idées
+
+Une idée conserve son ID même si elle change de statut. Noter la date, la décision et sa raison ; conserver les étapes précédentes plutôt que les effacer. Distinguer le retrait d’une fonction du code actif, sa mise de côté et l’abandon définitif d’une idée. Une suppression de code ne signifie pas une suppression des progrès enregistrés.
+
+| Date / période | Idées concernées | Décision ou évolution | Raison retrouvée | Ce qui reste ouvert |
+|---|---|---|---|---|
+| Direction confirmée avant le 9 octobre | P06 | Primaire 6–12 ans retenu comme public actuel | Concentrer les contenus et l’expérience sur un public défini | Adaptations selon l’année scolaire et le niveau de lecture |
+| 9 octobre | R09–R11 | Jardin, potager et cuisine mis de côté ; ateliers retirés du code actif | Concentrer Lumo sur les exercices ; plusieurs essais visuels n’avaient pas convaincu | Possibilité de reprendre une idée plus tard, sans engagement de la réintroduire |
+| Évolution vers Mon espace, date précise à confirmer | R02–R04, R38–R39 | Chambre principale remplacée par avatar, collection et carnet | Simplification de l’espace personnel retenue dans la conversation | Intérêt d’une chambre ou étagère de trophées à réévaluer ; ancien parcours à fiabiliser |
+| 12 octobre | R26–R27 | Écran de fin allégé après une version plus détaillée | Trop de texte et de répétitions signalés par l’utilisateur | Garder les données détaillées dans le suivi |
+| 12 octobre | R14–R15 | Décollage et floraison rétablis après leur retrait de la fin de mission | Le décollage était apprécié ; simplifier le texte ne devait pas supprimer le plaisir visuel | Améliorer les illustrations après test des mécaniques |
+| 12 octobre | R17–R19 | Château à construire envisagé, puis variante ennemie à détruire demandée et essayée | Envie d’une aventure où l’enfant joue un héros | Choix entre construction principale et destruction occasionnelle non tranché avec les enfants |
+| 12 octobre | R22–R25 | Pouvoirs proposés et consignés, sans développement | Donner des choix dans l’aventure ; souhait de réfléchir avant de coder | Effets, fréquence et accès permanent aux aides à définir |
+| 12 octobre, clarification utilisateur | P11, P24 | Essai de maths de 4ᵉ secondaire reconnu comme exploration, pas comme niveau du primaire | Tester le LLM et réfléchir à une extension aux élèves neuroatypiques du secondaire | Aucune décision d’élargir dès maintenant le public ni preuve d’efficacité de cette extension |
+
+Pour les futures décisions, ajouter une ligne indiquant : date, ID, ancien statut, nouveau statut, raison et observations. Les statuts possibles sont « Idée », « À explorer », « Retenue », « En essai », « Présente dans le prototype », « Mise de côté », « Retirée du code actif » et « Abandonnée ». Les exemples ci-dessus ne rendent pas ces statuts interchangeables.
 
 ## 6. Références locales
 
