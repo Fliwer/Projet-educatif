@@ -5,6 +5,7 @@ import { FUSEAU } from "./config.ts";
 import { ErreurMetier } from "./erreurs.ts";
 import { schemaQuetes } from "./formats.ts";
 import { type TypeQuestion } from "./types-jeux.ts";
+import { lireParcours } from "./parcours.ts";
 import { attribuerCadeau } from "./monde.ts";
 export { TYPES_QUESTION } from "./types-jeux.ts";
 export type { TypeQuestion } from "./types-jeux.ts";
@@ -35,6 +36,7 @@ export type QuestionEntree = {
 const SEPARATEUR = " ‖ "; // sépare les morceaux et les paires dans une réponse enregistrée
 
 export type QueteEntree = {
+  notion?: string;
   titre: string;
   matiere: string;
   questions: QuestionEntree[];
@@ -215,14 +217,14 @@ export function creerQuetes(enfant: Enfant, quetes: QueteEntree[]) {
   return transaction(() => {
     const cree = maintenant();
     const ajoutQuete = db.prepare(
-      "INSERT INTO quetes (enfant_id, titre, matiere, cree_le, recompense_cle) VALUES (?, ?, ?, ?, lower(hex(randomblob(16))))",
+      "INSERT INTO quetes (enfant_id, titre, matiere, cree_le, notion, recompense_cle) VALUES (?, ?, ?, ?, ?, lower(hex(randomblob(16))))",
     );
     const ajoutQuestion = db.prepare(
       "INSERT INTO questions (quete_id, ordre, type, consigne, choix, bonne) VALUES (?, ?, ?, ?, ?, ?)",
     );
     const creees: { id: number; titre: string; questions: number }[] = [];
     for (const q of quetes) {
-      const r = ajoutQuete.run(enfant.id, q.titre, q.matiere, cree);
+      const r = ajoutQuete.run(enfant.id, q.titre, q.matiere, cree, q.notion ?? null);
       const queteId = Number(r.lastInsertRowid);
       q.questions.forEach((qu, ordre) => {
         const donnees =
@@ -257,7 +259,7 @@ export function etatEnfant(enfant: Enfant) {
       `SELECT q.id, q.titre, q.matiere, q.statut,
               (SELECT COUNT(*) FROM questions WHERE quete_id = q.id) AS nb_questions
          FROM quetes q
-        WHERE q.enfant_id = ? AND (q.statut != 'terminee' OR substr(q.finie_le, 1, 10) = ?)
+        WHERE q.enfant_id = ? AND q.archivee=0 AND (q.statut != 'terminee' OR substr(q.finie_le, 1, 10) = ?)
         ORDER BY q.statut = 'terminee', q.id`,
     )
     .all(enfant.id, aujourdhui());
@@ -309,9 +311,9 @@ function questionPourEnfant(q: {
 
 /** Les questions d'une quête, sans les bonnes réponses. */
 export function questionsQuete(enfant: Enfant, queteId: number) {
-  const quete = db.prepare("SELECT * FROM quetes WHERE id = ? AND enfant_id = ?").get(queteId, enfant.id) as
-    | { id: number; titre: string; matiere: string; statut: string }
-    | undefined;
+  const quete = db
+    .prepare("SELECT * FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
+    .get(queteId, enfant.id) as { id: number; titre: string; matiere: string; statut: string } | undefined;
   if (!quete) return undefined;
   if (quete.statut === "a_faire")
     db.prepare("UPDATE quetes SET statut = 'en_cours' WHERE id = ?").run(queteId);
@@ -350,7 +352,7 @@ export function enregistrerReponse(enfant: Enfant, questionId: number, valeur: s
     const q = db
       .prepare(
         `SELECT qu.bonne, qu.type, qe.statut FROM questions qu JOIN quetes qe ON qe.id = qu.quete_id
-      WHERE qu.id = ? AND qe.enfant_id = ?`,
+      WHERE qu.id = ? AND qe.enfant_id = ? AND qe.archivee=0`,
       )
       .get(questionId, enfant.id) as { bonne: string; type: string; statut: string } | undefined;
     if (!q) return undefined;
@@ -406,7 +408,7 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
   return transaction(() => {
     const actuel = enfantParCode(enfant.code)!;
     const quete = db
-      .prepare("SELECT statut FROM quetes WHERE id = ? AND enfant_id = ?")
+      .prepare("SELECT statut FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
       .get(queteId, actuel.id);
     if (!quete) return undefined;
     const avant = niveau(actuel).niveau;
@@ -474,5 +476,6 @@ export function progression(enfant: Enfant, jours: number) {
     soirs_d_affilee: enfant.soirs,
     periode_jours: jours,
     quetes: detail,
+    parcours_complet: lireParcours(db, enfant.id),
   };
 }

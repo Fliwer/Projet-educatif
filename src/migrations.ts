@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-const VERSION = 5;
+const VERSION = 6;
 
 /** Migrations sérialisées entre serveur HTTP et MCP, y compris sur une ancienne base. */
 export function migrer(db: DatabaseSync) {
@@ -105,6 +105,11 @@ export function migrer(db: DatabaseSync) {
           SELECT recompense_cle FROM quetes WHERE 'quete:' || quetes.id = monde_attributions.source
         ) WHERE source IN (SELECT 'quete:' || id FROM quetes);
       `);
+    }
+    if (version < 6) {
+      db.exec(
+        "ALTER TABLE quetes ADD COLUMN archivee INTEGER NOT NULL DEFAULT 0 CHECK(archivee IN (0,1)); ALTER TABLE quetes ADD COLUMN notion TEXT;",
+      );
     }
     if (db.prepare("PRAGMA foreign_key_check").all().length)
       throw new Error("Liens invalides dans la base : migration annulée.");

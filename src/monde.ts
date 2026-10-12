@@ -1,3 +1,4 @@
+import { lireParcours } from "./parcours.ts";
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import { ErreurMetier } from "./erreurs.ts";
@@ -164,6 +165,7 @@ function vue(db: DatabaseSync, enfantId: number) {
     cadeaux_disponibles: solde(db, enfantId, objets),
     souvenirs: Math.min(12, heritage),
     progres: {
+      parcours: lireParcours(db, enfantId),
       missions_terminees: Number(
         db.prepare("SELECT quetes_finies FROM enfants WHERE id = ?").get(enfantId)!.quetes_finies,
       ),

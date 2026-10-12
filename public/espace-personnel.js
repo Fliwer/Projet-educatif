@@ -9,7 +9,7 @@ const h = (s) =>
 const rubriques = [
   ["avatar", "Mon avatar"],
   ["cadeau", "Ma collection"],
-  ["carnet", "Mes progrès"],
+  ["carnet", "Mon parcours"],
 ];
 const couleurs = {
   violet: ["Violet", "#9D89D2"],
@@ -135,7 +135,36 @@ export async function ouvrirMonde(
   }
   function carnetPage() {
     const p = monde.progres;
-    return `<section class="e-titre"><div><span class="m-eyebrow">Petit à petit, j’avance</span><h1 id="m-titre" tabindex="-1">Mon carnet de progrès</h1><p>Les missions que tu explores avec Milo.</p></div></section><div class="e-chiffres"><article><strong>${p.missions_terminees}</strong><span>missions terminées</span></article><article><strong>${p.questions_essayees}</strong><span>questions essayées dans tes missions conservées</span></article></div><section class="e-journal"><h2>Mes dernières missions</h2>${p.missions.length ? p.missions.map((q) => `<article><span class="e-mission-icone">${icone(q.statut === "terminee" ? "check" : "carnet")}</span><div><span class="m-eyebrow">${h(q.matiere)}</span><h3>${h(q.titre)}</h3><p>${Number(q.essayees)} / ${Number(q.total)} questions essayées</p></div><span class="e-etat">${q.statut === "terminee" ? "Terminée" : q.essayees ? "En cours" : "À explorer"}</span></article>`).join("") : "<p>Ta première aventure commencera avec une leçon envoyée par tes parents.</p>"}<button class="m-btn" data-retour>Retrouver mes quêtes</button></section>${monde.creations.length ? `<details class="e-souvenirs"><summary>Mes créations précédentes · ${monde.creations.length}</summary><div class="e-anciens">${monde.creations.map((c) => `<div>${platSvg(c.recette, c.decoration, c.motifs)}<span>${h(monde.catalogue.recettes.find((r) => r.id === c.recette)?.nom || "Ma création")}</span></div>`).join("")}</div></details>` : ""}`;
+    const parcours = p.parcours || [];
+    const terminees = parcours.filter((q) => q.statut === "terminee");
+    const recentes = terminees.slice(-8);
+    const prochaines = parcours.filter((q) => !q.archivee && q.statut !== "terminee");
+    const prochaine = prochaines.find((q) => q.essayees > 0) || prochaines[0];
+    const date = (s) => (s ? s.slice(0, 10).split("-").reverse().join("/") : "");
+    const etape = (q) =>
+      `<li class="e-etape"><span class="e-jalon" aria-hidden="true">✓</span><article><span class="m-eyebrow">${h(q.matiere)} · ${h(date(q.finie_le))}</span><h3>${h(q.titre)}</h3><p>Mission terminée${q.archivee ? " · conservée dans ton parcours" : ""}</p></article></li>`;
+    return `<section class="e-titre"><div><span class="m-eyebrow">Un pas après l’autre</span><h1 id="m-titre" tabindex="-1">Mon chemin avec Milo</h1><p>Regarde tout ce que tu as déjà exploré.</p></div></section>
+      <section class="e-compagnon">${pipSvg("content", "petit")}<div><h2>Chaque étape compte</h2><p>Tu peux faire une pause. Ton chemin reste ici.</p></div></section>
+      <div class="e-chiffres"><article><strong>${p.missions_terminees}</strong><span>missions terminées depuis le début</span></article><article><strong>${p.questions_essayees}</strong><span>questions explorées dans tes missions conservées</span></article></div>
+      <section class="e-journal e-parcours"><h2>Mes étapes accomplies</h2><p>De la plus ancienne à la plus récente.</p>
+      ${p.missions_terminees > terminees.length ? `<p class="e-note">${p.missions_terminees - terminees.length} missions plus anciennes comptent aussi dans ton total. Leur détail n’est plus disponible.</p>` : ""}
+      ${terminees.length > 8 ? `<details class="e-historique"><summary>Voir mes ${terminees.length - 8} premières étapes</summary><ol class="e-chemin">${terminees.slice(0, -8).map(etape).join("")}</ol></details>` : ""}
+      <ol class="e-chemin">${recentes.map(etape).join("")}
+      ${!terminees.length ? '<li class="e-etape"><span class="e-jalon" aria-hidden="true">✦</span><article><h3>Ton aventure commence ici</h3><p>Chaque mission terminée trouvera sa place sur ce chemin.</p></article></li>' : ""}
+      <li class="e-etape e-prochaine"><span class="e-jalon" aria-hidden="true">✦</span><article><span class="m-eyebrow">La suite, à ton rythme</span><h3>${prochaine ? h(prochaine.titre) : "Prêt pour une nouvelle découverte"}</h3><p>${prochaine ? `${Number(prochaine.essayees)} sur ${Number(prochaine.total)} questions explorées. Tu peux aussi choisir une autre mission.` : "Ton parent peut t’envoyer une nouvelle mission."}</p><button class="m-btn" data-retour>Choisir ma mission</button></article></li></ol></section>
+      <details class="e-souvenirs e-bilan"><summary>Avec mon parent · regarder mes apprentissages</summary><p>Ces observations décrivent les réponses aux exercices. Une mission terminée ne signifie pas encore que la notion est acquise.</p>
+      ${
+        parcours.some((q) => q.essayees > 0)
+          ? parcours
+              .filter((q) => q.essayees > 0)
+              .map(
+                (q) =>
+                  `<article class="e-observation"><span class="m-eyebrow">${h(q.matiere)}${q.archivee ? " · mission retirée du jeu" : ""}</span><h3>${h(q.notion || q.titre)}</h3><p>${Number(q.premier_essai)} sur ${Number(q.essayees)} questions essayées réussies au premier essai.</p><p>Réussites après un nouvel essai : ${Number(q.reussies - q.premier_essai)} · ${Number(q.essayees - q.reussies)} sans réponse correcte enregistrée.</p><p>${q.essayees < 5 ? "Encore peu d’observations : continuer à explorer." : q.essayees > q.premier_essai ? "À revoir ensemble : les questions qui ont demandé plusieurs essais." : "Toutes les questions essayées ont été réussies au premier essai dans cette mission."}</p></article>`,
+              )
+              .join("")
+          : "<p>Les observations apparaîtront après les premiers exercices.</p>"
+      }</details>
+      ${monde.creations.length ? `<details class="e-souvenirs"><summary>Mes créations précédentes · ${monde.creations.length}</summary><div class="e-anciens">${monde.creations.map((c) => `<div>${platSvg(c.recette, c.decoration, c.motifs)}<span>${h(monde.catalogue.recettes.find((r) => r.id === c.recette)?.nom || "Ma création")}</span></div>`).join("")}</div></details>` : ""}`;
   }
   function rendre() {
     if (!actif() || !monde) return;
