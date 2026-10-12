@@ -5,6 +5,7 @@ import { ouvrirMonde } from "./espace-personnel.js";
 import { miloSvg as pipSvg } from "./milo.js";
 import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
 import { attendreVoixFrancaise, nombreFrancais } from "./voix-appareil.js";
+import { finMissionVue } from "./fin-mission.js";
 const app = document.getElementById("app");
 app.dataset.voixVersion = "fr-20261012-2";
 const CLE_CODE = "lumo-code";
@@ -1465,24 +1466,8 @@ async function finirMission() {
 }
 
 function ecranVictoire(r) {
-  const bilan = r.bilan;
   const titre = r.revision ? "Entraînement terminé !" : "Mission terminée !";
-  const progression = r.nouveau_niveau
-    ? `Tu découvres le niveau ${r.niveau} !`
-    : `Une nouvelle étape dans ton parcours.`;
-  const finies = (r.niveau - 1) * r.quetes_par_niveau + r.vers_suivant;
-  afficher(`<section class="fin-seance">
-    <div class="victoire fin-illustration"><div class="rayons"></div><span class="fin-etincelle une" aria-hidden="true">✦</span><span class="fin-etincelle deux" aria-hidden="true">✧</span><span class="fin-etincelle trois" aria-hidden="true">✦</span>${pipSvg("joie", "geant")}</div>
-    <div class="victoire-texte"><p class="fin-surtexte">Une étape de plus avec Milo</p><h1>${titre}</h1><p>${echapper(mission.quete.titre)}</p></div>
-    <div class="fin-bilan">
-      <div class="fin-resultat questions"><span class="fin-label">Questions travaillées</span><strong>${ic("check")} ${bilan.total}</strong><span>Tu as exploré toute la mission.</span></div>
-      <div class="fin-resultat cadeau"><span class="fin-label">${r.revision ? "Ton entraînement" : "Ta collection"}</span><strong>${ic(r.revision ? "check" : "cadeau")} ${r.revision ? "Enregistré" : "+1"}</strong><span>${r.revision ? "Tes résultats précédents sont gardés." : "Crédit cadeau à utiliser quand tu veux."}</span></div>
-    </div>
-    <p class="fin-observation">${bilan.premier_essai} sur ${bilan.total} réponses trouvées dès le premier essai.</p>
-    ${rendezVousVue(r.rendez_vous, true)}
-    <p class="fin-note">${r.revision ? "Revoir une mission t’aide à progresser. Ton cadeau initial reste dans ta collection." : progression}</p>
-    <div class="fin-actions"><button class="btn" id="continuer-fin">Revenir à mes missions ${ic("fleche")}</button>${r.revision ? "" : '<button class="lien" id="cadeau">Choisir mon cadeau</button>'}</div>
-  </section>`);
+  afficher(finMissionVue(Boolean(r.revision)));
   if (!mouvementReduit && lire("lumo-mouvements-calmes") !== "oui") {
     confettis(24);
     animerPip("saute");
@@ -1490,10 +1475,6 @@ function ecranVictoire(r) {
   parler([titre, "Tu as pris le temps de travailler cette mission."]);
   $("#continuer-fin").onclick = ecranAccueil;
   $("#continuer-fin").focus({ preventScroll: true });
-  $("#cadeau")?.addEventListener("click", () => {
-    son("clic");
-    ecranChezPip(finies, "cadeau");
-  });
 }
 
 function quetesFinies(etat) {
