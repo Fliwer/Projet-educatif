@@ -18,6 +18,7 @@ let enEchec = false;
 globalThis.fetch = async (_adresse, options) => {
   appels++;
   assert.equal(JSON.parse(String(options?.body)).model_id, process.env.ELEVENLABS_MODELE);
+  assert.equal(JSON.parse(String(options?.body)).language_code, "fr");
   if (enEchec) throw new Error("Erreur simulée");
   await new Promise((fin) => setTimeout(fin, 20));
   return new Response(new Uint8Array([1, 2, 3]));
@@ -63,6 +64,7 @@ try {
   const fin = source.indexOf("/** Prépare à l'avance", debut);
   const morceaux = runInNewContext(source.slice(debut, fin) + "\nmorceauxVoix", {
     nettoyer: (texte: string) => texte.trim(),
+    nombreFrancais: (n: string) => n,
   });
   for (const [texte, operation] of [
     ["7 × 8 = ?", "fois"],

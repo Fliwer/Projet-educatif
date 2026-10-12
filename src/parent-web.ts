@@ -1,4 +1,4 @@
-import { pointsAVerifier } from "./pedagogie.ts";
+import { pointsAVerifier, pointsMission } from "./pedagogie.ts";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { lireBrouillon, validerBrouillon } from "./parents.ts";
 import { lireTexte, limiter, adresseClient } from "./http.ts";
@@ -126,7 +126,11 @@ Respecte les consignes pédagogiques de Lumo. Signale ce qui est illisible et ne
   const quetes = brouillon.quetes
     .map(
       (quete, indexQuete) =>
-        `<section><h2>${echapper(quete.titre)}</h2><p>${echapper(quete.matiere)} · ${echapper(quete.notion)}</p><p><strong>Niveau scolaire :</strong> ${echapper(quete.niveau_scolaire || "À préciser avec le parent")}</p><p>${quete.origine_contenu === "decouverte" ? "Fiche de découverte créée par l’assistant :" : "Extrait fourni par l’assistant, à comparer au devoir :"}</p><blockquote>${echapper(quete.extrait_lecon)}</blockquote>${quete.questions
+        `<section><h2>${echapper(quete.titre)}</h2>${pointsMission(quete)
+          .map((point) => `<p class="attention">À vérifier : ${echapper(point)}</p>`)
+          .join(
+            "",
+          )}<p>${echapper(quete.matiere)} · ${echapper(quete.notion)}</p><p><strong>Niveau scolaire :</strong> ${echapper(quete.niveau_scolaire || "À préciser avec le parent")}</p><p>${quete.origine_contenu === "decouverte" ? "Fiche de découverte créée par l’assistant :" : "Extrait fourni par l’assistant, à comparer au devoir :"}</p><blockquote>${echapper(quete.extrait_lecon)}</blockquote>${quete.questions
           .map(
             (question, i) =>
               `<article><label class="garder"><input form="validation" type="checkbox" name="question" value="${indexQuete}:${i}" checked> Garder la question ${i + 1}</label><h3>${i + 1}. ${echapper(question.consigne)}</h3><p>Jeu : ${echapper(nomsJeux[question.type])}</p>${pointsAVerifier(

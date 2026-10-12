@@ -38,6 +38,8 @@ Le service src/parcours.ts est partagé par l’espace enfant et le bilan MCP pa
 
 ## Rendez-vous avec Milo (12 octobre 2026)
 
+Essai effectué dans le navigateur sur un profil fictif : objectif de deux séances, deux missions terminées le même jour, compteur final d'une séance et deux crédits cadeaux de missions (aucun bonus de constellation). Les exercices de conjugaison issus de l'extrait enregistré ont été revus dans un nouveau brouillon : cinq questions par mission, deux formats, deux choix par question et deux associations. Les exercices validés précédemment et leurs réponses sont conservés. L'aperçu parent signale désormais le niveau scolaire manquant et les missions utilisant plus de trois formats ; ces alertes ne certifient pas l'adaptation à chaque enfant.
+
 Migration 8 : un objectif de 2, 3 ou 4 jours de pratique par semaine (3 par défaut), un journal d'une séance maximum par enfant et jour civil et l'objectif de chaque semaine. Le fuseau est celui de Lumo, Europe/Brussels par défaut ; la semaine commence le lundi. Une mission initiale ou une révision terminée inscrit la journée dans la même transaction. Reposter la fin d'une ancienne mission un autre jour ne crée pas de séance. Il n'y a ni récompense hebdomadaire supplémentaire ni perte de progrès pour un jour manqué.
 
 Changer le rythme conserve les séances de la semaine courante et la préférence pour les suivantes. Les anciens objectifs restent conservés ; le changement est versionné et les UUID empêchent les doubles modifications. Les journées historiques sont reprises à partir des missions terminées dont la date est connue, sans inventer les dates manquantes. Les semaines passées restent en base ; les huit dernières semaines de pratique sont consultables dans « Mes ciels précédents ».

@@ -318,6 +318,7 @@ button.mini-carte:active { transform: scale(0.97); }
 .papillon { animation: papillon 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
 /* ---------- Victoire ---------- */
+.aide-voix {padding:14px;border:1px solid #cbbded;border-radius:16px;background:#f1edf9;color:#58458c;font-size:16px;line-height:1.5}
 .profil-actif {display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px;border:1px solid var(--bord);border-radius:18px;background:rgba(255,255,255,.75);font-size:15px;color:var(--texte)}
 .profil-code {font-family:monospace;letter-spacing:1px}
 .profil-actif .lien {color:var(--violet-ombre);margin:0;min-height:44px}

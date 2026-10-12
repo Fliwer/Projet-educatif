@@ -29,3 +29,15 @@ export function supportAbsent(q: QuestionEntree): boolean {
     q.consigne,
   );
 }
+
+export function pointsMission(quete: { niveau_scolaire?: string; questions: QuestionEntree[] }): string[] {
+  const points: string[] = [];
+  if (!quete.niveau_scolaire)
+    points.push("Niveau scolaire manquant : le préciser avec le parent avant de juger la difficulté.");
+  const formats = new Set(quete.questions.map((q) => q.type)).size;
+  if (formats > 3)
+    points.push(
+      `${formats} formats dans cette mission : vérifier les changements de règles. Une mission courte peut garder deux formats familiers.`,
+    );
+  return points;
+}

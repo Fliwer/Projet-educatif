@@ -117,6 +117,7 @@ async function demanderElevenLabs(texte: string, voix: string, modeleVoix: strin
         body: JSON.stringify({
           text: texte,
           model_id: modeleVoix,
+          ...(modeleVoix === "eleven_multilingual_v2" ? {} : { language_code: "fr" }),
           voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
         }),
       },

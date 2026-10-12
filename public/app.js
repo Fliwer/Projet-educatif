@@ -4,7 +4,9 @@
 import { ouvrirMonde } from "./espace-personnel.js";
 import { miloSvg as pipSvg } from "./milo.js";
 import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
+import { attendreVoixFrancaise, nombreFrancais } from "./voix-appareil.js";
 const app = document.getElementById("app");
+app.dataset.voixVersion = "fr-20261012-2";
 const CLE_CODE = "lumo-code";
 const CLE_SON = "lumo-son";
 const mouvementReduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -113,24 +115,6 @@ function afficher(html, classe = "") {
 
 // ---------- Voix, sons, vibrations ----------
 
-/** Choisit la voix la plus humaine disponible : voix neuronales (Edge « Natural »), puis Google, puis le reste. */
-function meilleureVoix() {
-  const score = (v) => {
-    const n = v.name.toLowerCase();
-    let s = 0;
-    if (n.includes("natural")) s += 100;
-    if (/eloise|vivienne|denise|remy|henri/.test(n)) s += 20; // voix neuronales françaises d'Edge
-    if (n.includes("online") || !v.localService) s += 30;
-    if (n.includes("google")) s += 25;
-    if (v.lang === "fr-FR") s += 5;
-    return s;
-  };
-  return speechSynthesis
-    .getVoices()
-    .filter((v) => v.lang.startsWith("fr"))
-    .sort((a, b) => score(b) - score(a))[0];
-}
-
 // Voix de Milo : d'abord la voix ElevenLabs (via le serveur), sinon la voix de la tablette.
 let voixServeur = true; // passe à false si le serveur n'a pas de voix configurée
 let lecteur = null;
@@ -195,7 +179,8 @@ const CALCUL = /^\s*(\d{1,3})\s*([×x*+−÷:\-])\s*(\d{1,3})\s*=\s*\?\s*$/;
 /** Découpe ce que dit Milo en morceaux réutilisables (chaque morceau n'est fabriqué qu'une fois). */
 function morceauxVoix(texte) {
   const calcul = texte.match(CALCUL);
-  if (calcul) return [calcul[1], OPERATIONS[calcul[2]], calcul[3], "ça fait combien ?"];
+  if (calcul)
+    return [nombreFrancais(calcul[1]), OPERATIONS[calcul[2]], nombreFrancais(calcul[3]), "ça fait combien ?"];
   return [nettoyer(texte)];
 }
 
@@ -223,14 +208,14 @@ async function parler(texte) {
       if (ticket !== demandeVoix) return;
     }
   }
-  parlerTablette(morceaux.join(" "));
+  await parlerTablette(morceaux.join(" "), ticket);
 }
 
 /** Joue un morceau de voix, avec les lèvres de Milo qui suivent. Se termine quand le morceau est fini. */
 function jouerMorceau(url) {
   return new Promise((fini) => {
     const el = new Audio(url);
-    el.preservesPitch = false; // réglage C : la voix monte un peu, comme un petit personnage
+    el.preservesPitch = true;
     el.playbackRate = REGLAGE_VOIX;
     el.onended = fini;
     el.onpause = fini;
@@ -243,24 +228,36 @@ function jouerMorceau(url) {
   });
 }
 
-function parlerTablette(texte) {
-  if (!("speechSynthesis" in window)) return;
+async function parlerTablette(texte, ticket) {
+  const voix = await attendreVoixFrancaise(window.speechSynthesis);
+  if (ticket !== demandeVoix || !sonActif) return;
+  if (!voix) {
+    let notice = $("#etat-voix");
+    if (!notice) {
+      notice = document.createElement("p");
+      notice.id = "etat-voix";
+      notice.className = "aide-voix";
+      notice.setAttribute("role", "status");
+      app.prepend(notice);
+    }
+    notice.textContent =
+      "La voix française n’est pas disponible sur cet appareil. Pour une dictée, demande de l’aide à un adulte.";
+    return;
+  }
+  $("#etat-voix")?.remove();
   speechSynthesis.cancel();
   const phrase = new SpeechSynthesisUtterance(texte.replace(/[✨🎉🏆]/gu, ""));
   phrase.lang = "fr-FR";
-  const voix = meilleureVoix();
-  if (voix) phrase.voice = voix;
-  // Une voix naturelle sonne mieux sans retouche ; une vieille voix gagne à être un peu plus aiguë.
-  const naturelle = voix && /natural|online|google/i.test(voix.name);
-  phrase.rate = naturelle ? 1 : 0.95;
-  phrase.pitch = naturelle ? 1.05 : 1.15;
+  phrase.voice = voix;
+  phrase.rate = 0.95;
+  phrase.pitch = 1;
   phrase.onstart = () => animerBouche(() => speechSynthesis.speaking, false);
   speechSynthesis.speak(phrase);
 }
 
 // ---------- Les lèvres de Milo suivent sa voix ----------
 
-const REGLAGE_VOIX = 1.1; // réglage « C » choisi sur la page d'essai (+10 %)
+const REGLAGE_VOIX = 1; // Lecture d'origine : conserver l'intelligibilité des consignes.
 let analyseur = null;
 let boucleBouche = 0;
 

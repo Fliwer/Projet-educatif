@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { pointsAVerifier, supportAbsent } from "../src/pedagogie.ts";
+import { pointsAVerifier, supportAbsent, pointsMission } from "../src/pedagogie.ts";
 const dossier = await mkdtemp(join(tmpdir(), "lumo-pedagogie-"));
 process.env.LUMO_DATA = dossier;
 process.env.LUMO_ENV_IGNORE = "1";
@@ -25,6 +25,27 @@ try {
   assert.equal(supportAbsent({ ...question, consigne: "Regarde l’image. Quel animal vois-tu ?" }), true);
   assert.equal(supportAbsent({ ...question, consigne: "Quel document montre une classe ancienne ?" }), false);
   assert.equal(pointsAVerifier({ ...question, consigne: "Une phrase longue. ".repeat(8) }).length, 1);
+  assert.equal(pointsMission(quete).length, 0);
+  assert.equal(pointsMission({ questions: quete.questions }).length, 1);
+  assert.equal(
+    pointsMission({
+      niveau_scolaire: "4e primaire",
+      questions: [
+        { type: "texte", consigne: "Écris le mot.", bonne_reponse: "mot" },
+        { type: "choix", consigne: "2 + 1 = ?", choix: ["3", "4"], bonne_reponse: "3" },
+        {
+          type: "associer",
+          consigne: "Relie les mots.",
+          paires: [
+            ["je", "dois"],
+            ["nous", "devons"],
+          ],
+        },
+        { type: "dictee", consigne: "Écris le mot entendu.", bonne_reponse: "livre" },
+      ],
+    }).length,
+    1,
+  );
   assert.throws(
     () =>
       p.preparerBrouillon(1, e, [
