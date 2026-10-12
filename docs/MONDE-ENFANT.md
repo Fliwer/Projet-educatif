@@ -1,5 +1,15 @@
 # Espace personnel enfant
 
+## Règle de conception : une identité propre à Lumo
+
+Décision du 12 octobre 2026 : Duolingo et Adibou peuvent servir de références pour discuter d'un besoin, mais leurs écrans ne sont pas des modèles à reproduire. Chaque évolution doit partir des objectifs de Lumo : exercices liés aux devoirs, consignes accessibles aux enfants du primaire, validation parent et progression compréhensible.
+
+Les séances courtes, les révisions et le retour sur les réponses doivent être conçus pour ces objectifs. La carte, les récompenses, le personnage Milo, les textes, les illustrations, les sons et les animations doivent avoir une réalisation originale. Changer les couleurs ou remplacer une mascotte sur une interface reproduite ne satisfait pas cette règle.
+
+Avant d'accepter une nouvelle interface, vérifier son organisation, sa silhouette, ses interactions et ses textes, et retravailler ce qui ressemble trop à une référence. Conserver la provenance et les droits d'utilisation des assets. Les récompenses valorisent l'effort et les progrès, sans pénalité pour une journée manquée ni pression à prolonger la séance.
+
+Cette décision guide la conception ; elle ne constitue pas un audit juridique des écrans existants ni une garantie avant commercialisation.
+
 État du 9 octobre 2026 : avatar (quatre couleurs), collection de trois écussons et carnet de progrès. Une mission terminée attribue un crédit cadeau, indépendamment des erreurs et de la vitesse. Les anciens objets et créations restent consultables comme souvenirs.
 
 ## Contrats
