@@ -1,6 +1,6 @@
 // Intégration réelle HTTP et relais stdio, uniquement sur une base fictive temporaire.
 import { strict as assert } from "node:assert";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
@@ -30,6 +30,7 @@ assert.throws(() =>
 );
 const { creerParent, empreinte } = await import("../src/parents.ts");
 const { ajouterEnfant } = await import("../src/logic.ts");
+const { creerInvitation, lireInvitation } = await import("../src/invitations.ts");
 const parentA = creerParent("Parent A fictif");
 const parentB = creerParent("Parent B fictif");
 const enfantA = ajouterEnfant("Arthur A", "espace", parentA.id);
@@ -85,6 +86,51 @@ try {
     });
   });
   assert.equal((await fetch(`${adresse}/api/moi`, { headers: { "X-Lumo-Code": "ARTHUR" } })).status, 401);
+  const invitation = creerInvitation("famille-invitee");
+  const lienInvitation = `${adresse}/parent/connexion/${invitation.jeton}`;
+  const pageInvitation = await fetch(lienInvitation);
+  assert.equal(pageInvitation.status, 200);
+  assert.equal(pageInvitation.headers.get("Referrer-Policy"), "no-referrer");
+  assert.equal(pageInvitation.headers.get("Cache-Control"), "no-store");
+  const htmlInvitation = await pageInvitation.text();
+  assert.ok(htmlInvitation.includes(invitation.cle), "La famille reçoit sa propre clé privée");
+  assert.ok(!htmlInvitation.includes(parentA.cle) && !htmlInvitation.includes(parentB.cle));
+  const clientInvite = new Client({ name: "test-famille-invitee", version: "1.0.0" });
+  clients.push(clientInvite);
+  await clientInvite.connect(
+    new StreamableHTTPClientTransport(new URL(adresse + "/mcp"), {
+      requestInit: { headers: { Authorization: `Bearer ${invitation.cle}` } },
+    }),
+  );
+  const profilsInvites = JSON.parse(
+    contenu(await clientInvite.callTool({ name: "lister_enfants", arguments: {} })),
+  );
+  assert.deepEqual(
+    profilsInvites.enfants.map((e: any) => e.code),
+    [invitation.code],
+  );
+  const accesAutreEnfant = await clientInvite.callTool({
+    name: "creer_quetes",
+    arguments: { enfant: enfantA.code, quetes },
+  });
+  assert.equal(accesAutreEnfant.isError, true, "Une invitation ne donne pas accès à une autre famille");
+  const fichierInvitation = join(dossier, "connexions", "invitations", `${empreinte(invitation.jeton)}.json`);
+  const originalInvitation = await readFile(fichierInvitation, "utf8");
+  await writeFile(fichierInvitation, JSON.stringify({ ...JSON.parse(originalInvitation), expire: 1 }));
+  assert.equal(lireInvitation(invitation.jeton), undefined);
+  assert.equal((await fetch(lienInvitation)).status, 404, "Invitation expirée refusée");
+  await writeFile(fichierInvitation, originalInvitation);
+  db.prepare("UPDATE parents SET cle_hash = NULL WHERE id = ?").run(invitation.parent_id);
+  assert.equal((await fetch(lienInvitation)).status, 404, "Une clé révoquée ne peut plus être récupérée");
+  assert.equal(
+    (
+      await fetch(adresse + "/mcp", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${invitation.cle}` },
+      })
+    ).status,
+    401,
+  );
   const entetesEnfant = { "X-Lumo-Code": enfantA.code, "Content-Type": "application/json" };
   const rythmeCommande = { objectif: 2, version: 0, requete_id: randomUUID() };
   const posterRythme = (body: unknown) =>

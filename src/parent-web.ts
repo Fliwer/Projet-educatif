@@ -2,6 +2,7 @@ import { pointsAVerifier, pointsMission } from "./pedagogie.ts";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { lireBrouillon, validerBrouillon } from "./parents.ts";
 import { lireTexte, limiter, adresseClient } from "./http.ts";
+import { lireInvitation } from "./invitations.ts";
 
 const echapper = (valeur: unknown) =>
   String(valeur).replace(
@@ -41,6 +42,36 @@ export async function traiterParent(
   chemin: string,
   adresseApp: string,
 ): Promise<boolean> {
+  const connexion = chemin.match(/^\/parent\/connexion\/([A-Za-z0-9_-]{43})$/);
+  if (connexion && req.method === "GET") {
+    limiter(`invitation:${adresseClient(req)}`, 30);
+    const invitation = lireInvitation(connexion[1]);
+    // Même réponse pour un lien inconnu, expiré ou une connexion révoquée.
+    if (!invitation) {
+      page(
+        res,
+        404,
+        "<h1>Invitation indisponible</h1><p>Demande un nouveau lien à la personne qui t’a invité.</p>",
+      );
+      return true;
+    }
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Referrer-Policy": "no-referrer",
+      "X-Frame-Options": "DENY",
+      "Content-Security-Policy":
+        "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    });
+    const url = new URL(adresseApp).origin;
+    const message = `Pour Lumo : utilise le profil de test ${invitation.code}. À partir de cette photo, prépare cinq exercices courts par mission. Demande-moi l’année scolaire et le pays s’ils manquent. Signale les passages illisibles, ne les invente pas. Utilise le connecteur Lumo pour créer un brouillon, puis donne-moi le lien de vérification. Ne publie pas à ma place.`;
+    res.end(`<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connecter ma famille · Lumo</title><style>*{box-sizing:border-box}body{margin:0;background:#f3efff;color:#292341;font:17px/1.5 system-ui}main{max-width:720px;margin:auto;padding:24px 18px}section{background:white;border-radius:20px;padding:20px;margin:18px 0}h1,h2{line-height:1.2}textarea{width:100%;font:inherit;resize:vertical;padding:12px;border:1px solid #c8b9e3;border-radius:12px}button,a{color:#65449c}button{font:inherit;border:1px solid #c8b9e3;border-radius:12px;padding:12px;background:#f3efff;cursor:pointer}a{overflow-wrap:anywhere}</style><main>
+    <h1>Bienvenue dans Lumo</h1><p>Une connexion à installer une fois. Ensuite, une photo dans Claude suffit pour préparer les exercices.</p><p><strong>Invitation privée de test.</strong> Ce lien donne accès à la clé de ta famille : ne le partage pas publiquement. Utilise un pseudonyme et des photos sans nom ni information personnelle pour ce pilote.</p>
+    <section><h2>1. Connecte Claude à Lumo</h2><p>Dans les paramètres de Claude, ouvre <strong>Connecteurs → Ajouter un connecteur personnalisé</strong>. Si ce menu manque sur téléphone, fais cette étape sur claude.ai avec le même compte.</p><p>Nom : <strong>Lumo</strong></p><label for="url-mcp">URL du serveur</label><textarea id="url-mcp" readonly rows="2">${echapper(url)}/mcp</textarea><button data-copier="url-mcp" hidden>Copier l’URL</button><p>Choisis <strong>Aucune connexion</strong>, puis ajoute cet en-tête de requête. Le serveur utilise une clé privée, pas OAuth.</p><p>Nom de l’en-tête : <strong>Authorization</strong></p><textarea id="cle-mcp" aria-label="Valeur de l’en-tête Authorization" readonly rows="3">Bearer ${echapper(invitation.cle)}</textarea><button data-copier="cle-mcp" hidden>Copier la valeur</button><p>Transport : <strong>HTTP streamable</strong>. Enregistre le connecteur.</p></section>
+    <section><h2>2. Vérifie le profil</h2><p>Ouvre une conversation dans Claude sur ton téléphone et active Lumo dans les outils. Demande : <strong>« Liste les enfants dans Lumo, sans modifier les données. »</strong></p><p>Tu dois voir uniquement ton <strong>Profil test</strong>, code <strong>${echapper(invitation.code)}</strong>. Le profil est fictif et séparé des autres familles.</p></section>
+    <section><h2>3. Prends la photo du devoir</h2><p>Joins la photo dans cette conversation, puis copie ce message :</p><textarea id="message-photo" aria-label="Message pour préparer les exercices" readonly rows="7">${echapper(message)}</textarea><button data-copier="message-photo" hidden>Copier le message</button><p>Claude te donnera un brouillon. Vérifie les réponses, puis touche <strong>Envoyer les questions gardées</strong>. Les missions seront alors disponibles dans Lumo.</p><p><a href="${echapper(url)}/#profil=${encodeURIComponent(invitation.code)}">Ouvrir Lumo avec mon profil de test</a></p></section><p id="copie-statut" role="status"></p><p>L’invitation expire après 24 heures. La connexion créée dans Claude reste active jusqu’à sa révocation. Ce lien de test fonctionne tant que l’ordinateur et son tunnel restent allumés.</p></main><script src="/parent-connexion.js" defer></script></html>`);
+    return true;
+  }
   if (chemin === "/parent" && req.method === "GET") {
     page(
       res,
@@ -49,7 +80,7 @@ export async function traiterParent(
       <h1>Une photo. Des jeux pour apprendre.</h1>
       <p>Avec ton assistant connecté à Lumo, transforme une leçon en petites missions. Tu gardes le dernier mot avant leur envoi à l’enfant.</p>
       <section><h2>1. Vérifie ta connexion</h2><p>Dans la conversation choisie, active le connecteur Lumo puis demande : <strong>« Liste les enfants dans Lumo, sans modifier les données. »</strong></p><p>Si ton assistant ne trouve pas les profils, la connexion doit être configurée avant d’envoyer le devoir. Écrire « Pour Lumo » seul ne connecte pas ton compte.</p>
-      <details><summary>Quel assistant puis-je utiliser ?</summary><p><strong>Codex sur ordinateur :</strong> le connecteur local peut accéder à Lumo sur ce PC. Il ne devient pas accessible sur téléphone.</p><p><strong>ChatGPT :</strong> la connexion distante de ce prototype reste à configurer. La documentation des apps MCP personnalisées indique une utilisation sur le Web, pas sur mobile.</p><p><strong>Claude :</strong> les connecteurs distants sont disponibles sur mobile une fois configurés dans le compte. Le connecteur local de ce prototype ne suffit pas : l’accès distant Lumo reste à installer et tester.</p><p>Vérifié le 12 octobre 2026. <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt" rel="noreferrer">Documentation ChatGPT</a> · <a href="https://support.claude.com/en/articles/11725091-when-to-use-desktop-and-web-connectors" rel="noreferrer">Documentation Claude</a></p></details></section>
+      <details><summary>Quel assistant puis-je utiliser ?</summary><p><strong>Codex sur ordinateur :</strong> le connecteur local peut accéder à Lumo sur ce PC. Il ne devient pas accessible sur téléphone.</p><p><strong>ChatGPT :</strong> la connexion distante de ce prototype reste à configurer. La documentation des apps MCP personnalisées indique une utilisation sur le Web, pas sur mobile.</p><p><strong>Claude :</strong> le connecteur distant de notre pilote a été utilisé depuis un téléphone. Chaque nouvelle famille doit installer sa propre connexion privée. L’installation peut se faire sur claude.ai, puis le connecteur est utilisable sur mobile avec le même compte.</p><p>Vérifié le 12 octobre 2026. <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt" rel="noreferrer">Documentation ChatGPT</a> · <a href="https://support.claude.com/en/articles/11725091-when-to-use-desktop-and-web-connectors" rel="noreferrer">Documentation Claude</a></p></details></section>
       <section><h2>2. Ajoute ta photo et ce message</h2><p>Prends une photo nette de la leçon, joins-la dans ton assistant, puis copie ce message. Remplace les informations entre crochets.</p>
       <label for="message-lumo"><strong>Ton message pour l’assistant</strong></label>
       <textarea id="message-lumo" readonly rows="11" style="width:100%;font:inherit;line-height:1.5;padding:14px;border:1px solid #9e8dbe;border-radius:12px;resize:vertical">Pour Lumo : prépare des exercices à partir de cette photo pour [prénom ou pseudonyme], en [année scolaire et pays]. Aides utiles : [facultatif, par exemple consignes courtes].
