@@ -741,16 +741,15 @@ async function ecranAccueil() {
   }
   const faites = etat.quetes.filter((q) => q.statut === "terminee");
   const aFaire = etat.quetes.filter((q) => q.statut !== "terminee");
-  const restantes = etat.quetes_par_niveau - etat.vers_suivant;
   const finies = quetesFinies(etat);
   const toutFini = aFaire.length === 0 && faites.length > 0;
   const heure = new Date().getHours();
   const salut = heure >= 17 || heure < 5 ? "Bonsoir" : "Bonjour";
   const message = aFaire.length
-    ? `${aFaire.length === 1 ? "Une seule quête" : `${aFaire.length} quêtes`} ce soir. On y va ensemble ?`
+    ? "On fait une mission ensemble ?"
     : toutFini
-      ? "Tes missions sont finies ! Viens retrouver ton avatar et tes découvertes."
-      : "Pas de quête pour l'instant. Demande à tes parents de prendre tes devoirs en photo.";
+      ? "Bravo ! Tu peux rejouer tes missions."
+      : "Un parent peut préparer ta prochaine mission.";
 
   afficher(`
     <div class="haut">
@@ -762,23 +761,23 @@ async function ecranAccueil() {
       ${cielEtoile(14)}
       <button class="pip-btn" id="pip-accueil" aria-label="Toucher Milo">${pipSvg(toutFini ? "joie" : "content")}</button>
       <p class="bulle" id="bulle-accueil"><span class="salut">${salut} ${echapper(etat.prenom)} !</span>${echapper(message)}</p>
-      ${aFaire.length ? `<button class="btn jouer" id="jouer">${ic(iconeMatiere(aFaire[0].matiere))} Jouer : ${echapper(aFaire[0].titre)}</button>` : ""}
+      ${aFaire.length ? `<button class="btn jouer" id="jouer">${ic(iconeMatiere(aFaire[0].matiere))}<span><strong>${aFaire[0].statut === "en_cours" ? "Continuer" : "Jouer"}</strong><small>${echapper(aFaire[0].titre)}</small></span>${ic("fleche")}</button>` : ""}
     </div>
     <div class="duo">
       <div class="carte mini-carte">
-        <div class="entete">${badgeNiveau(etat.niveau)}<div><strong>Niveau ${etat.niveau}</strong><small>${pluriel(restantes, "quête")} avant le ${etat.niveau + 1}</small></div></div>
+        <div class="entete">${badgeNiveau(etat.niveau)}<div><strong>Niveau ${etat.niveau}</strong></div></div>
         <div class="progres or${etat.vers_suivant ? "" : " vide"}"><div style="width:${Math.round((etat.vers_suivant / etat.quetes_par_niveau) * 100)}%"></div></div>
       </div>
       <button class="carte mini-carte monde-apercu" id="maison">
-        <div class="entete"><span class="maison-ic">${ic("maison")}</span><div><strong>Mon espace</strong><small>Avatar · collection · progrès</small></div></div>
+        <div class="entete"><span class="maison-ic">${ic("maison")}</span><div><strong>Mon espace</strong></div></div>
       </button>
     </div>
     ${rendezVousVue(etat.rendez_vous)}
     <div class="section-titre"><h2>Mon parcours</h2><span>${faites.length}/${etat.quetes.length}</span></div>
-    ${aFaire.length ? '<button class="lien" id="voir-etape">Voir ma prochaine étape ↓</button>' : ""}
-    <p class="carte-aide">Touche une étape avec une coche pour refaire la mission.</p>
+    ${aFaire.length ? '<button class="lien" id="voir-etape">Aller à ma mission ↓</button>' : ""}
+    ${faites.length ? '<p class="carte-aide">Touche une coche pour rejouer.</p>' : ""}
     <div class="carte-quetes" id="chemin"></div>
-    <div class="profil-actif"><span>Profil de <strong>${echapper(etat.prenom)}</strong> · <span class="profil-code">${echapper(code)}</span></span><button class="lien" id="changer">Changer de profil</button></div>
+    <details class="profil-actif"><summary>Pour les parents</summary><p>Profil de <strong>${echapper(etat.prenom)}</strong> · <span class="profil-code">${echapper(code)}</span></p><p><a href="/parent">Préparer des exercices</a></p><button class="lien" id="changer">Changer de profil</button></details>
     ${barreNav("quetes")}`);
 
   // Les missions initiales restent sur la carte ; les révisions ont leurs propres résultats.

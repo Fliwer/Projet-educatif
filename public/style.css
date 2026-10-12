@@ -319,7 +319,9 @@ button.mini-carte:active { transform: scale(0.97); }
 
 /* ---------- Victoire ---------- */
 .aide-voix {padding:14px;border:1px solid #cbbded;border-radius:16px;background:#f1edf9;color:#58458c;font-size:16px;line-height:1.5}
-.profil-actif {display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px;border:1px solid var(--bord);border-radius:18px;background:rgba(255,255,255,.75);font-size:15px;color:var(--texte)}
+.profil-actif {display:block;text-align:center;padding:14px;border:1px solid var(--bord);border-radius:18px;background:rgba(255,255,255,.75);font-size:15px;color:var(--texte)}
+.profil-actif summary {cursor:pointer;min-height:44px;padding:10px;font-weight:800}
+.profil-actif p {margin:12px 0}
 .profil-code {font-family:monospace;letter-spacing:1px}
 .profil-actif .lien {color:var(--violet-ombre);margin:0;min-height:44px}
 .fin-seance {display:flex;flex-direction:column;gap:18px;max-width:520px;width:100%;margin:auto;text-align:center;padding:12px 0}
@@ -467,6 +469,10 @@ button.mini-carte:active { transform: scale(0.97); }
 .onglet:active { transform: scale(0.95); }
 .hero .bulle { flex: 1 1 180px; }
 .hero .jouer { margin: 12px 0 0 8px; flex: 1 1 100%; position: relative; text-transform: none; letter-spacing: 0; font-size: 19px; }
+.hero .jouer {display:flex;align-items:center;justify-content:center;gap:12px}
+.hero .jouer span:not(.ic) {display:flex;flex-direction:column;gap:3px}
+.hero .jouer strong {font-size:20px}
+.hero .jouer small {font-size:15px;font-weight:700}
 
 /* ---------- Lèvres de Milo quand il parle ---------- */
 .pip .bouche-parle { display: none; transform-box: fill-box; transform-origin: 50% 25%; transform: scaleY(var(--bouche, 0.12)); }
