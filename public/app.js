@@ -1024,7 +1024,7 @@ async function ecranRevision(id) {
     return;
   }
   afficher(
-    `<div class="hero">${pipSvg("content")}<h1>On s’entraîne ?</h1><p>${echapper(info.titre)}</p></div><div class="carte"><p>Tu gardes tes résultats précédents. Cet entraînement ne donne pas de nouveau cadeau.</p><div class="revision-choix">${info.reprise_id ? '<button class="btn" id="revision-reprendre">Continuer mon entraînement</button>' : '<button class="btn" id="revision-tout">Tout refaire</button>' + (info.a_revoir ? `<button class="btn orange" id="revision-cible">Revoir ${info.a_revoir} question${info.a_revoir > 1 ? "s" : ""}</button><p>Les questions non réussies au premier essai lors du dernier passage terminé.</p>` : "<p>Au dernier passage, tu as réussi chaque question dès le premier essai.</p>")}<button class="lien" id="revision-retour">Retour à la carte</button></div></div>`,
+    `<div class="hero revision-hero">${pipSvg("content")}<h1>On s’entraîne ?</h1><p>${echapper(info.titre)}</p></div><div class="carte revision-carte"><p>Tu gardes tes résultats précédents. Cet entraînement ne donne pas de nouveau cadeau.</p><div class="revision-choix">${info.reprise_id ? '<button class="btn" id="revision-reprendre">Continuer mon entraînement</button>' : '<button class="btn" id="revision-tout">Tout refaire</button>' + (info.a_revoir ? `<button class="btn orange" id="revision-cible">Revoir ${info.a_revoir} question${info.a_revoir > 1 ? "s" : ""}</button><p>Les questions non réussies au premier essai lors du dernier passage terminé.</p>` : "<p>Au dernier passage, tu as réussi chaque question dès le premier essai.</p>")}<button class="lien" id="revision-retour">Retour à la carte</button></div></div>`,
   );
   $("#revision-retour").onclick = ecranAccueil;
   if (info.reprise_id) {

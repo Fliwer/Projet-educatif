@@ -500,3 +500,8 @@ button.mini-carte:active { transform: scale(0.97); }
 .etape.fait .noeud { cursor:pointer; }
 .etape.fait .noeud:focus-visible { outline:4px solid #7054b4; outline-offset:5px; }
 .carte-aide { text-align:center; color:var(--doux); font-size:15px; margin:12px 0; }
+.hero.revision-hero { display:flex; flex-direction:column; gap:10px; padding:24px; text-align:center; background:#eee7fc; color:#443064; box-shadow:none; }
+.revision-hero h1 { margin:0; font-size:30px; }
+.revision-hero p { margin:0; color:#55476a; }
+.revision-hero .pip { width:100px; flex:none; }
+.revision-carte { padding:22px; }
