@@ -4,12 +4,12 @@
 import { ouvrirMonde } from "./espace-personnel.js";
 import { miloSvg as pipSvg } from "./milo.js";
 import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
-import { attendreVoixFrancaise, nombreFrancais } from "./voix-appareil.js";
+import { nombreFrancais } from "./voix-appareil.js";
 import { finMissionVue } from "./fin-mission.js";
 import { themeMission, decorMission, classeDecor, phraseProgres } from "./decors-mission.js";
 import { celebrerMission } from "./finale-mission.js";
 const app = document.getElementById("app");
-app.dataset.voixVersion = "fr-20261012-2";
+app.dataset.voixVersion = "milo-20261013";
 const CLE_CODE = "lumo-code";
 const CLE_SON = "lumo-son";
 const mouvementReduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -118,7 +118,7 @@ function afficher(html, classe = "") {
 
 // ---------- Voix, sons, vibrations ----------
 
-// Voix de Milo : d'abord la voix ElevenLabs (via le serveur), sinon la voix de la tablette.
+// Une seule identité sonore : les enregistrements Milo, sans changement automatique de voix.
 let voixServeur = true; // passe à false si le serveur n'a pas de voix configurée
 let lecteur = null;
 let demandeVoix = 0;
@@ -202,6 +202,8 @@ async function parler(texte) {
   if (voixServeur) {
     try {
       const urls = await Promise.all(morceaux.map(chargerVoix));
+      if (ticket !== demandeVoix || !sonActif) return;
+      $("#etat-voix")?.remove();
       for (const url of urls) {
         if (ticket !== demandeVoix || !sonActif) return; // une autre phrase a été demandée entre-temps
         await jouerMorceau(url);
@@ -211,51 +213,38 @@ async function parler(texte) {
       if (ticket !== demandeVoix) return;
     }
   }
-  await parlerTablette(morceaux.join(" "), ticket);
+  if (ticket !== demandeVoix || !sonActif) return;
+  signalerVoixManquante();
+}
+
+function signalerVoixManquante() {
+  let notice = $("#etat-voix");
+  if (!notice) {
+    notice = document.createElement("p");
+    notice.id = "etat-voix";
+    notice.className = "aide-voix";
+    notice.setAttribute("role", "status");
+    app.prepend(notice);
+  }
+  notice.textContent =
+    "Milo ne peut pas lire cette phrase pour le moment. Demande à un adulte de t’aider, surtout pour une dictée.";
 }
 
 /** Joue un morceau de voix, avec les lèvres de Milo qui suivent. Se termine quand le morceau est fini. */
 function jouerMorceau(url) {
-  return new Promise((fini) => {
+  return new Promise((fini, rejeter) => {
     const el = new Audio(url);
     el.preservesPitch = true;
     el.playbackRate = REGLAGE_VOIX;
     el.onended = fini;
     el.onpause = fini;
-    el.onerror = fini;
+    el.onerror = () => rejeter(new Error("Lecture audio impossible"));
     lecteur = el;
     const mesure = brancherAnalyse(el);
     el.play()
       .then(() => animerBouche(() => lecteur === el && !el.paused && !el.ended, mesure))
-      .catch(fini);
+      .catch(rejeter);
   });
-}
-
-async function parlerTablette(texte, ticket) {
-  const voix = await attendreVoixFrancaise(window.speechSynthesis);
-  if (ticket !== demandeVoix || !sonActif) return;
-  if (!voix) {
-    let notice = $("#etat-voix");
-    if (!notice) {
-      notice = document.createElement("p");
-      notice.id = "etat-voix";
-      notice.className = "aide-voix";
-      notice.setAttribute("role", "status");
-      app.prepend(notice);
-    }
-    notice.textContent =
-      "La voix française n’est pas disponible sur cet appareil. Pour une dictée, demande de l’aide à un adulte.";
-    return;
-  }
-  $("#etat-voix")?.remove();
-  speechSynthesis.cancel();
-  const phrase = new SpeechSynthesisUtterance(texte.replace(/[✨🎉🏆]/gu, ""));
-  phrase.lang = "fr-FR";
-  phrase.voice = voix;
-  phrase.rate = 0.95;
-  phrase.pitch = 1;
-  phrase.onstart = () => animerBouche(() => speechSynthesis.speaking, false);
-  speechSynthesis.speak(phrase);
 }
 
 // ---------- Les lèvres de Milo suivent sa voix ----------

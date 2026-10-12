@@ -124,7 +124,7 @@ async function api(req: IncomingMessage, res: ServerResponse, chemin: string) {
     return r ? json(res, 200, r) : json(res, 404, { erreur: "Question introuvable" });
   }
 
-  // Voix de Milo (ElevenLabs). Sans clé, l'app utilise la voix de la tablette.
+  // Voix de Milo (ElevenLabs). Un fichier absent est signalé sans changer de voix.
   if (req.method === "POST" && chemin === "/api/voix") {
     if (!voixDisponible()) return json(res, 503, { erreur: "Voix non configurée" });
     const { texte, voix } = schemaVoix.parse(await lireJson(req));
@@ -209,10 +209,10 @@ const serveur = createServer(
   console.log("Code de démonstration : LUMO01 (Arthur, fictif)");
   console.log(
     process.env.LUMO_PARTAGE === "1"
-      ? "Voix de Milo : fichiers déjà enregistrés, sinon voix de la tablette (aucune génération payante)"
+      ? "Voix de Milo : fichiers déjà enregistrés uniquement (aucune génération payante)"
       : voixDisponible()
         ? "Voix de Milo : ElevenLabs"
-        : "Voix de Milo : voix de la tablette (pas de clé ElevenLabs dans .env)",
+        : "Voix de Milo indisponible : configurer la voix et ses enregistrements",
   );
 });
 for (const signal of ["SIGINT", "SIGTERM"] as const)
