@@ -86,6 +86,26 @@ try {
   });
   assert.equal((await fetch(`${adresse}/api/moi`, { headers: { "X-Lumo-Code": "ARTHUR" } })).status, 401);
   const entetesEnfant = { "X-Lumo-Code": enfantA.code, "Content-Type": "application/json" };
+  const rythmeCommande = { objectif: 2, version: 0, requete_id: randomUUID() };
+  const posterRythme = (body: unknown) =>
+    fetch(adresse + "/api/rendez-vous", {
+      method: "POST",
+      headers: entetesEnfant,
+      body: JSON.stringify(body),
+    });
+  assert.equal((await fetch(adresse + "/api/rendez-vous", { method: "POST" })).status, 401);
+  assert.equal((await posterRythme({ ...rythmeCommande, enfant_id: enfantB.id })).status, 400);
+  const rythmes = await Promise.all([posterRythme(rythmeCommande), posterRythme(rythmeCommande)]);
+  assert.deepEqual(
+    rythmes.map((r) => r.status),
+    [200, 200],
+  );
+  const rythmesEtats = await Promise.all(rythmes.map((r) => r.json()));
+  assert.ok(rythmesEtats.every((r) => r.version === 1 && r.objectif === 2));
+  const etatAutreRythme = await (
+    await fetch(adresse + "/api/moi", { headers: { "X-Lumo-Code": enfantB.code } })
+  ).json();
+  assert.equal(etatAutreRythme.rendez_vous.objectif, 3, "Le rythme d'une autre famille n'est pas modifié");
   assert.equal((await fetch(adresse + "/api/monde")).status, 401);
   const initialMonde = (await (
     await fetch(adresse + "/api/monde", { headers: entetesEnfant })

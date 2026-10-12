@@ -52,6 +52,11 @@ try {
   const fin = l.terminerQuete(enfant, reprise.id)!;
   l.terminerQuete(enfant, reprise.id);
   assert.equal(fin.revision, true);
+  assert.equal(
+    fin.rendez_vous.seances,
+    1,
+    "La mission initiale et sa révision ne comptent qu'un jour de pratique",
+  );
   assert.deepEqual(
     fin.bilan,
     { total: 2, reussies: 2, premier_essai: 2 },

@@ -7,6 +7,7 @@ import { schemaQuetes } from "./formats.ts";
 import { type TypeQuestion } from "./types-jeux.ts";
 import { lireParcours } from "./parcours.ts";
 import { attribuerCadeau } from "./monde.ts";
+import { lireRendezVous, enregistrerSeance } from "./rendez-vous.ts";
 export { TYPES_QUESTION } from "./types-jeux.ts";
 export type { TypeQuestion } from "./types-jeux.ts";
 
@@ -274,6 +275,7 @@ export function etatEnfant(enfant: Enfant) {
     .get(enfant.id) as { etoiles: number };
   return {
     prenom: enfant.prenom,
+    rendez_vous: lireRendezVous(db, enfant.id),
     univers: enfant.univers,
     soirs: enfant.soirs,
     etoiles,
@@ -431,17 +433,17 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
         .all(queteId);
       if (!questions.length || questions.some((q) => !q.reussie && Number(q.essais) < 2))
         throw new ErreurMetier("Il reste des questions à découvrir.", 409);
-      const jour = aujourdhui();
+      const instantFin = new Date();
+      const finieLe = instantFin.toLocaleString("sv-SE", { timeZone: FUSEAU });
+      const jour = finieLe.slice(0, 10);
       const soirs =
         actuel.dernier_jour === jour
           ? actuel.soirs
           : actuel.dernier_jour === aujourdhui(-1)
             ? actuel.soirs + 1
             : 1;
-      db.prepare("UPDATE quetes SET statut = 'terminee', finie_le = ? WHERE id = ?").run(
-        maintenant(),
-        queteId,
-      );
+      db.prepare("UPDATE quetes SET statut = 'terminee', finie_le = ? WHERE id = ?").run(finieLe, queteId);
+      enregistrerSeance(db, actuel.id, instantFin);
       if (quete.origine_id === null) {
         db.prepare(
           "UPDATE enfants SET quetes_finies = quetes_finies + 1, soirs = ?, dernier_jour = ? WHERE id = ?",
@@ -460,6 +462,7 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
       .get(queteId)!;
     return {
       revision: quete.origine_id !== null,
+      rendez_vous: lireRendezVous(db, actuel.id),
       bilan: {
         total: Number(bilan.total),
         reussies: Number(bilan.reussies),

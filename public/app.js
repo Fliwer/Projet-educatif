@@ -3,6 +3,7 @@
 // Règle d'or : l'enfant n'est jamais jugé. Pas de rouge, pas de note, pas de « faux ».
 import { ouvrirMonde } from "./espace-personnel.js";
 import { miloSvg as pipSvg } from "./milo.js";
+import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
 const app = document.getElementById("app");
 const CLE_CODE = "lumo-code";
 const CLE_SON = "lumo-son";
@@ -842,7 +843,6 @@ async function ecranAccueil() {
 
   afficher(`
     <div class="haut">
-      <span class="pastille flamme" title="Soirs de suite">${ic("flamme")} ${etat.soirs}</span>
       <span class="pastille etoiles" title="Étoiles">${ic("etoile")} ${etat.etoiles ?? 0}</span>
       <span class="espace"></span>
       <button class="icone-btn" id="son" aria-label="${sonActif ? "Couper le son" : "Activer le son"}">${ic(sonActif ? "sonOn" : "sonOff")}</button>
@@ -862,6 +862,7 @@ async function ecranAccueil() {
         <div class="entete"><span class="maison-ic">${ic("maison")}</span><div><strong>Mon espace</strong><small>Avatar · collection · progrès</small></div></div>
       </button>
     </div>
+    ${rendezVousVue(etat.rendez_vous)}
     <div class="section-titre"><h2>Mon parcours</h2><span>${faites.length}/${etat.quetes.length}</span></div>
     ${aFaire.length ? '<button class="lien" id="voir-etape">Voir ma prochaine étape ↓</button>' : ""}
     <p class="carte-aide">Touche une étape avec une coche pour refaire la mission.</p>
@@ -871,6 +872,7 @@ async function ecranAccueil() {
 
   // Les missions initiales restent sur la carte ; les révisions ont leurs propres résultats.
   const ordre = [...faites, ...aFaire];
+  brancherRendezVous(app, etat.rendez_vous, appel, identifiantReponse, ecranAccueil);
   if (ordre.length) dessinerChemin(ordre, aFaire[0]?.id, toutFini, finies);
   else $("#chemin").innerHTML = '<p class="vide">Tes quêtes apparaîtront ici.</p>';
 
@@ -1480,6 +1482,7 @@ function ecranVictoire(r) {
       <div class="fin-resultat cadeau"><span class="fin-label">${r.revision ? "Ton entraînement" : "Ta collection"}</span><strong>${ic(r.revision ? "check" : "cadeau")} ${r.revision ? "Enregistré" : "+1"}</strong><span>${r.revision ? "Tes résultats précédents sont gardés." : "Crédit cadeau à utiliser quand tu veux."}</span></div>
     </div>
     <p class="fin-observation">${bilan.premier_essai} sur ${bilan.total} réponses trouvées dès le premier essai.</p>
+    ${rendezVousVue(r.rendez_vous, true)}
     <p class="fin-note">${r.revision ? "Revoir une mission t’aide à progresser. Ton cadeau initial reste dans ta collection." : progression}</p>
     <div class="fin-actions"><button class="btn" id="continuer-fin">Revenir à mes missions ${ic("fleche")}</button>${r.revision ? "" : '<button class="lien" id="cadeau">Choisir mon cadeau</button>'}</div>
   </section>`);

@@ -21,6 +21,7 @@ import {
 import { adressePublique, traiterMcp } from "./mcp-http.ts";
 import { traiterParent } from "./parent-web.ts";
 import { lireMonde, agirMonde } from "./monde.ts";
+import { choisirRythme } from "./rendez-vous.ts";
 
 const PORT = Number(process.env.PORT ?? 4321);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error("PORT invalide");
@@ -75,6 +76,8 @@ async function api(req: IncomingMessage, res: ServerResponse, chemin: string) {
   limiter(`enfant:${enfant.id}`, 300);
 
   if (req.method === "GET" && chemin === "/api/moi") return json(res, 200, etatEnfant(enfant));
+  if (req.method === "POST" && chemin === "/api/rendez-vous")
+    return json(res, 200, choisirRythme(db, enfant.id, await lireJson(req)));
   if (req.method === "GET" && chemin === "/api/monde") return json(res, 200, lireMonde(db, enfant.id));
   if (req.method === "POST" && chemin === "/api/monde/actions")
     return json(res, 200, agirMonde(db, enfant.id, await lireJson(req)));

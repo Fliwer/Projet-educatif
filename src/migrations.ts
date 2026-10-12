@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-const VERSION = 7;
+const VERSION = 8;
 
 /** Migrations sérialisées entre serveur HTTP et MCP, y compris sur une ancienne base. */
 export function migrer(db: DatabaseSync) {
@@ -115,6 +115,18 @@ export function migrer(db: DatabaseSync) {
       db.exec(
         "ALTER TABLE quetes ADD COLUMN origine_id INTEGER REFERENCES quetes(id); ALTER TABLE quetes ADD COLUMN reprise_requete TEXT; ALTER TABLE quetes ADD COLUMN reprise_mode TEXT; ALTER TABLE questions ADD COLUMN source_id INTEGER REFERENCES questions(id); CREATE UNIQUE INDEX idx_reprise_requete ON quetes(reprise_requete) WHERE reprise_requete IS NOT NULL; CREATE TABLE reprise_demandes (requete TEXT PRIMARY KEY, enfant_id INTEGER NOT NULL REFERENCES enfants(id), origine_id INTEGER NOT NULL REFERENCES quetes(id), mode TEXT NOT NULL, quete_id INTEGER NOT NULL REFERENCES quetes(id)); CREATE UNIQUE INDEX idx_reprise_active ON quetes(origine_id) WHERE origine_id IS NOT NULL AND statut != 'terminee' AND archivee=0;",
       );
+    }
+    if (version < 8) {
+      db.exec(`
+        CREATE TABLE rendez_vous_reglages (enfant_id INTEGER PRIMARY KEY REFERENCES enfants(id), objectif INTEGER NOT NULL CHECK(objectif IN (2,3,4)), version INTEGER NOT NULL DEFAULT 0 CHECK(version>=0));
+        CREATE TABLE rendez_vous_semaines (enfant_id INTEGER NOT NULL REFERENCES enfants(id), semaine TEXT NOT NULL, objectif INTEGER NOT NULL CHECK(objectif IN (2,3,4)), PRIMARY KEY(enfant_id,semaine));
+        CREATE TABLE rendez_vous_jours (enfant_id INTEGER NOT NULL, jour TEXT NOT NULL, semaine TEXT NOT NULL, PRIMARY KEY(enfant_id,jour), FOREIGN KEY(enfant_id,semaine) REFERENCES rendez_vous_semaines(enfant_id,semaine));
+        CREATE TABLE rendez_vous_commandes (enfant_id INTEGER NOT NULL REFERENCES enfants(id), requete_id TEXT NOT NULL, signature TEXT NOT NULL, PRIMARY KEY(enfant_id,requete_id));
+        INSERT INTO rendez_vous_semaines(enfant_id,semaine,objectif)
+          SELECT DISTINCT enfant_id,date(substr(finie_le,1,10),printf('-%d days',(CAST(strftime('%w',substr(finie_le,1,10)) AS INTEGER)+6)%7)),3 FROM quetes WHERE statut='terminee' AND date(substr(finie_le,1,10)) IS NOT NULL;
+        INSERT INTO rendez_vous_jours(enfant_id,jour,semaine)
+          SELECT DISTINCT enfant_id,substr(finie_le,1,10),date(substr(finie_le,1,10),printf('-%d days',(CAST(strftime('%w',substr(finie_le,1,10)) AS INTEGER)+6)%7)) FROM quetes WHERE statut='terminee' AND date(substr(finie_le,1,10)) IS NOT NULL;
+      `);
     }
     if (db.prepare("PRAGMA foreign_key_check").all().length)
       throw new Error("Liens invalides dans la base : migration annulée.");
