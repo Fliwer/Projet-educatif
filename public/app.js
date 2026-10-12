@@ -847,16 +847,23 @@ async function ecranAccueil() {
         <div class="entete"><span class="maison-ic">${ic("maison")}</span><div><strong>Mon espace</strong><small>Avatar · collection · progrès</small></div></div>
       </button>
     </div>
-    <div class="section-titre"><h2>Tes quêtes du soir</h2><span>${faites.length}/${etat.quetes.length}</span></div>
+    <div class="section-titre"><h2>Mon parcours</h2><span>${faites.length}/${etat.quetes.length}</span></div>
+    ${aFaire.length ? '<button class="lien" id="voir-etape">Voir ma prochaine étape ↓</button>' : ""}
+    <p class="carte-aide">Touche une étape avec une coche pour refaire la mission.</p>
     <div class="carte-quetes" id="chemin"></div>
     <button class="lien" id="changer">Changer de code</button>
     ${barreNav("quetes")}`);
 
-  // Seules les 2 dernières quêtes finies restent sur la route : la suivante est toujours visible.
-  const ordre = [...faites.slice(-2), ...aFaire];
+  // Les missions initiales restent sur la carte ; les révisions ont leurs propres résultats.
+  const ordre = [...faites, ...aFaire];
   if (ordre.length) dessinerChemin(ordre, aFaire[0]?.id, toutFini, finies);
   else $("#chemin").innerHTML = '<p class="vide">Tes quêtes apparaîtront ici.</p>';
 
+  $("#voir-etape")?.addEventListener("click", () => {
+    const noeud = $("#chemin .noeud.actuel");
+    noeud?.scrollIntoView({ block: "center", behavior: "instant" });
+    noeud?.focus({ preventScroll: true });
+  });
   const bulle = $("#bulle-accueil");
   const dire = (t) => {
     bulle.innerHTML = echapper(t);
@@ -963,18 +970,17 @@ function dessinerChemin(ordre, actuelId, toutFini, finies) {
     const etape = placer(
       i,
       `
-      ${actuel ? '<span class="commencer">Commencer</span>' : ""}
-      <button class="noeud${fait ? " fait" : ""}${actuel ? " actuel" : ""}" aria-label="${echapper(q.titre)}${fait ? " (terminée)" : ""}">${ic(fait ? "check" : iconeMatiere(q.matiere))}</button>
-      <span class="etiquette ${cote(i)}"><small>${echapper(q.matiere)}</small>${echapper(q.titre)}</span>`,
+      ${actuel ? `<span class="commencer">${q.statut === "en_cours" ? "Reprendre" : "Commencer"}</span>` : ""}
+      <button class="noeud${fait ? " fait" : ""}${actuel ? " actuel" : ""}" aria-label="${echapper(q.titre)}${fait ? " · Refaire cette mission" : ""}">${ic(fait ? "check" : iconeMatiere(q.matiere))}</button>
+      <span class="etiquette ${cote(i)}"><small>${echapper(q.matiere)}</small>${echapper(q.titre)}${fait ? "<small>Terminée · Refaire</small>" : q.statut === "en_cours" ? "<small>En cours</small>" : ""}</span>`,
       fait ? "fait" : "",
     );
     const noeud = etape.querySelector(".noeud");
-    if (fait) noeud.disabled = true;
-    else
-      noeud.addEventListener("click", () => {
-        son("clic");
-        ecranMission(q.id);
-      });
+    noeud.addEventListener("click", () => {
+      son("clic");
+      if (fait) ecranRevision(q.id);
+      else ecranMission(q.id);
+    });
   });
 
   const coffre = placer(
@@ -1007,6 +1013,42 @@ function brancherNav(finies) {
       b.dataset.onglet === "maison" ? ecranChezPip(finies) : ecranAccueil();
     });
   });
+}
+
+async function ecranRevision(id) {
+  let info;
+  try {
+    info = await appel(`/api/quetes/${id}/revision`);
+  } catch (e) {
+    proposerReessai(e, () => ecranRevision(id));
+    return;
+  }
+  afficher(
+    `<div class="hero">${pipSvg("content")}<h1>On s’entraîne ?</h1><p>${echapper(info.titre)}</p></div><div class="carte"><p>Tu gardes tes résultats précédents. Cet entraînement ne donne pas de nouveau cadeau.</p><div class="revision-choix">${info.reprise_id ? '<button class="btn" id="revision-reprendre">Continuer mon entraînement</button>' : '<button class="btn" id="revision-tout">Tout refaire</button>' + (info.a_revoir ? `<button class="btn orange" id="revision-cible">Revoir ${info.a_revoir} question${info.a_revoir > 1 ? "s" : ""}</button><p>Les questions non réussies au premier essai lors du dernier passage terminé.</p>` : "<p>Au dernier passage, tu as réussi chaque question dès le premier essai.</p>")}<button class="lien" id="revision-retour">Retour à la carte</button></div></div>`,
+  );
+  $("#revision-retour").onclick = ecranAccueil;
+  if (info.reprise_id) {
+    $("#revision-reprendre").onclick = () => ecranMission(info.reprise_id);
+    return;
+  }
+  const commencer = (mode) => {
+    const requete_id = identifiantReponse();
+    const envoyer = async () => {
+      try {
+        const r = await appel(`/api/quetes/${id}/revision`, {
+          method: "POST",
+          body: JSON.stringify({ mode, requete_id }),
+        });
+        await ecranMission(r.id);
+      } catch (e) {
+        proposerReessai(e, envoyer);
+      }
+    };
+    document.querySelectorAll(".revision-choix button").forEach((b) => (b.disabled = true));
+    envoyer();
+  };
+  $("#revision-tout").onclick = () => commencer("tout");
+  $("#revision-cible")?.addEventListener("click", () => commencer("cible"));
 }
 
 // ---------- Écran : mission ----------
@@ -1462,6 +1504,13 @@ function cinematique() {
 }
 
 function ecranVictoire(r) {
+  if (r.revision) {
+    afficher(
+      `<div class="victoire">${pipSvg("joie", "grand")}</div><div class="victoire-texte"><h1>Entraînement terminé !</h1><p>Tu as pris le temps de revoir cette mission.</p><p>Ce passage est gardé dans ton suivi. Ton cadeau initial reste dans ta collection.</p></div><button class="btn" id="retour-revision">Revenir à mon parcours</button>`,
+    );
+    $("#retour-revision").onclick = ecranAccueil;
+    return;
+  }
   const qpn = r.quetes_par_niveau;
   const niveauAvant = r.nouveau_niveau ? r.niveau - 1 : r.niveau;
   const avant = r.nouveau_niveau ? (qpn - 1) / qpn : Math.max(0, r.vers_suivant - 1) / qpn;

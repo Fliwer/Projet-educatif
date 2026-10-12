@@ -496,3 +496,7 @@ button.mini-carte:active { transform: scale(0.97); }
   border-color: var(--violet); background: var(--violet-clair); color: var(--violet-ombre);
   box-shadow: 0 4px 0 var(--violet-moyen); animation: pulse 1.2s ease-in-out infinite;
 }
+.revision-choix { display:grid; gap:18px; margin-top:20px; }
+.etape.fait .noeud { cursor:pointer; }
+.etape.fait .noeud:focus-visible { outline:4px solid #7054b4; outline-offset:5px; }
+.carte-aide { text-align:center; color:var(--doux); font-size:15px; margin:12px 0; }

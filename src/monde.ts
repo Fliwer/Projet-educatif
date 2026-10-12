@@ -172,7 +172,7 @@ function vue(db: DatabaseSync, enfantId: number) {
       questions_essayees: Number(
         db
           .prepare(
-            "SELECT COUNT(DISTINCT r.question_id) AS n FROM reponses r JOIN questions qu ON qu.id=r.question_id JOIN quetes q ON q.id=qu.quete_id WHERE q.enfant_id=?",
+            "SELECT COUNT(DISTINCT COALESCE(qu.source_id,qu.id)) AS n FROM reponses r JOIN questions qu ON qu.id=r.question_id JOIN quetes q ON q.id=qu.quete_id WHERE q.enfant_id=?",
           )
           .get(enfantId)!.n,
       ),

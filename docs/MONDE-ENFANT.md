@@ -25,3 +25,11 @@ Les ateliers sont retirés du code actif et récupérables dans le tag archive/a
 Les bases et secrets ne sont pas dans Git. Sauvegarde : npm run backup. Restauration : voir EXPLOITATION.md. Les limites avant production restent décrites dans ARCHITECTURE.md.
 
 Le service src/parcours.ts est partagé par l’espace enfant et le bilan MCP parent (parcours_complet, historique complet distinct de la période demandée). Les nouvelles notions sont conservées ; les anciennes missions sans notion utilisent leur titre, sans attribution inventée. scripts/test-parcours.ts vérifie les compteurs, l’isolation et le refus de jouer/répondre/terminer une mission retirée.
+
+## Carte et révisions (12 octobre 2026)
+
+La carte principale conserve toutes les missions initiales non archivées, terminées comprises. Toucher une étape terminée ouvre « Tout refaire » ou une révision ciblée sur les questions non réussies au premier essai au dernier passage terminé. Si le dernier passage était ciblé, ce choix porte sur ce passage partiel, pas sur une évaluation complète de la notion.
+
+Migration 7 : les passages de révision sont liés à la mission initiale, avec leurs propres questions et réponses. Un seul passage actif par mission ; les UUID de démarrage restent idempotents après la fin. Une révision peut être interrompue puis reprise. Les étoiles globales, cadeaux, niveaux et compteurs de missions ne sont pas augmentés. Le suivi distingue premier passage et entraînements. Les missions retirées et leurs révisions restent inaccessibles au jeu.
+
+POST /api/quetes/:id/revision accepte un mode (tout/cible) et un UUID. GET retourne les choix disponibles sans démarrer un passage. Les droits restent ceux du profil identifié. Les tests test-revisions.ts couvrent conservation, isolation, absence de récompenses, sélection ciblée et répétitions concurrentes.

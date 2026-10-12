@@ -136,9 +136,9 @@ export async function ouvrirMonde(
   function carnetPage() {
     const p = monde.progres;
     const parcours = p.parcours || [];
-    const terminees = parcours.filter((q) => q.statut === "terminee");
+    const terminees = parcours.filter((q) => q.statut === "terminee" && !q.origine_id);
     const recentes = terminees.slice(-8);
-    const prochaines = parcours.filter((q) => !q.archivee && q.statut !== "terminee");
+    const prochaines = parcours.filter((q) => !q.archivee && !q.origine_id && q.statut !== "terminee");
     const prochaine = prochaines.find((q) => q.essayees > 0) || prochaines[0];
     const date = (s) => (s ? s.slice(0, 10).split("-").reverse().join("/") : "");
     const etape = (q) =>
@@ -159,7 +159,7 @@ export async function ouvrirMonde(
               .filter((q) => q.essayees > 0)
               .map(
                 (q) =>
-                  `<article class="e-observation"><span class="m-eyebrow">${h(q.matiere)}${q.archivee ? " · mission retirée du jeu" : ""}</span><h3>${h(q.notion || q.titre)}</h3><p>${Number(q.premier_essai)} sur ${Number(q.essayees)} questions essayées réussies au premier essai.</p><p>Réussites après un nouvel essai : ${Number(q.reussies - q.premier_essai)} · ${Number(q.essayees - q.reussies)} sans réponse correcte enregistrée.</p><p>${q.essayees < 5 ? "Encore peu d’observations : continuer à explorer." : q.essayees > q.premier_essai ? "À revoir ensemble : les questions qui ont demandé plusieurs essais." : "Toutes les questions essayées ont été réussies au premier essai dans cette mission."}</p></article>`,
+                  `<article class="e-observation"><span class="m-eyebrow">${h(q.matiere)}${q.archivee ? " · mission retirée du jeu" : ""}</span><h3>${h(q.notion || q.titre)}${q.origine_id ? " · Entraînement" : " · Premier passage"}</h3><p>${Number(q.premier_essai)} sur ${Number(q.essayees)} questions essayées réussies au premier essai.</p><p>Réussites après un nouvel essai : ${Number(q.reussies - q.premier_essai)} · ${Number(q.essayees - q.reussies)} sans réponse correcte enregistrée.</p><p>${q.essayees < 5 ? "Encore peu d’observations : continuer à explorer." : q.essayees > q.premier_essai ? "À revoir ensemble : les questions qui ont demandé plusieurs essais." : "Toutes les questions essayées ont été réussies au premier essai dans cette mission."}</p></article>`,
               )
               .join("")
           : "<p>Les observations apparaîtront après les premiers exercices.</p>"

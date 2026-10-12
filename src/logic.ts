@@ -257,18 +257,19 @@ export function etatEnfant(enfant: Enfant) {
   const quetes = db
     .prepare(
       `SELECT q.id, q.titre, q.matiere, q.statut,
+              (SELECT id FROM quetes r WHERE r.origine_id=q.id AND r.archivee=0 AND r.statut!='terminee') AS reprise_id,
               (SELECT COUNT(*) FROM questions WHERE quete_id = q.id) AS nb_questions
          FROM quetes q
-        WHERE q.enfant_id = ? AND q.archivee=0 AND (q.statut != 'terminee' OR substr(q.finie_le, 1, 10) = ?)
-        ORDER BY q.statut = 'terminee', q.id`,
+        WHERE q.enfant_id = ? AND q.archivee=0 AND q.origine_id IS NULL
+        ORDER BY q.statut != 'terminee', COALESCE(q.finie_le,q.cree_le), q.id`,
     )
-    .all(enfant.id, aujourdhui());
+    .all(enfant.id);
   // Une étoile par bonne réponse : ce compteur ne fait que monter.
   const { etoiles } = db
     .prepare(
       `SELECT COUNT(DISTINCT r.question_id) AS etoiles FROM reponses r
          JOIN questions qu ON qu.id = r.question_id JOIN quetes qe ON qe.id = qu.quete_id
-        WHERE qe.enfant_id = ? AND r.correcte = 1`,
+        WHERE qe.enfant_id = ? AND qe.origine_id IS NULL AND r.correcte = 1`,
     )
     .get(enfant.id) as { etoiles: number };
   return {
@@ -313,7 +314,9 @@ function questionPourEnfant(q: {
 export function questionsQuete(enfant: Enfant, queteId: number) {
   const quete = db
     .prepare("SELECT * FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
-    .get(queteId, enfant.id) as { id: number; titre: string; matiere: string; statut: string } | undefined;
+    .get(queteId, enfant.id) as
+    | { id: number; titre: string; matiere: string; statut: string; origine_id: number | null }
+    | undefined;
   if (!quete) return undefined;
   if (quete.statut === "a_faire")
     db.prepare("UPDATE quetes SET statut = 'en_cours' WHERE id = ?").run(queteId);
@@ -340,7 +343,14 @@ export function questionsQuete(enfant: Enfant, queteId: number) {
       reussie: Boolean(bilan.reussie),
     };
   });
-  return { id: quete.id, titre: quete.titre, matiere: quete.matiere, univers: enfant.univers, questions };
+  return {
+    id: quete.id,
+    titre: quete.titre,
+    matiere: quete.matiere,
+    univers: enfant.univers,
+    revision: quete.origine_id !== null,
+    questions,
+  };
 }
 
 export function enregistrerReponse(enfant: Enfant, questionId: number, valeur: string, requeteId?: string) {
@@ -408,7 +418,7 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
   return transaction(() => {
     const actuel = enfantParCode(enfant.code)!;
     const quete = db
-      .prepare("SELECT statut FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
+      .prepare("SELECT statut, origine_id FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
       .get(queteId, actuel.id);
     if (!quete) return undefined;
     const avant = niveau(actuel).niveau;
@@ -432,13 +442,20 @@ export function terminerQuete(enfant: Enfant, queteId: number) {
         maintenant(),
         queteId,
       );
-      db.prepare(
-        "UPDATE enfants SET quetes_finies = quetes_finies + 1, soirs = ?, dernier_jour = ? WHERE id = ?",
-      ).run(soirs, jour, actuel.id);
-      attribuerCadeau(db, actuel.id, queteId);
+      if (quete.origine_id === null) {
+        db.prepare(
+          "UPDATE enfants SET quetes_finies = quetes_finies + 1, soirs = ?, dernier_jour = ? WHERE id = ?",
+        ).run(soirs, jour, actuel.id);
+        attribuerCadeau(db, actuel.id, queteId);
+      }
     }
     const apres = enfantParCode(actuel.code)!;
-    return { ...niveau(apres), soirs: apres.soirs, nouveau_niveau: niveau(apres).niveau > avant };
+    return {
+      revision: quete.origine_id !== null,
+      ...niveau(apres),
+      soirs: apres.soirs,
+      nouveau_niveau: niveau(apres).niveau > avant,
+    };
   });
 }
 

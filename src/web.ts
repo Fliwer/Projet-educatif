@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { networkInterfaces } from "node:os";
 import { extname, join, resolve, sep } from "node:path";
 import { z } from "zod";
+import { reprendreQuete, questionsARevoir } from "./revisions.ts";
 import { RACINE } from "./config.ts";
 import { db } from "./db.ts";
 import { ErreurMetier } from "./erreurs.ts";
@@ -84,6 +85,30 @@ async function api(req: IncomingMessage, res: ServerResponse, chemin: string) {
     return q ? json(res, 200, q) : json(res, 404, { erreur: "Quête introuvable" });
   }
 
+  const revision = chemin.match(/^\/api\/quetes\/(\d+)\/revision$/);
+  if (revision && req.method === "GET") {
+    const source = db
+      .prepare(
+        "SELECT id,titre FROM quetes WHERE id=? AND enfant_id=? AND archivee=0 AND origine_id IS NULL AND statut='terminee'",
+      )
+      .get(Number(revision[1]), enfant.id);
+    if (!source) return json(res, 404, { erreur: "Mission indisponible" });
+    const active = db
+      .prepare("SELECT id FROM quetes WHERE origine_id=? AND archivee=0 AND statut!='terminee'")
+      .get(source.id);
+    return json(res, 200, {
+      ...source,
+      a_revoir: questionsARevoir(enfant, Number(source.id)).length,
+      reprise_id: active?.id ?? null,
+    });
+  }
+  if (revision && req.method === "POST") {
+    const corps = z
+      .object({ mode: z.enum(["tout", "cible"]), requete_id: z.string().uuid() })
+      .strict()
+      .parse(await lireJson(req));
+    return json(res, 200, reprendreQuete(enfant, Number(revision[1]), corps.mode, corps.requete_id));
+  }
   const fin = chemin.match(/^\/api\/quetes\/(\d+)\/terminer$/);
   if (req.method === "POST" && fin) {
     const r = terminerQuete(enfant, Number(fin[1]));

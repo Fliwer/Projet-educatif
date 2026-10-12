@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node src/web.ts",
     "mcp": "node src/mcp.ts",
-    "test": "node scripts/test-metier.ts && node scripts/test-monde.ts && node scripts/test-parcours.ts && node scripts/test-mcp.ts && node scripts/test-voix.ts && node scripts/test-mcp-distant.ts && node scripts/test-sauvegarde.ts",
+    "test": "node scripts/test-metier.ts && node scripts/test-monde.ts && node scripts/test-parcours.ts && node scripts/test-revisions.ts && node scripts/test-mcp.ts && node scripts/test-voix.ts && node scripts/test-mcp-distant.ts && node scripts/test-sauvegarde.ts",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run format:check && node --check public/app.js && node --check public/monde-art.js && node --check public/milo.js && node --check public/monde-mouvement.js && node --check public/espace-personnel.js",
     "verify": "npm run check && npm test",

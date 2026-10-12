@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-const VERSION = 6;
+const VERSION = 7;
 
 /** Migrations sérialisées entre serveur HTTP et MCP, y compris sur une ancienne base. */
 export function migrer(db: DatabaseSync) {
@@ -109,6 +109,11 @@ export function migrer(db: DatabaseSync) {
     if (version < 6) {
       db.exec(
         "ALTER TABLE quetes ADD COLUMN archivee INTEGER NOT NULL DEFAULT 0 CHECK(archivee IN (0,1)); ALTER TABLE quetes ADD COLUMN notion TEXT;",
+      );
+    }
+    if (version < 7) {
+      db.exec(
+        "ALTER TABLE quetes ADD COLUMN origine_id INTEGER REFERENCES quetes(id); ALTER TABLE quetes ADD COLUMN reprise_requete TEXT; ALTER TABLE quetes ADD COLUMN reprise_mode TEXT; ALTER TABLE questions ADD COLUMN source_id INTEGER REFERENCES questions(id); CREATE UNIQUE INDEX idx_reprise_requete ON quetes(reprise_requete) WHERE reprise_requete IS NOT NULL; CREATE TABLE reprise_demandes (requete TEXT PRIMARY KEY, enfant_id INTEGER NOT NULL REFERENCES enfants(id), origine_id INTEGER NOT NULL REFERENCES quetes(id), mode TEXT NOT NULL, quete_id INTEGER NOT NULL REFERENCES quetes(id)); CREATE UNIQUE INDEX idx_reprise_active ON quetes(origine_id) WHERE origine_id IS NOT NULL AND statut != 'terminee' AND archivee=0;",
       );
     }
     if (db.prepare("PRAGMA foreign_key_check").all().length)
