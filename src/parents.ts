@@ -66,6 +66,7 @@ export function lireBrouillon(jeton: string) {
         nonce: string;
         contenu: string;
         publie: number;
+        expire: number;
       }
     | undefined;
   if (!ligne) return undefined;

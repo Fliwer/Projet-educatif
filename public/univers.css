@@ -1,0 +1,646 @@
+/* L’aventure choisie guide les couleurs et le parcours. */
+.u-shell {
+  --u-accent: #62519d;
+  --u-pale: #eee8fa;
+  --u-sky: #e8e5fa;
+  --u-ink: #30284f;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 18px 55px;
+  color: #37334c;
+}
+[data-aventure="jardin"] .u-shell {
+  --u-accent: #3b7359;
+  --u-pale: #e3efdc;
+  --u-sky: #e7f2dc;
+  --u-ink: #244b3b;
+}
+[data-aventure="medieval"] .u-shell {
+  --u-accent: #805687;
+  --u-pale: #f2e5d2;
+  --u-sky: #fbefd9;
+  --u-ink: #583f61;
+}
+.u-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #696279;
+}
+.u-entete .lien {
+  min-height: 44px;
+}
+.u-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #fffdf7, var(--u-sky));
+  padding: 32px;
+  border: 1px solid #fff;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px #35305f0a;
+}
+.u-surtitre {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  color: var(--u-accent);
+  margin-bottom: 10px;
+}
+.u-shell h1 {
+  font-size: clamp(30px, 3.5vw, 45px);
+  margin: 0 0 16px;
+  color: var(--u-ink);
+  text-wrap: balance;
+}
+.u-hero-texte > p {
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 44ch;
+}
+.u-shell .u-depart {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 24px;
+  min-height: 64px;
+  text-align: left;
+  background: var(--u-accent);
+  border-color: var(--u-accent);
+  box-shadow: 0 4px 0 var(--u-ink);
+  font-size: 20px;
+  padding: 12px 22px;
+  white-space: normal;
+}
+.u-depart span {
+  display: block;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: "Nunito Sans", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.u-panorama {
+  position: relative;
+  padding-bottom: 52px;
+  min-width: 0;
+  transform: rotate(-2deg);
+}
+.u-panorama > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+  box-shadow: 0 18px 30px #3931511c;
+  transform: scale(1.03);
+}
+.u-compagnon {
+  position: absolute;
+  bottom: 0;
+  left: 12%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: rotate(2deg);
+}
+.u-compagnon > svg {
+  width: 94px;
+  height: 110px;
+  filter: drop-shadow(0 5px 5px #29263d14);
+}
+.u-compagnon > span {
+  padding: 12px 16px;
+  background: #fffdf7;
+  border-radius: 18px 18px 18px 3px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--u-ink);
+  box-shadow: 0 4px 18px #3931510a;
+}
+.u-avancee {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 10px 30px;
+  flex-wrap: wrap;
+}
+.u-avancee > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.u-avancee strong {
+  font-size: 24px;
+  color: var(--u-accent);
+  white-space: nowrap;
+}
+.u-avancee progress {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  min-width: 100px;
+  height: 12px;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e1ddec;
+  color: var(--u-accent);
+}
+.u-avancee progress::-webkit-progress-bar {
+  background: #e1ddec;
+  border-radius: 20px;
+}
+.u-avancee progress::-webkit-progress-value {
+  background: var(--u-accent);
+  border-radius: 20px;
+}
+.u-avancee progress::-moz-progress-bar {
+  background: var(--u-accent);
+  border-radius: 20px;
+}
+.u-avancee-fin {
+  font-size: 14px;
+  color: #696279;
+}
+.u-section-titre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 22px;
+}
+.u-section-titre h2 {
+  font-size: 28px;
+  color: var(--u-ink);
+}
+.u-legende {
+  font-size: 14px;
+  white-space: nowrap;
+  color: #356b52;
+}
+.u-parcours {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  position: relative;
+}
+.u-parcours:before {
+  content: "";
+  position: absolute;
+  top: 43px;
+  left: 8%;
+  right: 8%;
+  border-top: 3px dashed var(--u-accent);
+  opacity: 0.3;
+}
+.u-lieu {
+  position: relative;
+  background: #fffdf8;
+  border: 2px solid #e5dfec;
+  border-radius: 24px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 5px 0 #ded6eb66;
+  min-width: 0;
+}
+.u-lieu-haut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.u-etape {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--u-pale);
+  color: var(--u-accent);
+  font-size: 22px;
+  font-weight: 800;
+}
+.u-etat {
+  font-size: 12px;
+  font-weight: 800;
+  color: #696279;
+  padding: 5px 8px;
+  border-radius: 30px;
+  background: #f1eef6;
+}
+.u-prochaine {
+  border-color: var(--u-accent);
+  background: linear-gradient(155deg, #fffdf8, var(--u-pale));
+}
+.u-prochaine .u-etat {
+  background: var(--u-accent);
+  color: white;
+}
+.u-explore .u-etape {
+  background: #d5ece1;
+  color: #356b52;
+}
+.u-explore .u-etat {
+  background: #e1efe6;
+  color: #356b52;
+}
+.u-lieu h3 {
+  font-family: "Fredoka", Arial, sans-serif;
+  color: var(--u-ink);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.u-lieu p {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.u-lieu .u-lecon {
+  font-size: 14px;
+  color: #696279;
+  padding-top: 4px;
+  margin-bottom: 6px;
+}
+.u-lieu .btn {
+  font-size: 16px;
+  min-height: 48px;
+  margin-top: auto;
+  white-space: normal;
+}
+.u-prochaine .btn {
+  background: var(--u-accent);
+  border-color: var(--u-accent);
+  box-shadow: 0 4px 0 var(--u-ink);
+}
+.u-autres {
+  margin-top: 42px;
+  padding-top: 24px;
+  border-top: 1px solid #ded6eb;
+}
+.u-explication {
+  font-size: 16px;
+  margin: -8px 0 22px;
+  line-height: 1.6;
+}
+.u-choix {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.u-carte {
+  font: inherit;
+  text-align: left;
+  padding: 8px 8px 16px;
+  border: 2px solid #e5dfec;
+  border-radius: 24px;
+  background: #fffaf4;
+  color: #37334c;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #ded6eb66;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.u-carte > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+.u-carte > span {
+  display: block;
+  margin: 5px 10px 0;
+  font-size: 13px;
+}
+.u-carte .u-nom {
+  font-family: "Fredoka", Arial, sans-serif;
+  font-size: 25px;
+  margin-top: 12px;
+  color: var(--u-ink);
+}
+.u-selectionnee {
+  border-color: var(--u-accent);
+  box-shadow: 0 4px 0 var(--u-accent);
+  background: var(--u-pale);
+}
+.u-carte:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.u-shell button:focus-visible {
+  outline: 3px solid var(--u-accent);
+  outline-offset: 5px;
+}
+.u-statut {
+  min-height: 26px;
+  color: var(--u-accent);
+  font-size: 16px;
+  margin-top: 14px;
+}
+.u-note {
+  text-align: center;
+  font-size: 14px;
+  color: #696279;
+  padding: 16px 0;
+}
+.u-fin,
+.u-vide {
+  padding: 26px;
+  border-radius: 24px;
+  text-align: center;
+  background: var(--u-pale);
+  margin-top: 20px;
+  line-height: 1.6;
+}
+.u-vide > span {
+  display: block;
+  font-size: 40px;
+  color: var(--u-accent);
+  margin-bottom: 10px;
+}
+.u-vide h3 {
+  font-size: 24px;
+  color: var(--u-ink);
+  margin-bottom: 10px;
+}
+.u-invitation {
+  margin-top: 20px;
+  font-weight: 800;
+  color: var(--u-accent);
+}
+@media (hover: hover) {
+  .u-carte:not(:disabled):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 0 #ded6eb66;
+  }
+  .u-selectionnee:not(:disabled):hover {
+    box-shadow: 0 8px 0 var(--u-accent);
+  }
+}
+@media (max-width: 850px) {
+  .u-hero {
+    padding: 24px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .u-compagnon {
+    left: 0;
+  }
+  .u-compagnon > span {
+    font-size: 12px;
+    padding: 10px;
+  }
+  .u-avancee-fin {
+    display: none;
+  }
+  .u-parcours {
+    gap: 12px;
+  }
+  .u-lieu {
+    padding: 16px;
+  }
+  .u-etat {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+}
+@media (max-width: 700px) {
+  .u-shell {
+    padding: 8px 0 30px;
+  }
+  .u-entete {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  .u-hero {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+    gap: 26px;
+    border-radius: 26px;
+  }
+  .u-hero-texte > p {
+    font-size: 16px;
+  }
+  .u-shell h1 {
+    font-size: 34px;
+  }
+  .u-panorama {
+    width: 100%;
+    max-width: 480px;
+    margin: auto;
+    padding: 0 8px 46px;
+    transform: none;
+  }
+  .u-panorama > svg {
+    transform: none;
+  }
+  .u-compagnon {
+    left: 10%;
+    bottom: -8px;
+    transform: none;
+  }
+  .u-compagnon > svg {
+    width: 76px;
+    height: 88px;
+  }
+  .u-compagnon > span {
+    font-size: 13px;
+  }
+  .u-shell .u-depart {
+    width: 100%;
+    margin-top: 18px;
+  }
+  .u-avancee {
+    padding: 22px 4px;
+    gap: 14px;
+  }
+  .u-avancee > div {
+    font-size: 12px;
+  }
+  .u-section-titre h2 {
+    font-size: 25px;
+  }
+  .u-surtitre {
+    font-size: 10px;
+    letter-spacing: 1.3px;
+  }
+  .u-legende {
+    font-size: 12px;
+  }
+  .u-parcours {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding-left: 13px;
+  }
+  .u-parcours:before {
+    left: 0;
+    right: auto;
+    top: 22px;
+    bottom: 22px;
+    border-top: 0;
+    border-left: 3px dashed var(--u-accent);
+  }
+  .u-lieu {
+    padding: 20px;
+    gap: 12px;
+  }
+  .u-lieu h3 {
+    text-wrap: initial;
+  }
+  .u-lieu-haut {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .u-etat {
+    font-size: 12px;
+  }
+  .u-choix {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .u-carte {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    column-gap: 8px;
+    padding: 10px;
+    align-items: center;
+    border-radius: 20px;
+  }
+  .u-carte > svg {
+    grid-row: 1/3;
+    border-radius: 12px;
+  }
+  .u-carte .u-nom {
+    font-size: 23px;
+    align-self: end;
+    margin-top: 0;
+  }
+  .u-carte > span:last-child {
+    align-self: start;
+    font-size: 12px;
+  }
+  .u-autres {
+    margin-top: 28px;
+  }
+  .u-explication {
+    font-size: 15px;
+  }
+  .u-note {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-shell * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto;
+  }
+}
+.univers {
+  max-width: none !important;
+}
+#app[data-aventure="medieval"] .hero {
+  background: linear-gradient(155deg, #fff6dc, #e7d8ee);
+  border-radius: 30px;
+}
+#app[data-aventure="espace"] .hero {
+  background: linear-gradient(145deg, #e9e7fa, #dcebf6);
+  border-radius: 30px;
+}
+.u-banniere {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 16px 20px;
+  background: #fffaf1;
+  border-radius: 20px;
+  font-size: 19px;
+}
+.u-banniere strong {
+  display: block;
+}
+.u-banniere .lien {
+  font-size: 17px;
+  min-height: 44px;
+}
+.scene.decor-royaume {
+  background: linear-gradient(#f5e7d0, #d4e7d5);
+}
+.mission-lieu {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #776486;
+  text-align: center;
+  padding: 0 14px;
+  margin: 5px 0 12px;
+}
+.u-mini-art {
+  width: 90px;
+  flex-shrink: 0;
+}
+.u-mini-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (max-width: 700px) {
+  .u-banniere {
+    flex-wrap: wrap;
+  }
+}
+.lieu-quete {
+  display: block;
+  font-size: 17px;
+  line-height: 1.15;
+  font-weight: 700;
+  margin-bottom: 7px;
+  color: #63488b;
+}
+#app[data-aventure="espace"] .carte-quetes {
+  background: linear-gradient(160deg, #e9e5f9, #ddebf5);
+  border-radius: 28px;
+}
+#app[data-aventure="medieval"] .carte-quetes {
+  background: linear-gradient(160deg, #fff0d7, #dce9da);
+  border-radius: 28px;
+}
+#app[data-aventure="medieval"] .noeud:not(.fait):not(.coffre) {
+  background: #c3add8;
+  border-color: #9579aa;
+}
+#app[data-aventure="espace"] .lieu-quete {
+  color: #46598b;
+}
+#app[data-aventure="jardin"] .hero {
+  background: linear-gradient(155deg, #f4f6d8, #d8eddf);
+  border-radius: 30px;
+}
+#app[data-aventure="jardin"] .carte-quetes {
+  background: linear-gradient(160deg, #ecf4dc, #d7ecdf);
+  border-radius: 28px;
+}
+#app[data-aventure="jardin"] .lieu-quete {
+  color: #356b52;
+}
+#app[data-aventure="jardin"] .noeud:not(.fait):not(.coffre) {
+  background: #b5d8a4;
+  border-color: #78a587;
+}

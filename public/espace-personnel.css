@@ -1,5 +1,5 @@
 .e-shell {
-  padding-bottom: 30px !important;
+  padding-bottom: calc(110px + env(safe-area-inset-bottom)) !important;
 }
 .e-retour {
   margin-left: auto;
@@ -426,20 +426,103 @@
   }
 }
 /* Chemin calme : étapes lisibles sans animation, rang ni échéance. */
-.e-chemin { list-style:none; padding:8px 0; margin:0; }
-.e-etape { display:grid; grid-template-columns:48px minmax(0,1fr); gap:16px; position:relative; padding:0 0 24px; }
-.e-etape::before { content:""; position:absolute; top:42px; bottom:0; left:23px; border-left:3px dashed #c5b6e4; }
-.e-etape:last-child::before { display:none; }
-.e-jalon { width:48px; height:48px; border-radius:50%; background:#deefe6; color:#32684f; display:grid; place-items:center; font-size:24px; border:3px solid white; z-index:1; }
-.e-etape article { background:#faf7ff; border:1px solid #e8e0f3; border-radius:20px; padding:18px; min-width:0; overflow-wrap:anywhere; }
-.e-etape h3 { margin:7px 0; font-size:21px; }
-.e-etape p { margin:7px 0; font-size:15px; line-height:1.6; }
-.e-prochaine article { background:#fff5da; border-color:#efdaad; }
-.e-prochaine .e-jalon { background:#ffe8a8; color:#785926; }
-.e-prochaine .m-btn { margin-top:10px; }
-.e-historique { margin:18px 0; }
-.e-historique summary,.e-bilan summary { cursor:pointer; padding:12px 0; font-weight:700; }
-.e-observation { padding:18px 0; border-top:1px solid #e8e0f3; }
-.e-observation p { line-height:1.6; }
-.e-observation h3 { margin:10px 0; }
-@media(max-width:440px) { .e-etape { gap:10px; grid-template-columns:36px minmax(0,1fr); } .e-jalon {width:36px;height:36px;font-size:19px;} .e-etape::before {left:17px;top:34px;} .e-etape article {padding:14px;} }
+.e-chemin {
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+}
+.e-etape {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 16px;
+  position: relative;
+  padding: 0 0 24px;
+}
+.e-etape::before {
+  content: "";
+  position: absolute;
+  top: 42px;
+  bottom: 0;
+  left: 23px;
+  border-left: 3px dashed #c5b6e4;
+}
+.e-etape:last-child::before {
+  display: none;
+}
+.e-jalon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #deefe6;
+  color: #32684f;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  border: 3px solid white;
+  z-index: 1;
+}
+.e-etape article {
+  background: #faf7ff;
+  border: 1px solid #e8e0f3;
+  border-radius: 20px;
+  padding: 18px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.e-etape h3 {
+  margin: 7px 0;
+  font-size: 21px;
+}
+.e-etape p {
+  margin: 7px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.e-prochaine article {
+  background: #fff5da;
+  border-color: #efdaad;
+}
+.e-prochaine .e-jalon {
+  background: #ffe8a8;
+  color: #785926;
+}
+.e-prochaine .m-btn {
+  margin-top: 10px;
+}
+.e-historique {
+  margin: 18px 0;
+}
+.e-historique summary,
+.e-bilan summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-weight: 700;
+}
+.e-observation {
+  padding: 18px 0;
+  border-top: 1px solid #e8e0f3;
+}
+.e-observation p {
+  line-height: 1.6;
+}
+.e-observation h3 {
+  margin: 10px 0;
+}
+@media (max-width: 440px) {
+  .e-etape {
+    gap: 10px;
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+  .e-jalon {
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
+  }
+  .e-etape::before {
+    left: 17px;
+    top: 34px;
+  }
+  .e-etape article {
+    padding: 14px;
+  }
+}

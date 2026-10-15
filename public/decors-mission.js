@@ -1,6 +1,9 @@
 import { fusee, jardin } from "./scenes-mission.js";
 
 export function themeMission(quete) {
+  if (quete.aventure === "jardin") return "fleurs";
+  if (quete.aventure === "espace") return "fusee";
+  if (quete.aventure === "medieval") return "royaume";
   const simplifier = (s) =>
     String(s ?? "")
       .normalize("NFD")
@@ -59,6 +62,8 @@ export function decorMission(theme, faites, total, nouvelles = 0, fete = false) 
   const pieces = Math.round((faites / total) * 6);
   const avant = Math.round(((faites - nouvelles) / total) * 6);
   if (theme === "fusee") return fusee(pieces, pieces - avant);
+  if (theme === "royaume")
+    return `<svg viewBox="0 0 220 180" role="img" aria-label="Le château de Milo : ${pieces} parties construites sur 6">${ciel}<g class="groupe-royaume">${assembler(personnages.chateau, pieces, pieces - avant)}</g></svg>`;
   const formes = personnages[theme];
   if (!formes) throw new Error("Décor inconnu");
   const detruire = () => {
@@ -94,4 +99,5 @@ export const phraseProgres = (theme) =>
     robot: "Une pièce de plus pour ton robot !",
     ballon: "Ton ballon prend des couleurs !",
     chateau: "Un rempart de moins !",
+    royaume: "Tu as pris le temps de travailler cette mission.",
   })[theme];

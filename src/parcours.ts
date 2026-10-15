@@ -5,7 +5,8 @@ export function lireParcours(db: DatabaseSync, enfantId: number) {
   return db
     .prepare(
       `
-    SELECT q.id, q.titre, q.matiere, q.notion, q.statut, q.archivee, q.finie_le, q.origine_id, q.reprise_mode,
+    SELECT q.id, q.titre, q.matiere, q.notion, q.statut, q.archivee, q.cree_le, q.finie_le, q.origine_id, q.reprise_mode,
+      (SELECT json_object('consigne', qa.consigne, 'illustration', qa.illustration) FROM questions qa WHERE qa.quete_id=q.id ORDER BY qa.illustration IS NULL, qa.ordre, qa.id LIMIT 1) AS apercu_json,
       COUNT(qu.id) AS total,
       SUM(CASE WHEN qu.source_id IS NOT NULL AND (SELECT r.correcte FROM reponses r WHERE r.question_id=qu.source_id ORDER BY r.id LIMIT 1)=1 THEN 1 ELSE 0 END) AS initial_premier_essai,
       SUM(CASE WHEN EXISTS(SELECT 1 FROM reponses r WHERE r.question_id=qu.id) THEN 1 ELSE 0 END) AS essayees,
@@ -25,6 +26,8 @@ export function lireParcours(db: DatabaseSync, enfantId: number) {
     notion: string | null;
     statut: string;
     archivee: number;
+    cree_le: string;
+    apercu_json: string | null;
     finie_le: string | null;
     total: number;
     essayees: number;

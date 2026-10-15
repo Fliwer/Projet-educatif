@@ -65,14 +65,38 @@ export function reprendreQuete(enfant: Enfant, origine: number, mode: "tout" | "
       );
     const result = db
       .prepare(
-        "INSERT INTO quetes(enfant_id,titre,matiere,notion,cree_le,origine_id,reprise_requete,reprise_mode) VALUES(?,?,?,?,?,?,?,?)",
+        "INSERT INTO quetes(enfant_id,titre,matiere,notion,cree_le,origine_id,reprise_requete,reprise_mode,resume) VALUES(?,?,?,?,?,?,?,?,?)",
       )
-      .run(enfant.id, source.titre, source.matiere, source.notion, maintenant(), origine, requete, mode);
+      .run(
+        enfant.id,
+        source.titre,
+        source.matiere,
+        source.notion,
+        maintenant(),
+        origine,
+        requete,
+        mode,
+        source.resume,
+      );
     const id = Number(result.lastInsertRowid);
     const ajouter = db.prepare(
-      "INSERT INTO questions(quete_id,ordre,type,consigne,choix,bonne,source_id) VALUES(?,?,?,?,?,?,?)",
+      "INSERT INTO questions(quete_id,ordre,type,consigne,choix,bonne,source_id,illustration,indice,aide,explication) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
     );
-    questions.forEach((q, i) => ajouter.run(id, i, q.type, q.consigne, q.choix, q.bonne, q.id));
+    questions.forEach((q, i) =>
+      ajouter.run(
+        id,
+        i,
+        q.type,
+        q.consigne,
+        q.choix,
+        q.bonne,
+        q.id,
+        q.illustration,
+        q.indice,
+        q.aide,
+        q.explication,
+      ),
+    );
     db.prepare("INSERT INTO reprise_demandes VALUES(?,?,?,?,?)").run(requete, enfant.id, origine, mode, id);
     return { id };
   });

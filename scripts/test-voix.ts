@@ -16,12 +16,31 @@ const fetchOriginal = globalThis.fetch;
 let appels = 0;
 let enEchec = false;
 globalThis.fetch = async (_adresse, options) => {
+  assert.ok(String(_adresse).includes("/with-timestamps?"), "Timings obtenus dans le même appel TTS");
   appels++;
   assert.equal(JSON.parse(String(options?.body)).model_id, process.env.ELEVENLABS_MODELE);
-  assert.equal(JSON.parse(String(options?.body)).language_code, "fr");
+  const demande = JSON.parse(String(options?.body));
+  if (demande.model_id === "eleven_multilingual_v2") {
+    assert.equal(demande.language_code, undefined);
+    if (demande.text === "six") {
+      assert.equal(demande.previous_text, "Comptons ensemble en français : quatre, cinq,");
+      assert.equal(demande.next_text, "sept, huit, neuf.");
+    } else if (["huit", "vingt et un"].includes(demande.text)) {
+      assert.equal(demande.previous_text, "Nous faisons un calcul en français. Lis le nombre suivant :");
+      assert.equal(demande.next_text, "Continuons notre exercice de mathématiques en français.");
+    } else assert.equal(demande.previous_text, undefined);
+  } else assert.equal(demande.language_code, "fr");
   if (enEchec) throw new Error("Erreur simulée");
   await new Promise((fin) => setTimeout(fin, 20));
-  return new Response(new Uint8Array([1, 2, 3]));
+  const characters = [...demande.text];
+  return Response.json({
+    audio_base64: Buffer.from([1, 2, 3]).toString("base64"),
+    alignment: {
+      characters,
+      character_start_times_seconds: characters.map((_: string, i: number) => i * 0.1),
+      character_end_times_seconds: characters.map((_: string, i: number) => (i + 1) * 0.1),
+    },
+  });
 };
 try {
   const { voixPip, suiviVoix, voixDisponible } = await import("../src/voix.ts");
@@ -36,6 +55,9 @@ try {
   assert.equal(appels, 1, "Deux demandes simultanées partagent une génération");
   await voixPip("Bonjour !");
   assert.equal(appels, 1, "Une phrase enregistrée ne rappelle pas l'API");
+  const { lireReperesVoix } = await import("../src/reperes-voix.ts");
+  assert.equal((await lireReperesVoix("Bonjour !")).mots[0]?.text, "Bonjour");
+  assert.equal(appels, 1, "Lire les repères locaux ne consomme aucun nouvel appel API");
   process.env.ELEVENLABS_MODELE = "autre-modele";
   await voixPip("Bonjour !");
   assert.equal(appels, 2, "Le modèle est lu après le chargement des réglages");
@@ -59,6 +81,16 @@ try {
   process.env.LUMO_VOIX_CARACTERES_JOUR = "1";
   await assert.rejects(voixPip("Budget épuisé"));
   assert.equal(appels, 3, "Budget persistant vérifié avant l'appel externe");
+  process.env.LUMO_VOIX_CARACTERES_JOUR = "2000";
+  process.env.ELEVENLABS_MODELE = "eleven_multilingual_v2";
+  await voixPip("six");
+  assert.equal(appels, 4, "Six est généré avec un contexte français silencieux");
+  await voixPip("six");
+  assert.equal(appels, 4, "La correction française est réutilisée depuis le cache");
+  await voixPip("huit");
+  await voixPip("vingt et un");
+  await voixPip("Écris le mot que tu entends.");
+  assert.equal(appels, 7, "Les nombres simples et composés reçoivent du contexte, pas les consignes");
   const source = await readFile(join(import.meta.dirname, "..", "public", "app.js"), "utf8");
   const debut = source.indexOf("const OPERATIONS =");
   const fin = source.indexOf("/** Prépare à l'avance", debut);

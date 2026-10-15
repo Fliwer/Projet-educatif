@@ -549,3 +549,19 @@ button.mini-carte:active { transform: scale(0.97); }
 .revision-hero p { margin:0; color:#55476a; }
 .revision-hero .pip { width:100px; flex:none; }
 .revision-carte { padding:22px; }
+
+/* Lecture guidée : une couleur stable, sans clignotement ni déplacement du texte. */
+.mot-milo { border-radius: .2em; }
+.mot-milo.mot-lu, #texte-consigne.phrase-lue { background: #ffe6a7; color: #17203a; box-shadow: 0 0 0 3px #ffe6a7; border-radius: .2em; }
+.suivi-lecture { display: block; margin: 4px auto 12px; min-height: 44px; }
+/* Rappel avant la mission et aide progressive, accessibles sans effacer la réponse. */
+.preparation-mission { max-width: 660px; margin: 0 auto 32px; padding: 24px; text-align: left; }
+.preparation-mission ul { padding-left: 22px; }
+.preparation-mission h3 { margin-top: 24px; }
+.preparation-mission li { margin: 12px 0; line-height: 1.6; }
+.preparation-mission .boutons { margin-top: 24px; }
+.rappel-regle { white-space: pre-line; line-height: 1.7; font-size: 1.15rem; }
+.outils-apprentissage { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 20px 0 12px; }
+.outils-apprentissage button, .aide-exercice button { min-height: 44px; }
+.aide-exercice { max-width: 620px; margin: 0 auto 24px; padding: 18px 22px; border-radius: 20px; background: #f1edff; color: #40336c; text-align: left; }
+.aide-exercice p { white-space: pre-line; line-height: 1.6; margin: 8px 0; }

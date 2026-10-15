@@ -118,7 +118,7 @@ try {
   db.exec("DROP TRIGGER panne_test;");
   migrer(db);
   migrer(db);
-  assert.equal(db.prepare("PRAGMA user_version").get()!.user_version, 8);
+  assert.equal(db.prepare("PRAGMA user_version").get()!.user_version, 11);
   assert.equal(db.prepare("PRAGMA foreign_key_check").all().length, 0);
   console.log(
     "OK : 6 jeux, validation, isolation, tentatives, retries, correction différée, reprise, récompenses atomiques et migrations répétables.",

@@ -16,7 +16,11 @@ Priorité aux exercices et au suivi des apprentissages. Adapter lecture et aide 
 
 Comptes réels, invitations, autorisations professionnelles et hébergement permanent restent à construire. Le prototype n’est pas prêt pour une commercialisation.
 
-## Références
+## Préférence de conversation
+
+Le pseudo de l’assistant pour la mission Lumo est **Zéphiro**, proposé le 13 octobre 2026 à la demande de l’utilisateur. Milo reste le compagnon des enfants dans l’application.
+
+## Références du projet
 
 - README.md : installation et parcours.
 - docs/ARCHITECTURE.md : structure et limites.

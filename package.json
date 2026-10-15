@@ -10,9 +10,9 @@
   "scripts": {
     "start": "node src/web.ts",
     "mcp": "node src/mcp.ts",
-    "test": "node scripts/test-metier.ts && node scripts/test-monde.ts && node scripts/test-pedagogie.ts && node scripts/test-parcours.ts && node scripts/test-revisions.ts && node scripts/test-rendez-vous.ts && node scripts/test-mcp.ts && node scripts/test-voix.ts && node scripts/test-voix-appareil.mjs && node scripts/test-voix-milo-lecture.mjs && node scripts/test-mcp-distant.ts && node scripts/test-sauvegarde.ts",
+    "test": "node scripts/test-metier.ts && node scripts/test-monde.ts && node scripts/test-univers.mjs && node scripts/test-pedagogie.ts && node scripts/test-parcours.ts && node scripts/test-revisions.ts && node scripts/test-rendez-vous.ts && node scripts/test-mcp.ts && node scripts/test-voix.ts && node scripts/test-voix-appareil.mjs && node scripts/test-voix-milo-lecture.mjs && node scripts/test-surlignage-milo.mjs && node scripts/test-suivi-parent.ts && node scripts/test-parent-app.ts && node scripts/test-mcp-distant.ts && node scripts/test-sauvegarde.ts && node scripts/test-geometrie.ts && node scripts/test-accompagnement.ts",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run format:check && node --check public/app.js && node --check public/monde-art.js && node --check public/milo.js && node --check public/monde-mouvement.js && node --check public/espace-personnel.js",
+    "check": "npm run typecheck && npm run format:check && node --check public/app.js && node --check public/monde-art.js && node --check public/milo.js && node --check public/monde-mouvement.js && node --check public/espace-personnel.js && node --check public/geometrie.js && node --check public/accompagnement.js",
     "verify": "npm run check && npm test",
     "backup": "node scripts/sauvegarder.ts",
     "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.ts\" \"public/*.js\" \"*.json\"",

@@ -1,0 +1,688 @@
+.parent-app .periode-suivi {
+  margin: 0;
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #755c85;
+}
+.parent-app .periode-suivi select,
+.parent-app .form-ressenti select {
+  display: block;
+  border: 1px solid #a99ab5;
+  border-radius: 11px;
+  background: #fff;
+  min-height: 45px;
+  font: inherit;
+  color: #584361;
+  padding: 10px 32px 10px 13px;
+  margin-top: 7px;
+  width: 100%;
+}
+.borne-suivi {
+  font-size: 12px;
+  color: #84718c;
+  margin: 0 0 18px !important;
+}
+.indicateurs-suivi {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.indicateurs-suivi > div {
+  border: 1px solid #e9e1ed;
+  border-radius: 17px;
+  background: #fff;
+  padding: 20px;
+}
+.indicateurs-suivi strong {
+  display: block;
+  font-size: 34px;
+  font-weight: 600;
+  color: #755788;
+  line-height: 1.25;
+}
+.indicateurs-suivi span {
+  display: block;
+  font-size: 12px;
+  color: #786780;
+  line-height: 1.6;
+  margin-top: 7px;
+}
+.indicateurs-suivi > div:nth-child(3) {
+  background: #eff4ed;
+  border-color: #e0eadc;
+}
+.indicateurs-suivi > div:nth-child(4) {
+  background: #fbf4e8;
+  border-color: #eee0c8;
+}
+.indicateurs-suivi > div:nth-child(4) strong {
+  color: #8e6d3b;
+}
+.synthese-suivi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 24px;
+}
+.parent-app .suivi-parent-detail section {
+  margin-bottom: 24px;
+}
+.parent-app .synthese-suivi > section {
+  margin: 0;
+}
+.parent-app .suivi-parent-detail h2 {
+  font-size: 21px;
+  line-height: 1.4;
+}
+.parent-app .suivi-parent-detail section > p {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.parent-app .suivi-parent-detail section > .discret {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.parent-app .appuis-suivi {
+  background: #f1f5ee;
+  border-color: #e1e8dd;
+}
+.parent-app .attention-suivi {
+  background: #faf4ec;
+  border-color: #ece0d1;
+}
+.synthese-suivi h2 {
+  margin-bottom: 14px;
+}
+.entete-suivi {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.legende-suivi {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 11px !important;
+  margin: 14px 0 20px !important;
+}
+.legende-suivi span::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+.cle-premier::before {
+  background: #9e84b8;
+}
+.cle-apres::before {
+  background: #9aaf90;
+}
+.cle-revoir::before {
+  background: #d1b685;
+}
+.grille-matieres {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.parent-app .matiere-suivi {
+  margin: 0;
+  padding: 20px;
+  background: #fcfafc;
+  border-color: #e9e1ed;
+  border-radius: 15px;
+}
+.matiere-suivi > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.parent-app .matiere-suivi h3 {
+  font-size: 17px;
+  margin: 0;
+}
+.matiere-suivi dl {
+  margin: 18px 0 12px;
+}
+.matiere-suivi dl > div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 12px;
+  margin: 9px 0;
+  color: #786681;
+}
+.matiere-suivi dd {
+  font-weight: 650;
+  color: #61486f;
+  margin: 0;
+}
+.matiere-suivi .discret {
+  margin: 0;
+  font-size: 11px !important;
+}
+.barre-suivi {
+  height: 10px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #eee9f2;
+  margin: 18px 0;
+}
+.barre-suivi > span {
+  height: 100%;
+}
+.segment-premier {
+  background: #9e84b8;
+}
+.segment-apres {
+  background: #9aaf90;
+}
+.segment-revoir {
+  background: #d1b685;
+}
+.evolution-suivi ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+.evolution-suivi li {
+  margin: 18px 0;
+}
+.evolution-suivi li > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  gap: 10px;
+  color: #7b6784;
+}
+.evolution-suivi li strong {
+  font-weight: 600;
+  color: #685174;
+}
+.evolution-suivi .barre-suivi {
+  margin: 8px 0 0;
+  height: 9px;
+}
+.reprises-suivi ul {
+  font-size: 14px;
+  padding-left: 20px;
+  color: #7c6884;
+  line-height: 1.9;
+}
+.grand-chiffre {
+  display: block;
+  font-size: 46px;
+  line-height: 1.4;
+  color: #8c719f;
+  font-weight: 500;
+  margin: 16px 0;
+}
+.notion-suivi {
+  border-bottom: 1px solid #e8e1ed;
+  margin: 0;
+  padding: 9px 0;
+}
+.notion-suivi:last-of-type {
+  border: 0;
+}
+.notion-suivi summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  list-style: none;
+}
+.notion-suivi summary::-webkit-details-marker {
+  display: none;
+}
+.notion-suivi summary:after {
+  content: "+";
+  font-size: 20px;
+  color: #846b93;
+}
+.notion-suivi[open] summary:after {
+  content: "−";
+}
+.notion-suivi summary > span:first-child {
+  flex: 1;
+}
+.notion-suivi summary small,
+.notion-suivi summary strong {
+  display: block;
+}
+.notion-suivi summary strong {
+  font-weight: 600;
+  color: #685073;
+  font-size: 14px;
+}
+.notion-suivi summary small {
+  font-size: 11px;
+  margin-bottom: 4px;
+  color: #826c8d;
+}
+.parent-app .badge.ambre {
+  background: #f7ecd7;
+  color: #886a36;
+}
+.notion-suivi > div {
+  padding: 0 0 15px;
+}
+.notion-suivi > div > p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.notion-suivi ul {
+  padding-left: 18px;
+  margin: 18px 0;
+  font-size: 13px;
+  color: #725f7e;
+}
+.notion-suivi li {
+  margin: 14px 0;
+}
+.notion-suivi li strong {
+  font-weight: 500;
+}
+.notion-suivi li small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #897392;
+}
+.notion-suivi .bouton-secondaire {
+  margin: 8px 0 14px;
+}
+.methode-suivi {
+  padding: 14px 20px;
+  background: #eeebf1;
+  border-radius: 15px;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 24px;
+}
+.parent-app .methode-suivi summary {
+  font-size: 14px;
+  font-weight: 600;
+}
+.methode-suivi p {
+  padding: 10px 0 0;
+}
+.parent-app .ressenti-parent {
+  background: #f3eff8;
+}
+.form-ressenti > div:first-child {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.form-ressenti select {
+  font-size: 13px !important;
+}
+.parent-app .form-ressenti label {
+  font-size: 13px;
+}
+.historique-ressenti {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+.historique-ressenti li {
+  padding: 13px 0;
+  border-bottom: 1px solid #e3dbea;
+  font-size: 13px;
+  color: #7c6887;
+}
+.historique-ressenti li strong,
+.historique-ressenti li span,
+.historique-ressenti li small {
+  display: block;
+}
+.historique-ressenti li strong {
+  font-size: 12px;
+  color: #6b507d;
+}
+.historique-ressenti li span {
+  margin: 4px 0;
+}
+.historique-ressenti li small {
+  font-size: 11px;
+  color: #85718f;
+}
+.statut-ressenti {
+  font-size: 13px;
+  margin: 14px 0 !important;
+}
+.parent-app .suivi-vide {
+  min-height: 200px;
+}
+@media (max-width: 1100px) {
+  .synthese-suivi {
+    grid-template-columns: 1fr;
+  }
+  .indicateurs-suivi {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grille-matieres {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .parent-app .periode-suivi {
+    width: 100%;
+  }
+  .indicateurs-suivi {
+    gap: 10px;
+  }
+  .indicateurs-suivi > div {
+    padding: 17px 13px;
+  }
+  .indicateurs-suivi strong {
+    font-size: 29px;
+  }
+  .indicateurs-suivi span {
+    font-size: 11px;
+  }
+  .parent-app .suivi-parent-detail h2 {
+    font-size: 20px;
+  }
+  .parent-app .suivi-parent-detail section {
+    padding: 20px 17px;
+  }
+  .grille-matieres {
+    gap: 12px;
+  }
+  .parent-app .matiere-suivi {
+    padding: 17px 14px;
+  }
+  .legende-suivi {
+    display: block;
+    font-size: 11px !important;
+  }
+  .legende-suivi span {
+    display: block;
+    margin: 8px 0;
+  }
+  .matiere-suivi dl > div {
+    font-size: 12px;
+  }
+  .form-ressenti > div:first-child {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .parent-app .form-ressenti button {
+    font-size: 12px;
+  }
+  .notion-suivi summary strong {
+    font-size: 13px;
+  }
+  .notion-suivi summary .badge {
+    font-size: 10px;
+  }
+  .methode-suivi {
+    padding: 10px 14px;
+  }
+}
+
+.parent-app .bilan-hebdomadaire {
+  background: #f0e9f6;
+  border-color: #ddd0e8;
+  margin-bottom: 24px;
+}
+.bilan-hebdomadaire h2 {
+  font-size: 25px !important;
+}
+.bilan-colonnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd2e5;
+  margin-top: 20px;
+}
+.bilan-colonnes h3 {
+  font-size: 16px;
+}
+.bilan-colonnes p,
+.bilan-colonnes li {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #786582;
+}
+.bilan-colonnes ul {
+  padding-left: 18px;
+}
+.details-suivi {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e9e1ed;
+  border-radius: 17px;
+  margin: 24px 0;
+}
+.parent-app .details-suivi > summary {
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 44px;
+}
+.details-suivi[open] > summary {
+  margin-bottom: 18px;
+}
+.details-suivi .synthese-suivi {
+  margin: 0;
+}
+.grille-competences {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.parent-app .grille-competences article {
+  margin: 0;
+  background: #faf7fc;
+  padding: 18px;
+  border-color: #e8e0ed;
+  border-radius: 14px;
+}
+.grille-competences small {
+  font-size: 11px;
+  color: #85718e;
+}
+.grille-competences h3 {
+  font-size: 15px;
+  margin: 6px 0 12px;
+}
+.grille-competences p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+.conseil-cible {
+  padding: 16px;
+  background: #f1f5ed;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.conseil-cible > strong {
+  font-size: 12px;
+  color: #637958;
+}
+.conseil-cible p {
+  font-size: 13px;
+  margin: 10px 0 !important;
+}
+.parent-app .form-profil-parent select {
+  display: block;
+  width: 100%;
+  min-height: 45px;
+  border: 1px solid #9e8cac;
+  border-radius: 10px;
+  font: inherit;
+  background: #fff;
+  padding: 10px;
+}
+.edition-profil {
+  border-bottom: 1px solid #e8e1ed;
+  margin: 0;
+  padding: 8px 0;
+}
+.edition-profil summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 70px;
+}
+.edition-profil summary > span:nth-child(2) {
+  flex: 1;
+}
+.edition-profil summary strong,
+.edition-profil summary small {
+  display: block;
+}
+.edition-profil summary small {
+  font-size: 12px;
+  color: #8c7996;
+  margin-top: 5px;
+}
+.edition-profil[open] {
+  padding-bottom: 20px;
+}
+.parent-app .ajout-profil {
+  margin-top: 22px;
+}
+.parent-app .message-profil {
+  padding: 16px 20px;
+  border-radius: 13px;
+  background: #edf4e9;
+  color: #647d56;
+  margin-bottom: 20px;
+}
+.parent-app #profil-demande-resume {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.parent-app #preparer button.lien-action {
+  margin-top: 10px;
+}
+.parent-app .form-ressenti > div:first-child {
+  grid-template-columns: 1fr 1fr;
+}
+.parent-app .form-ressenti label:last-child {
+  grid-column: 1/-1;
+}
+@media (max-width: 600px) {
+  .bilan-colonnes,
+  .grille-competences {
+    grid-template-columns: 1fr;
+  }
+  .bilan-colonnes {
+    gap: 15px;
+  }
+  .details-suivi {
+    padding: 12px 15px;
+  }
+  .parent-app .form-ressenti > div:first-child {
+    grid-template-columns: 1fr;
+  }
+  .parent-app .app-sidebar nav button {
+    font-size: 10px;
+  }
+  .parent-app .app-sidebar nav button svg {
+    height: 18px;
+    width: 18px;
+  }
+}
+
+.parent-app .resume-suivi-accueil {
+  background: #f4f1f8;
+  border-color: #e4dbea;
+}
+.resume-suivi-accueil .titre-section {
+  align-items: flex-start;
+}
+.resume-suivi-accueil h2 {
+  font-size: 20px;
+}
+.resume-chiffres {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 18px 0;
+}
+.resume-chiffres p {
+  font-size: 12px;
+  margin: 0;
+  color: #806c8a;
+}
+.resume-chiffres strong {
+  display: block;
+  color: #846499;
+  font-size: 30px;
+  font-weight: 500;
+}
+.resume-suivi-accueil > p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+}
+.resume-suivi-accueil .lien-action {
+  font-size: 11px;
+  max-width: 150px;
+  text-align: right;
+}
+@media (max-width: 600px) {
+  .resume-suivi-accueil .titre-section {
+    display: block;
+  }
+  .resume-suivi-accueil .lien-action {
+    max-width: none;
+    text-align: left;
+  }
+  .resume-chiffres {
+    gap: 12px;
+  }
+}
+
+.suivi-parent-detail h2,
+.suivi-parent-detail h3,
+.edition-profil summary strong,
+.notion-suivi summary strong {
+  overflow-wrap: anywhere;
+}
+.parent-app .form-profil-parent button:disabled {
+  opacity: 0.65;
+}
+
+.questions-competence {
+  margin: 14px 0 0;
+  border-top: 1px solid #e5dbea;
+  padding-top: 8px;
+}
+.parent-app .questions-competence summary {
+  font-size: 12px;
+  padding: 10px 0;
+  min-height: 44px;
+}
+.questions-competence ul {
+  padding-left: 16px;
+  font-size: 12px;
+  color: #776180;
+}
+.questions-competence li {
+  margin: 14px 0;
+}
+.questions-competence li strong {
+  font-weight: 500;
+  display: block;
+}
+.questions-competence li span {
+  display: block;
+  color: #897592;
+  font-size: 11px;
+  margin-top: 5px;
+}

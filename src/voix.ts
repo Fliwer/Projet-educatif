@@ -6,11 +6,26 @@ import { join } from "node:path";
 import { DOSSIER_DONNEES, FUSEAU } from "./config.ts";
 import { db, transaction } from "./db.ts";
 import { ErreurMetier } from "./erreurs.ts";
+import { motsDepuisAlignement } from "./reperes-voix.ts";
 
 const DOSSIER = join(DOSSIER_DONNEES, "voix");
 // .env est chargé par web.ts après les imports : lire ces réglages au moment de l'appel.
 const modele = () => process.env.ELEVENLABS_MODELE ?? "eleven_multilingual_v2";
 const JOURNAL = join(DOSSIER, "suivi.jsonl");
+const MOTS_NOMBRES = new Set(
+  "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize vingt vingts trente quarante cinquante soixante cent cents et".split(
+    " ",
+  ),
+);
+function estNombreFrancais(texte: string): boolean {
+  return (
+    texte.length <= 60 &&
+    texte
+      .trim()
+      .split(/[\s-]+/)
+      .every((mot) => MOTS_NOMBRES.has(mot))
+  );
+}
 let ecriture = Promise.resolve();
 function noter(type: string, caracteres = 0) {
   const ligne = JSON.stringify({ date: new Date().toISOString(), type, caracteres }) + "\n";
@@ -88,7 +103,7 @@ async function tour<T>(travail: () => Promise<T>): Promise<T> {
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function demanderElevenLabs(texte: string, voix: string, modeleVoix: string): Promise<Buffer> {
+async function demanderElevenLabs(texte: string, voix: string, modeleVoix: string) {
   for (let essai = 1; ; essai++) {
     // Réserver avant chaque tentative réseau : une erreur incertaine compte dans la limite.
     const limite = Number(process.env.LUMO_VOIX_CARACTERES_JOUR ?? 2000);
@@ -105,27 +120,44 @@ async function demanderElevenLabs(texte: string, voix: string, modeleVoix: strin
     });
     noter("appel", [...texte].length);
     const r = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voix)}?output_format=mp3_44100_128`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voix)}/with-timestamps?output_format=mp3_44100_128`,
       {
         method: "POST",
         signal: AbortSignal.timeout(10_000),
         headers: {
           "xi-api-key": process.env.ELEVENLABS_API_KEY!,
           "Content-Type": "application/json",
-          Accept: "audio/mpeg",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           text: texte,
           model_id: modeleVoix,
           ...(modeleVoix === "eleven_multilingual_v2" ? {} : { language_code: "fr" }),
+          // Les nombres isolés manquent de contexte linguistique. Ces indications ne sont pas lues.
+          ...(estNombreFrancais(texte) && modeleVoix === "eleven_multilingual_v2"
+            ? {
+                previous_text:
+                  texte === "six"
+                    ? "Comptons ensemble en français : quatre, cinq,"
+                    : "Nous faisons un calcul en français. Lis le nombre suivant :",
+                next_text:
+                  texte === "six"
+                    ? "sept, huit, neuf."
+                    : "Continuons notre exercice de mathématiques en français.",
+              }
+            : {}),
           voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
         }),
       },
     );
     if (r.ok) {
-      const audio = Buffer.from(await r.arrayBuffer());
+      const resultat = await r.json();
+      if (typeof resultat.audio_base64 !== "string" || resultat.audio_base64.length > 7_000_000)
+        throw new Error("Réponse audio invalide");
+      const audio = Buffer.from(resultat.audio_base64, "base64");
       if (!audio.length || audio.length > 5_000_000) throw new Error("Réponse audio invalide");
-      return audio;
+      const mots = motsDepuisAlignement(resultat.normalized_alignment ?? resultat.alignment);
+      return { audio, mots };
     }
     // « Trop de demandes » : on attend un peu et on réessaie (3 fois au maximum).
     if (r.status === 429 && essai < 4) {
@@ -166,12 +198,27 @@ export async function voixPip(texte: string, voix = process.env.ELEVENLABS_VOIX!
     throw new VoixNonEnregistree("Cette phrase utilise la voix de l’appareil.");
   if (!enFabrication.has(cle)) {
     const fabrication = tour(() => demanderElevenLabs(texte, voix, modeleVoix))
-      .then(async (audio) => {
+      .then(async ({ audio, mots }) => {
         await mkdir(DOSSIER, { recursive: true });
         const temporaire = `${fichier}.${process.pid}.tmp`;
         try {
           await writeFile(temporaire, audio);
           await rename(temporaire, fichier);
+          if (mots.length) {
+            const repere = join(DOSSIER, `${cle}.mots.json`);
+            const temporaireRepere = `${repere}.${process.pid}.tmp`;
+            try {
+              await writeFile(
+                temporaireRepere,
+                JSON.stringify({ audio_sha256: createHash("sha256").update(audio).digest("hex"), mots }),
+              );
+              await rename(temporaireRepere, repere);
+            } catch {
+              console.warn("Les repères de lecture n’ont pas pu être enregistrés.");
+            } finally {
+              await rm(temporaireRepere, { force: true });
+            }
+          }
         } finally {
           await rm(temporaire, { force: true });
         }

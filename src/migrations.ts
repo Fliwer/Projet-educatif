@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-const VERSION = 8;
+const VERSION = 11;
 
 /** Migrations sérialisées entre serveur HTTP et MCP, y compris sur une ancienne base. */
 export function migrer(db: DatabaseSync) {
@@ -127,6 +127,39 @@ export function migrer(db: DatabaseSync) {
         INSERT INTO rendez_vous_jours(enfant_id,jour,semaine)
           SELECT DISTINCT enfant_id,substr(finie_le,1,10),date(substr(finie_le,1,10),printf('-%d days',(CAST(strftime('%w',substr(finie_le,1,10)) AS INTEGER)+6)%7)) FROM quetes WHERE statut='terminee' AND date(substr(finie_le,1,10)) IS NOT NULL;
       `);
+    }
+    if (
+      version < 9 &&
+      !db
+        .prepare("PRAGMA table_info(questions)")
+        .all()
+        .some((c) => c.name === "illustration")
+    )
+      db.exec("ALTER TABLE questions ADD COLUMN illustration TEXT;");
+    if (version < 10) {
+      const colonnes = new Set(
+        db
+          .prepare("PRAGMA table_info(enfants)")
+          .all()
+          .map((c) => c.name),
+      );
+      for (const colonne of ["niveau_scolaire", "pays", "aides"])
+        if (!colonnes.has(colonne)) db.exec(`ALTER TABLE enfants ADD COLUMN ${colonne} TEXT;`);
+    }
+    if (version < 11) {
+      for (const [table, colonnes] of [
+        ["quetes", ["resume"]],
+        ["questions", ["indice", "aide", "explication"]],
+      ] as const) {
+        const presentes = new Set(
+          db
+            .prepare(`PRAGMA table_info(${table})`)
+            .all()
+            .map((c) => c.name),
+        );
+        for (const colonne of colonnes)
+          if (!presentes.has(colonne)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${colonne} TEXT;`);
+      }
     }
     if (db.prepare("PRAGMA foreign_key_check").all().length)
       throw new Error("Liens invalides dans la base : migration annulée.");

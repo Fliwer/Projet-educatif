@@ -282,6 +282,21 @@ try {
     body: "confirme=oui&nonce=invalide",
   });
   assert.equal(mauvais.status, 400);
+  for (const body of [
+    new URLSearchParams({ nonce, selection_presente: "oui", question: "0:0" }),
+    new URLSearchParams({ confirme: "oui", nonce, selection_presente: "oui" }),
+  ]) {
+    const refusSelection = await fetch(lien, {
+      method: "POST",
+      headers: { Origin: adresse, "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    assert.equal(refusSelection.status, 400, "Confirmation et sélection non vide exigées côté serveur");
+  }
+  const toujoursVide = await (
+    await fetch(`${adresse}/api/moi`, { headers: { "X-Lumo-Code": enfantA.code } })
+  ).json();
+  assert.equal(toujoursVide.quetes.length, 0, "Un envoi refusé ne publie aucune mission");
   const valider = () =>
     fetch(lien, {
       method: "POST",

@@ -1,5 +1,19 @@
 import { z } from "zod";
 import { TYPES_QUESTION } from "./types-jeux.ts";
+export const schemaFigure = z.object({
+  id: z.string().regex(/^[A-L]$/),
+  points: z
+    .array(z.tuple([z.number().min(20).max(280), z.number().min(20).max(200)]))
+    .min(3)
+    .max(8),
+  diagonales: z.boolean().optional(),
+  sommets: z.boolean().optional(),
+  codage_cotes: z.enum(["egaux", "opposes"]).optional(),
+  codage_diagonales: z.enum(["milieux", "egales", "perpendiculaires", "egales_perpendiculaires"]).optional(),
+  angles_droits: z.boolean().optional(),
+});
+export const schemaIllustration = z.object({ figures: z.array(schemaFigure).min(1).max(12) });
+export type Illustration = z.infer<typeof schemaIllustration>;
 const fragment = z
   .string()
   .trim()
@@ -17,7 +31,9 @@ export const schemaQuestion = z.object({
         "'ordre' : remettre des morceaux dans l'ordre, des mots pour faire une phrase, des syllabes pour faire un mot, " +
         "des nombres du plus petit au plus grand, les étapes d'une histoire (champ elements, dans le BON ordre ; l'app les mélange). " +
         "'associer' : relier 2 à 5 paires, par exemple un calcul et son résultat, un mot et son contraire, un pronom et son verbe conjugué (champ paires). " +
-        "'dictee' : Milo dit un mot ou une petite phrase à voix haute et l'enfant l'écrit ; les accents comptent (bonne_reponse = le mot ; la consigne ne doit PAS l'écrire).",
+        "'dictee' : Milo dit un mot ou une petite phrase à voix haute et l'enfant l'écrit ; les accents comptent (bonne_reponse = le mot ; la consigne ne doit PAS l'écrire). " +
+        "'figures' : sélectionner une ou plusieurs figures de l'illustration (bonne_reponse = identifiants séparés par « ‖ »). " +
+        "'diagonales' : tracer les deux diagonales d'un quadrilatère en reliant ses sommets (bonne_reponse = « AC ‖ BD »).",
     ),
   consigne: z
     .string()
@@ -25,6 +41,32 @@ export const schemaQuestion = z.object({
     .min(1)
     .max(200)
     .describe("Consigne courte et simple, lue à voix haute à l'enfant"),
+  illustration: schemaIllustration
+    .optional()
+    .describe(
+      "Dessins géométriques : coordonnées dans un cadre de 300 × 220, identifiants A à L. Aucun SVG ou HTML libre.",
+    ),
+  indice: z
+    .string()
+    .trim()
+    .min(1)
+    .max(240)
+    .optional()
+    .describe("Premier repère pour chercher, sans donner la réponse."),
+  aide: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .optional()
+    .describe("Méthode guidée en petites étapes, sans donner la réponse."),
+  explication: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .optional()
+    .describe("Explication de la correction, montrée seulement après la dernière tentative."),
   choix: z.array(fragment).max(4).optional().describe("Pour 'choix' : 2 à 4 réponses, dont la bonne"),
   elements: z.array(fragment).max(8).optional().describe("Pour 'ordre' : 2 à 8 morceaux, dans le bon ordre"),
   paires: z
@@ -57,6 +99,15 @@ export const schemaQuete = z.object({
     .optional()
     .describe("lecon si extrait fourni ; decouverte pour une fiche créée sans devoir source."),
   extrait_lecon: z.string().trim().min(1).max(1200).optional(),
+  resume: z
+    .string()
+    .trim()
+    .min(1)
+    .max(700)
+    .optional()
+    .describe(
+      "Rappel pour l’enfant avant de jouer : 2 ou 3 phrases sur la règle utile et un exemple différent des questions. Fidèle à la leçon.",
+    ),
   questions: z.array(schemaQuestion).min(1).max(12),
 });
 // Contrat commun : le MCP et une future API produisent les mêmes exercices.

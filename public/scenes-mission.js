@@ -78,7 +78,7 @@ export function jardin(faites, total, nouvelles = 0, fete = false) {
         .join("")
     : "";
   return `
-    <svg viewBox="0 0 220 180" aria-label="Le jardin : ${faites} fleurs sur ${total}">
+    <svg viewBox="0 0 220 180" aria-label="Le jardin : ${faites} fleur${faites > 1 ? "s" : ""} sur ${total}">
       <circle cx="186" cy="30" r="16" fill="#FFC83D"/><circle cx="186" cy="30" r="24" fill="#FFC83D" opacity=".25"/>
       <ellipse cx="50" cy="34" rx="22" ry="9" fill="#fff"/><ellipse cx="66" cy="28" rx="14" ry="9" fill="#fff"/>
       <path d="M0 150 Q60 128 120 146 T220 140 V180 H0Z" fill="#9FE0AE"/>

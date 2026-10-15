@@ -31,7 +31,7 @@ function ecusson(id) {
 
 /** Parcours personnel actif. Les anciens ateliers sont archivés dans Git. */
 export async function ouvrirMonde(
-  { app, afficher, appel, identifiantReponse, retour, souvenirs, pipSvg, son },
+  { app, afficher, appel, identifiantReponse, retour, souvenirs, pipSvg, son, navigation = () => {} },
   debut,
 ) {
   const session = identifiantReponse();
@@ -44,6 +44,7 @@ export async function ouvrirMonde(
     message = "";
   afficher('<p class="m-chargement">Ton espace se prépare…</p>', "monde");
   app.dataset.mondeSession = session;
+  navigation();
   app.setAttribute("aria-live", "off");
   const actif = () => app.dataset.mondeSession === session && app.classList.contains("monde");
   const badgeDisponible = (id) => id === "aucun" || monde.objets.includes(id);
@@ -63,6 +64,7 @@ export async function ouvrirMonde(
         '<section class="m-chargement"><h1>Ton espace t’attend</h1><p>La connexion fait une pause.</p><button class="m-btn" id="e-recharger">Réessayer</button><button class="m-btn m-secondaire" id="e-retour">Mes quêtes</button></section>';
       app.querySelector("#e-recharger").onclick = charger;
       app.querySelector("#e-retour").onclick = retour;
+      navigation();
     }
   }
   async function envoyer(donnees) {
@@ -171,6 +173,7 @@ export async function ouvrirMonde(
     const scroll = window.scrollY;
     history.replaceState(null, "", "#mon-monde/" + onglet);
     app.innerHTML = `<div class="m-shell e-shell"><header class="m-header"><button class="m-marque" data-retour aria-label="Lumo, retour aux quêtes">Lumo</button><span class="m-header-texte">Mon espace</span><button class="m-retour e-retour" data-retour>${icone("fleche")} Mes quêtes</button></header><nav class="m-nav" aria-label="Mon espace personnel">${rubriques.map(([id, nom]) => `<button data-nav="${id}" class="${onglet === id ? "selectionne" : ""}" ${onglet === id ? 'aria-current="page"' : ""} ${verrou() ? "disabled" : ""}>${icone(id === "avatar" ? "soleil" : id)}<span>${nom}</span></button>`).join("")}</nav><div class="e-statut ${erreur ? "e-erreur" : ""}" role="status" aria-live="polite">${h(enCours ? "Enregistrement…" : erreur || message)}${commande && !enCours ? '<button id="e-reessayer" class="m-btn">Réessayer</button>' : ""}</div>${{ avatar: avatarPage, cadeau: collectionPage, carnet: carnetPage }[onglet]()}<footer class="m-footer">Ton espace, à ton rythme. Avec Milo.</footer></div>`;
+    navigation();
     app.querySelectorAll("[data-retour]").forEach(
       (b) =>
         (b.onclick = () => {

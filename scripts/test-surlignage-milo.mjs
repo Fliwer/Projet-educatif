@@ -1,0 +1,46 @@
+import assert from "node:assert/strict";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
+import { texteSurlignable, indexMotLu, associerMots, creerSuiviLecture } from "../public/surlignage-milo.js";
+assert.equal((texteSurlignable("7 × 6 = ?").match(/data-morceau=/g) ?? []).length, 4);
+assert.ok(texteSurlignable("<img src=x>").includes("&lt;img"), "Texte d’exercice échappé");
+const mots = [{ text: "Lis", start: .1, end: .4 }, { text: "bien.", start: .6, end: 1 }];
+assert.equal(indexMotLu(mots, .05), -1);
+assert.equal(indexMotLu(mots, .2), 0);
+assert.equal(indexMotLu(mots, .5), -1, "Pas de surlignage pendant une pause audio");
+assert.equal(indexMotLu(mots, .8), 1);
+const classe = () => { const valeurs=new Set();return {add: v=>valeurs.add(v),remove:v=>valeurs.delete(v),contains:v=>valeurs.has(v)}; };
+const elements = ["Lis", "bien."].map(textContent=>({textContent,classList:classe()}));
+assert.equal(associerMots(elements,mots)?.[1],elements[1]);
+assert.equal(associerMots(elements,[{text:"Autre"}]),null, "Pas de suivi inventé si texte et repères divergent");
+const apostrophe = {textContent:"d’arbres"};
+assert.deepEqual(associerMots([apostrophe],[{text:"d’"},{text:"arbres"}]),[apostrophe,apostrophe],"Un mot avec apostrophe peut recevoir deux repères audio");
+let frame=0;const callbacks=new Map();
+globalThis.requestAnimationFrame=fn=>{callbacks.set(++frame,fn);return frame;};
+globalThis.cancelAnimationFrame=id=>callbacks.delete(id);
+function tick(){const tous=[...callbacks.values()];callbacks.clear();tous.forEach(fn=>fn());}
+const zone={isConnected:true,classList:classe(),querySelectorAll:()=>elements,querySelector:()=>null};
+const audio={paused:false,ended:false,currentTime:.2};
+const suivi=creerSuiviLecture(zone,0,mots);suivi.demarrer(audio);
+assert.equal(elements[0].classList.contains("mot-lu"),true);
+audio.currentTime=.8;tick();assert.equal(elements[0].classList.contains("mot-lu"),false);assert.equal(elements[1].classList.contains("mot-lu"),true);
+audio.paused=true;tick();assert.equal(elements[1].classList.contains("mot-lu"),false);assert.equal(callbacks.size,0);
+audio.paused=false;audio.currentTime=.2;suivi.demarrer(audio);zone.isConnected=false;tick();assert.equal(callbacks.size,0,"Changer d’écran arrête le suivi");
+zone.isConnected=true;
+const dictee=creerSuiviLecture(zone,1,mots);dictee.demarrer(audio);assert.ok(elements.every(e=>!e.classList.contains("mot-lu")));assert.equal(zone.classList.contains("phrase-lue"),false,"Le mot de dictée caché ne révèle pas de texte");dictee.arreter();
+const segment={textContent:"7",classList:classe()};const calcul={isConnected:true,classList:classe(),querySelectorAll:()=>[segment],querySelector:()=>segment};
+const suiviCalcul=creerSuiviLecture(calcul,0);suiviCalcul.demarrer(audio);assert.equal(segment.classList.contains("mot-lu"),true);suiviCalcul.arreter();assert.equal(segment.classList.contains("mot-lu"),false);
+const dossier=await mkdtemp(join(tmpdir(),"lumo-reperes-"));
+process.env.LUMO_ENV_IGNORE="1";process.env.LUMO_DATA=dossier;process.env.ELEVENLABS_VOIX="voix-test";process.env.ELEVENLABS_MODELE="modele-test";
+try{
+ const {lireReperesVoix}=await import("../src/reperes-voix.ts");
+ const cle=createHash("sha256").update("voix-test|modele-test|Lis bien.").digest("hex").slice(0,32),dir=join(dossier,"voix"),audioCache=Buffer.from("audio initial");
+ await mkdir(dir);await writeFile(join(dir,`${cle}.mp3`),audioCache);
+ assert.deepEqual(await lireReperesVoix("Lis bien."),{mots:[]});
+ await writeFile(join(dir,`${cle}.mots.json`),JSON.stringify({audio_sha256:createHash("sha256").update(audioCache).digest("hex"),mots}));
+ assert.deepEqual(await lireReperesVoix("Lis bien."),{mots});
+ await writeFile(join(dir,`${cle}.mp3`),"audio remplacé");assert.deepEqual(await lireReperesVoix("Lis bien."),{mots:[]},"Remplacer un audio invalide les anciens repères");
+}finally{await rm(dossier,{recursive:true,force:true});}
+console.log("OK surlignage : temps réel, pauses, arrêt, texte échappé, dictée protégée et repères liés au fichier audio.");

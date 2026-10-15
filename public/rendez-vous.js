@@ -13,8 +13,9 @@ function carteRendezVous(etat, compact = false) {
     [177, 82],
     [235, 30],
   ].slice(0, objectif);
-  const titre = etat.atteint ? "Ton ciel s’illumine !" : "Mon ciel de la semaine";
-  const detail = etat.atteint ? "Bravo ! Tu peux faire une pause." : "À ton rythme.";
+  const titre = "Mes jours de pratique cette semaine";
+  const compteur = `${faits} jour${faits > 1 ? "s" : ""} sur ${objectif}`;
+  const detail = etat.atteint ? "Objectif atteint ! La suite, c’est à ton rythme." : "À ton rythme.";
   const fin = new Date(`${etat.semaine}T12:00:00Z`);
   fin.setUTCDate(fin.getUTCDate() + 6);
   const date = (d) =>
@@ -23,9 +24,9 @@ function carteRendezVous(etat, compact = false) {
       month: "short",
       timeZone: "UTC",
     });
-  return `<section class="rv-carte ${compact ? "rv-compact" : "rv-simple"}" aria-label="Rendez-vous avec Milo"><div class="rv-entete"><h2>${titre}</h2><span class="rv-compteur" aria-label="${faits} séance${faits === 1 ? "" : "s"} sur ${objectif}">${faits}<small> / ${objectif}</small></span></div>
-  <svg class="rv-ciel" viewBox="0 0 280 115" role="img" aria-label="${faits} étoile${faits === 1 ? " illuminée" : "s illuminées"} sur ${objectif}"><path d="M18 110Q140 50 265 106" fill="none" stroke="#e5ddfa" stroke-width="2"/><polyline points="${points.map((p) => p.join(",")).join(" ")}" fill="none" stroke="#cbbded" stroke-width="3" stroke-dasharray="5 7"/>${points.map(([x, y], i) => `<g transform="translate(${x} ${y})" class="${i < faits ? "rv-allumee" : "rv-attente"}"><circle r="20" fill="${i < faits ? "#fff2c4" : "#f3effc"}"/><path d="m0-13 4 8 9 2-7 7 2 9-8-4-8 4 2-9-7-7 9-2Z" fill="${i < faits ? "#ffc84d" : "#d7ceee"}" stroke="${i < faits ? "#bb841e" : "#b4a3d4"}" stroke-width="1.5"/></g>`).join("")}<circle cx="250" cy="95" r="3" fill="#9d89d2"/><circle cx="16" cy="32" r="2" fill="#9d89d2"/></svg>
-  <p class="rv-detail" role="status">${detail}</p>${compact ? "" : `<details class="rv-reglage"><summary>Avec un parent</summary><p class="rv-semaine">${h(date(etat.semaine))} – ${h(date(fin.toISOString().slice(0, 10)))}</p><p>Deux, trois ou quatre jours de pratique cette semaine. Une mission ou un entraînement terminé compte pour la journée, au maximum une fois par jour. Les étoiles restent allumées si tu manques un jour.</p><div class="rv-choix">${[2, 3, 4].map((n) => `<button type="button" data-rythme="${n}" aria-pressed="${n === objectif}">${n} séances</button>`).join("")}</div><p class="rv-retour" role="status"></p></details>`}</section>`;
+  return `<section class="rv-carte ${compact ? "rv-compact" : "rv-simple"}" aria-label="Jours de pratique cette semaine"><div class="rv-entete"><h2>${titre}</h2><span class="rv-compteur">${compteur}</span></div>
+  <div class="rv-corps"><svg class="rv-ciel" viewBox="0 0 280 115" role="img" aria-label="${faits} étoile${faits === 1 ? " illuminée" : "s illuminées"} sur ${objectif}"><path d="M18 110Q140 50 265 106" fill="none" stroke="#e5ddfa" stroke-width="2"/><polyline points="${points.map((p) => p.join(",")).join(" ")}" fill="none" stroke="#cbbded" stroke-width="3" stroke-dasharray="5 7"/>${points.map(([x, y], i) => `<g transform="translate(${x} ${y})" class="${i < faits ? "rv-allumee" : "rv-attente"}"><circle r="20" fill="${i < faits ? "#fff2c4" : "#f3effc"}"/><path d="m0-13 4 8 9 2-7 7 2 9-8-4-8 4 2-9-7-7 9-2Z" fill="${i < faits ? "#ffc84d" : "#d7ceee"}" stroke="${i < faits ? "#bb841e" : "#b4a3d4"}" stroke-width="1.5"/></g>`).join("")}<circle cx="250" cy="95" r="3" fill="#9d89d2"/><circle cx="16" cy="32" r="2" fill="#9d89d2"/></svg>
+  <p class="rv-detail" role="status">${detail}</p></div><p class="rv-aide">Termine une mission pour allumer une étoile, une fois par jour.</p>${compact ? "" : `<details class="rv-reglage"><summary>Avec un parent</summary><p class="rv-semaine">${h(date(etat.semaine))} – ${h(date(fin.toISOString().slice(0, 10)))}</p><p>Deux, trois ou quatre jours de pratique cette semaine. Une mission ou un entraînement terminé compte pour la journée, au maximum une fois par jour. Les étoiles restent allumées si tu manques un jour.</p><div class="rv-choix">${[2, 3, 4].map((n) => `<button type="button" data-rythme="${n}" aria-pressed="${n === objectif}">${n} jours</button>`).join("")}</div><p class="rv-retour" role="status"></p></details>`}</section>`;
 }
 export function rendezVousVue(etat, compact = false) {
   const carte = carteRendezVous(etat, compact);

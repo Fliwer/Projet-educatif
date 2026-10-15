@@ -48,7 +48,11 @@ try {
   assert.equal(entrainement.questions.length, 2);
   assert.equal(entrainement.questions[0].essais, 0);
   assert.equal(l.questionsQuete(autre, reprise.id), undefined);
-  entrainement.questions.forEach((q, i) => l.enregistrerReponse(enfant, q.id, String(i + 4), randomUUID()));
+  entrainement.questions.forEach((q, i) => {
+    const reponse = l.enregistrerReponse(enfant, q.id, String(i + 4), randomUUID())!;
+    assert.equal(reponse.correcte, true);
+    assert.equal(reponse.etoile_gagnee, false, "Une révision ne promet pas de nouvelle étoile à l’écran");
+  });
   const fin = l.terminerQuete(enfant, reprise.id)!;
   l.terminerQuete(enfant, reprise.id);
   assert.equal(fin.revision, true);
@@ -88,6 +92,14 @@ try {
   assert.throws(() => reprendreQuete(enfant, source.id, "cible", randomUUID()));
   const tout = reprendreQuete(enfant, source.id, "tout", randomUUID());
   assert.equal(l.questionsQuete(enfant, tout.id)!.questions.length, 3);
+  const dejaReussie = l.questionsQuete(enfant, tout.id)!.questions[0];
+  const identifiant = randomUUID();
+  assert.equal(l.enregistrerReponse(enfant, dejaReussie.id, "3", identifiant)!.etoile_gagnee, false);
+  assert.equal(
+    l.enregistrerReponse(enfant, dejaReussie.id, "3", identifiant)!.etoile_gagnee,
+    false,
+    "Retry de révision sans étoile",
+  );
   assert.equal(l.etatEnfant(enfant).quetes.length, 1, "Une seule étape par mission sur la carte");
   archiverQuete(db, enfant.id, source.id);
   assert.equal(l.questionsQuete(enfant, tout.id), undefined);

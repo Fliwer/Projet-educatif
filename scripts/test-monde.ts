@@ -18,6 +18,28 @@ try {
   const agir = (action: object) => agirMonde(db, enfant.id, commande(action));
   assert.deepEqual(lire().avatar, { couleur: "violet", badge: "aucun" });
   assert.equal(lire().cadeaux_disponibles, 0);
+  assert.equal(lire().aventure, "espace");
+  const avantUnivers = lire();
+  const choixUnivers = commande({ action: "univers", aventure: "medieval" });
+  agirMonde(db, enfant.id, choixUnivers);
+  assert.equal(lire().aventure, "medieval");
+  assert.equal(lireMonde(db, autre.id).aventure, "espace", "Le choix est isolé par enfant");
+  assert.equal(l.etatEnfant(enfant).aventure, "medieval");
+  assert.equal(
+    lire().cadeaux_disponibles,
+    avantUnivers.cadeaux_disponibles,
+    "Changer d’univers ne donne pas de récompense",
+  );
+  const apresUnivers = lire();
+  agirMonde(db, enfant.id, choixUnivers);
+  assert.deepEqual(lire(), apresUnivers, "Le retry de sélection est idempotent");
+  agir({ action: "univers", aventure: "jardin" });
+  assert.equal(lire().aventure, "jardin", "Le jardin est enregistré et relu");
+  assert.equal(l.etatEnfant(enfant).aventure, "jardin");
+  assert.equal(lire().cadeaux_disponibles, avantUnivers.cadeaux_disponibles);
+  assert.equal(lireMonde(db, autre.id).aventure, "espace");
+  assert.throws(() => agir({ action: "univers", aventure: "inconnu" }));
+  assert.throws(() => agir({ action: "univers", aventure: "medieval", enfant_id: autre.id }));
   assert.throws(
     () => agir({ action: "avatar", avatar: { couleur: "bleu", badge: "badge_fusee" } }),
     /collection/,
@@ -84,9 +106,10 @@ try {
   agirMonde(db, enfant.id, cadeau);
   assert.equal(lire().cadeaux_disponibles, 0);
   agir({ action: "avatar", avatar: { couleur: "vert", badge: "badge_fusee" } });
-  const { avatar, ...conserve } = JSON.parse(
+  const { avatar, aventure, ...conserve } = JSON.parse(
     String(db.prepare("SELECT donnees FROM monde_etats WHERE enfant_id=?").get(enfant.id)!.donnees),
   );
+  assert.equal(aventure, "espace", "Un ancien profil reçoit l’univers par défaut sans perdre ses données");
   assert.deepEqual(
     conserve,
     ancien,

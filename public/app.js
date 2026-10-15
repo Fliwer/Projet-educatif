@@ -5,11 +5,15 @@ import { ouvrirMonde } from "./espace-personnel.js";
 import { miloSvg as pipSvg } from "./milo.js";
 import { rendezVousVue, brancherRendezVous } from "./rendez-vous.js";
 import { nombreFrancais } from "./voix-appareil.js";
+import { texteSurlignable, creerSuiviLecture } from "./surlignage-milo.js";
+import { ouvrirUnivers, UNIVERS_AVENTURE, illustrationUnivers, parcoursUnivers } from "./univers.js";
 import { finMissionVue } from "./fin-mission.js";
 import { themeMission, decorMission, classeDecor, phraseProgres } from "./decors-mission.js";
 import { celebrerMission } from "./finale-mission.js";
+import { illustrationHtml, jeuFigures, jeuDiagonales, montrerCorrectionGeometrique } from "./geometrie.js";
+import { accompagnement, reperesMission } from "./accompagnement.js";
 const app = document.getElementById("app");
-app.dataset.voixVersion = "milo-20261013";
+app.dataset.voixVersion = "milo-partout-20261014";
 const CLE_CODE = "lumo-code";
 const CLE_SON = "lumo-son";
 const mouvementReduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -122,6 +126,26 @@ function afficher(html, classe = "") {
 let voixServeur = true; // passe à false si le serveur n'a pas de voix configurée
 let lecteur = null;
 let demandeVoix = 0;
+let suiviLecture = null;
+let surlignageActif = lire("lumo-surlignage") !== "non";
+const reperesVoix = new Map();
+async function chargerReperes(texte) {
+  if (!reperesVoix.has(texte)) {
+    if (reperesVoix.size >= 80) reperesVoix.delete(reperesVoix.keys().next().value);
+    reperesVoix.set(
+      texte,
+      fetch("/api/voix/reperes", {
+        method: "POST",
+        signal: AbortSignal.timeout(2000),
+        headers: { "Content-Type": "application/json", "X-Lumo-Code": code },
+        body: JSON.stringify({ texte }),
+      })
+        .then((r) => (r.ok ? r.json() : { mots: [] }))
+        .catch(() => ({ mots: [] })),
+    );
+  }
+  return (await reperesVoix.get(texte)).mots;
+}
 const audiosVoix = new Map(); // texte -> promesse d'URL audio (chaque phrase n'est chargée qu'une fois)
 
 /** Prépare le texte pour la voix : sans émojis, et les signes de maths dits comme un enfant les entend. */
@@ -150,6 +174,7 @@ function chargerVoix(texte) {
     audiosVoix.set(
       texte,
       fetch("/api/voix", {
+        cache: "no-store",
         signal: AbortSignal.timeout(12_000),
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Lumo-Code": code },
@@ -194,7 +219,7 @@ function prechargerVoix(textes) {
 }
 
 /** Milo parle. On peut lui donner une phrase, ou une liste de morceaux dits à la suite. */
-async function parler(texte) {
+async function parler(texte, { zone = null } = {}) {
   if (!sonActif) return;
   taire();
   const morceaux = (Array.isArray(texte) ? texte : [texte]).flatMap(morceauxVoix).filter(Boolean);
@@ -202,11 +227,18 @@ async function parler(texte) {
   if (voixServeur) {
     try {
       const urls = await Promise.all(morceaux.map(chargerVoix));
+      const reperes =
+        zone && surlignageActif && !zone.querySelector("[data-morceau]")
+          ? await Promise.all(morceaux.map(chargerReperes))
+          : [];
       if (ticket !== demandeVoix || !sonActif) return;
       $("#etat-voix")?.remove();
-      for (const url of urls) {
+      for (const [i, url] of urls.entries()) {
         if (ticket !== demandeVoix || !sonActif) return; // une autre phrase a été demandée entre-temps
-        await jouerMorceau(url);
+        await jouerMorceau(
+          url,
+          zone && surlignageActif ? creerSuiviLecture(zone, i, reperes[i] ?? []) : null,
+        );
       }
       return;
     } catch {
@@ -231,14 +263,27 @@ function signalerVoixManquante() {
 }
 
 /** Joue un morceau de voix, avec les lèvres de Milo qui suivent. Se termine quand le morceau est fini. */
-function jouerMorceau(url) {
+function jouerMorceau(url, suivi = null) {
   return new Promise((fini, rejeter) => {
     const el = new Audio(url);
     el.preservesPitch = true;
     el.playbackRate = REGLAGE_VOIX;
-    el.onended = fini;
-    el.onpause = fini;
-    el.onerror = () => rejeter(new Error("Lecture audio impossible"));
+    const terminer = () => {
+      suivi?.arreter();
+      if (suiviLecture === suivi) suiviLecture = null;
+      fini();
+    };
+    el.onended = terminer;
+    el.onpause = terminer;
+    el.onplaying = () => {
+      suiviLecture = suivi;
+      suivi?.demarrer(el);
+    };
+    el.onwaiting = () => suivi?.arreter();
+    el.onerror = () => {
+      suivi?.arreter();
+      rejeter(new Error("Lecture audio impossible"));
+    };
     lecteur = el;
     const mesure = brancherAnalyse(el);
     el.play()
@@ -307,6 +352,8 @@ document.addEventListener("pointerdown", () => {
   } catch {}
 });
 function taire() {
+  suiviLecture?.arreter();
+  suiviLecture = null;
   demandeVoix++;
   lecteur?.pause();
   lecteur = null;
@@ -727,6 +774,8 @@ async function ecranAccueil() {
     return;
   }
   const faites = etat.quetes.filter((q) => q.statut === "terminee");
+  app.dataset.aventure = etat.aventure;
+  const aventure = UNIVERS_AVENTURE[etat.aventure] ?? UNIVERS_AVENTURE.espace;
   const aFaire = etat.quetes.filter((q) => q.statut !== "terminee");
   const finies = quetesFinies(etat);
   const toutFini = aFaire.length === 0 && faites.length > 0;
@@ -760,6 +809,7 @@ async function ecranAccueil() {
       </button>
     </div>
     ${rendezVousVue(etat.rendez_vous)}
+    <section class="u-banniere"><span class="u-mini-art">${illustrationUnivers(etat.aventure)}</span><span><strong>${echapper(aventure.titre)}</strong>Explore les lieux avec Milo.</span><button class="lien" id="ouvrir-univers">Mon univers →</button></section>
     <div class="section-titre"><h2>Mon parcours</h2><span>${faites.length}/${etat.quetes.length}</span></div>
     ${aFaire.length ? '<button class="lien" id="voir-etape">Aller à ma mission ↓</button>' : ""}
     ${faites.length ? '<p class="carte-aide">Touche une coche pour rejouer.</p>' : ""}
@@ -768,8 +818,10 @@ async function ecranAccueil() {
     ${barreNav("quetes")}`);
 
   // Les missions initiales restent sur la carte ; les révisions ont leurs propres résultats.
-  const ordre = [...faites, ...aFaire];
+  const lieux = new Map(parcoursUnivers(etat.quetes, etat.aventure).map((q) => [q.id, q]));
+  const ordre = [...faites, ...aFaire].map((q) => lieux.get(q.id));
   brancherRendezVous(app, etat.rendez_vous, appel, identifiantReponse, ecranAccueil);
+  $("#ouvrir-univers").onclick = ecranUnivers;
   if (ordre.length) dessinerChemin(ordre, aFaire[0]?.id, toutFini, finies);
   else $("#chemin").innerHTML = '<p class="vide">Tes quêtes apparaîtront ici.</p>';
 
@@ -835,7 +887,7 @@ function dessinerChemin(ordre, actuelId, toutFini, finies) {
   const indexActuel = actuelId ? ordre.findIndex((q) => q.id === actuelId) : ordre.length;
   const d = trace(n - 1);
 
-  const DECOS = [
+  const DECOS_NATURE = [
     '<rect x="-3" y="2" width="6" height="16" rx="2" fill="#D9B58F"/><circle cy="-6" r="15" fill="#B7EBCB"/><circle cx="-9" cy="2" r="9" fill="#A2E2BD"/>',
     '<ellipse rx="24" ry="9" fill="#fff"/><ellipse cx="-8" cy="-7" rx="12" ry="10" fill="#fff"/><ellipse cx="8" cy="-7" rx="9" ry="8" fill="#fff"/>',
     `<g fill="#FFD866">${[
@@ -850,6 +902,20 @@ function dessinerChemin(ordre, actuelId, toutFini, finies) {
       .join("")}</g>`,
     '<ellipse rx="20" ry="11" fill="#C3EED3"/><circle cx="-7" cy="-5" r="3.5" fill="#FF9EB5"/><circle cx="7" cy="-3" r="3.5" fill="#FFD866"/><circle cx="0" cy="-8" r="3" fill="#B3A2E8"/>',
   ];
+  const DECOS =
+    app.dataset.aventure === "medieval"
+      ? [
+          '<path d="M-25 15V-10h12v-12h12v12h12v-12h12v37Z" fill="#baa4d3"/><path d="M-7 15V3a7 7 0 0 1 14 0v12" fill="#8c709f"/>',
+          DECOS_NATURE[0],
+          '<path d="M-22 8 0-17 22 8Z" fill="#c48998"/><rect x="-16" y="8" width="32" height="21" rx="3" fill="#fff0d1"/>',
+        ]
+      : app.dataset.aventure === "jardin"
+        ? DECOS_NATURE
+        : [
+            '<circle r="19" fill="#b8a3df"/><ellipse rx="29" ry="7" transform="rotate(-22)" fill="none" stroke="#ffcc76" stroke-width="5"/>',
+            '<path d="M-10 18V-7Q0-32 10-7V18Z" fill="#fff1db"/><circle cy="-3" r="5" fill="#89cddd"/><path d="m-6 18 6 15 6-15" fill="#ffcc76"/>',
+            DECOS_NATURE[2],
+          ];
   let decos = "";
   for (let i = 0; i < n - 1; i++) {
     const milieuX = (pts[i].x + pts[i + 1].x) / 2;
@@ -886,7 +952,7 @@ function dessinerChemin(ordre, actuelId, toutFini, finies) {
       `
       ${actuel ? `<span class="commencer">${q.statut === "en_cours" ? "Reprendre" : "Commencer"}</span>` : ""}
       <button class="noeud${fait ? " fait" : ""}${actuel ? " actuel" : ""}" aria-label="${echapper(q.titre)}${fait ? " · Refaire cette mission" : ""}">${ic(fait ? "check" : iconeMatiere(q.matiere))}</button>
-      <span class="etiquette ${cote(i)}"><small>${echapper(q.matiere)}</small>${echapper(q.titre)}${fait ? "<small>Terminée · Refaire</small>" : q.statut === "en_cours" ? "<small>En cours</small>" : ""}</span>`,
+      <span class="etiquette ${cote(i)}"><span class="lieu-quete">${echapper(q.lieu)}</span><small>${echapper(q.matiere)}</small>${echapper(q.titre)}${fait ? "<small>Terminée · Refaire</small>" : q.statut === "en_cours" ? "<small>En cours</small>" : ""}</span>`,
       fait ? "fait" : "",
     );
     const noeud = etape.querySelector(".noeud");
@@ -913,10 +979,10 @@ function dessinerChemin(ordre, actuelId, toutFini, finies) {
 function barreNav(actif) {
   const onglet = (id, icone, texte) =>
     `<button class="onglet${actif === id ? " actif" : ""}" data-onglet="${id}" ${actif === id ? 'aria-current="page"' : ""}>${ic(icone)}<span>${texte}</span></button>`;
-  return `<nav class="nav-bas" aria-label="Navigation">${onglet("quetes", "etoile", "Mes quêtes")}${onglet("maison", "maison", "Mon espace")}</nav>`;
+  return `<nav class="nav-bas" aria-label="Navigation">${onglet("quetes", "livre", "Mes quêtes")}${onglet("univers", "etoile", "Mon univers")}${onglet("maison", "maison", "Mon espace")}</nav>`;
 }
 function brancherNav(finies) {
-  document.querySelectorAll(".onglet").forEach((b) => {
+  app.querySelectorAll(".nav-bas .onglet").forEach((b) => {
     b.addEventListener("click", () => {
       if (b.classList.contains("actif")) {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -924,8 +990,32 @@ function brancherNav(finies) {
       }
       son("clic");
       taire();
-      b.dataset.onglet === "maison" ? ecranChezPip(finies) : ecranAccueil();
+      b.dataset.onglet === "maison"
+        ? ecranChezPip(finies)
+        : b.dataset.onglet === "univers"
+          ? ecranUnivers()
+          : ecranAccueil();
     });
+  });
+}
+
+function installerNavigation(actif) {
+  app.querySelector(".nav-bas")?.remove();
+  app.insertAdjacentHTML("beforeend", barreNav(actif));
+  brancherNav();
+}
+
+function ecranUnivers() {
+  taire();
+  return ouvrirUnivers({
+    app,
+    afficher,
+    appel,
+    identifiantReponse,
+    retour: ecranAccueil,
+    jouer: (q) => (q.statut === "terminee" ? ecranRevision(q.id) : ecranMission(q.id)),
+    pipSvg,
+    navigation: () => installerNavigation("univers"),
   });
 }
 
@@ -981,11 +1071,65 @@ async function ecranMission(id) {
     essais: {},
     faites: quete.questions.filter((q) => q.terminee).length,
     total: quete.questions.length,
-    etoiles: quete.questions.filter((q) => q.reussie).length,
+    etoiles: quete.revision ? 0 : quete.questions.filter((q) => q.reussie).length,
     serie: 0,
   };
+  app.dataset.aventure = quete.aventure;
+  try {
+    const etat = await appel("/api/moi");
+    const lieu = parcoursUnivers(etat.quetes, quete.aventure).find((q) => q.id === id || q.reprise_id === id);
+    mission.lieu = lieu?.lieu ?? UNIVERS_AVENTURE[quete.aventure]?.titre;
+  } catch {
+    mission.lieu = UNIVERS_AVENTURE[quete.aventure]?.titre;
+  }
   prechargerVoix(quete.questions.map((q) => q.consigne));
-  afficherQuestion();
+  if (mission.file.length) afficherPreparation();
+  else finirMission();
+}
+
+function contenuRappel() {
+  const quete = mission.quete;
+  return `${quete.resume ? `<p class="rappel-regle">${echapper(quete.resume)}</p>` : ""}<h3>Comment jouer</h3><ul>${reperesMission(
+    quete,
+  )
+    .map((texte) => `<li>${echapper(texte)}</li>`)
+    .join("")}</ul><p>Tu peux demander un indice ou de l’aide à Milo à tout moment.</p>`;
+}
+
+function lireRappel() {
+  parler([mission.quete.resume || "On regarde comment jouer.", ...reperesMission(mission.quete)]);
+}
+
+function afficherPreparation() {
+  afficher(
+    `<div class="hero">${pipSvg("content")}<h1>Avant de commencer</h1><p>${echapper(mission.quete.titre)}</p></div><section class="carte preparation-mission" aria-label="Tes repères pour la mission">${contenuRappel()}<div class="boutons"><button class="btn blanc" id="ecouter-rappel">${ic("sonOn")} Écouter</button><button class="btn" id="commencer-mission">${mission.faites || mission.file.some((q) => q.essais) ? "Continuer ma mission" : "C’est parti !"}</button></div><button class="lien" id="retour-preparation">Retour à la carte</button></section>`,
+  );
+  $("#ecouter-rappel").onclick = lireRappel;
+  $("#commencer-mission").onclick = afficherQuestion;
+  $("#retour-preparation").onclick = ecranAccueil;
+}
+
+function ouvrirRappel() {
+  const fond = modale(
+    `<h2>Mes petits repères</h2>${contenuRappel()}<div class="boutons"><button class="btn blanc" id="ecouter-rappel">Écouter</button><button class="btn" id="fermer-rappel">Revenir à l’exercice</button></div>`,
+  );
+  fond.querySelector("#ecouter-rappel").onclick = lireRappel;
+  fond.querySelector("#fermer-rappel").onclick = () => {
+    taire();
+    fermerModale(fond);
+    $("#rappel-mission")?.focus();
+  };
+}
+
+function montrerAide(q, niveau) {
+  const aide = accompagnement(q);
+  const texte = niveau === 1 ? aide.indice : aide.aide;
+  const panneau = $("#aide-exercice");
+  panneau.hidden = false;
+  panneau.innerHTML = `<strong>${niveau === 1 ? "Un petit indice" : "On cherche ensemble"}</strong><p>${echapper(texte)}</p><button class="lien" id="ecouter-aide">${ic("sonOn")} Écouter l’aide</button>`;
+  $("#ecouter-aide").onclick = () => parler(texte);
+  $("#demander-aide").textContent = niveau === 1 ? "Aide-moi étape par étape" : "Relire l’indice";
+  $("#demander-aide").onclick = () => montrerAide(q, niveau === 1 ? 2 : 1);
 }
 
 function afficherQuestion() {
@@ -998,10 +1142,15 @@ function afficherQuestion() {
     <div class="barre-haut">
       <button class="icone-btn plat" id="quitter" aria-label="Faire une pause">${ic("croix")}</button>
       <div class="progres${faites ? "" : " vide"}"><div style="width:${Math.round((faites / total) * 100)}%"></div></div>
-      <span class="pastille etoiles" id="compteur">${ic("etoile")} <b>${mission.etoiles}</b></span>
+      ${mission.quete.revision ? '<span class="pastille">Entraînement</span>' : `<span class="pastille etoiles" id="compteur">${ic("etoile")} <b>${mission.etoiles}</b></span>`}
     </div>
     ${scene()}
-    <div class="pip-bloc">${pipSvg("content")}<p class="bulle consigne">${echapper(q.consigne)}<button class="lire" id="lire" aria-label="Réécouter la consigne">${ic("sonOn")}</button></p></div>
+    ${mission.lieu ? `<span class="mission-lieu">${echapper(mission.lieu)} · ${echapper(mission.quete.titre)}</span>` : ""}
+    <div class="pip-bloc">${pipSvg("content")}<p class="bulle consigne"><span id="texte-consigne">${texteSurlignable(q.consigne)}</span><button class="lire" id="lire" aria-label="Réécouter la consigne">${ic("sonOn")}</button></p></div>
+    <button class="lien suivi-lecture" id="suivi-lecture" aria-pressed="${surlignageActif}">Surlignage : ${surlignageActif ? "activé" : "désactivé"}</button>
+    ${q.illustration && !["figures", "diagonales"].includes(q.type) ? illustrationHtml(q.illustration) : ""}
+    <div class="outils-apprentissage"><button class="lien" id="rappel-mission">Mes petits repères</button><button class="lien" id="demander-aide" aria-controls="aide-exercice">Un indice</button></div>
+    <aside class="aide-exercice" id="aide-exercice" aria-live="polite" hidden></aside>
     <div id="reponse"></div>
     <div class="pied" id="pied"><div class="pied-int"><button class="btn" id="verifier" disabled>Vérifier</button></div></div>`);
 
@@ -1013,14 +1162,24 @@ function afficherQuestion() {
     verifierBtn.disabled = !choisi;
   };
   (JEUX[q.type] ?? jeuTexte)(zone, q, pret);
+  $("#rappel-mission").onclick = ouvrirRappel;
+  $("#demander-aide").onclick = () => montrerAide(q, 1);
+  if ((mission.essais[q.id] ?? q.essais) > 0) montrerAide(q, 1);
   verifierBtn.addEventListener("click", () => verifier(q));
   const aDire = q.type === "dictee" ? [q.consigne, q.a_dire] : q.consigne;
   $("#lire").addEventListener("click", () => {
     pipHumeur("content", "saute");
-    parler(aDire);
+    parler(aDire, { zone: $("#texte-consigne") });
   });
   $("#quitter").addEventListener("click", demanderPause);
-  parler(aDire);
+  $("#suivi-lecture").onclick = () => {
+    surlignageActif = !surlignageActif;
+    ecrire("lumo-surlignage", surlignageActif ? "oui" : "non");
+    $("#suivi-lecture").setAttribute("aria-pressed", String(surlignageActif));
+    $("#suivi-lecture").textContent = `Surlignage : ${surlignageActif ? "activé" : "désactivé"}`;
+    if (!surlignageActif) suiviLecture?.arreter();
+  };
+  parler(aDire, { zone: $("#texte-consigne") });
 }
 
 // ---------- Les jeux ----------
@@ -1201,6 +1360,8 @@ const JEUX = {
   ordre: jeuOrdre,
   associer: jeuAssocier,
   dictee: jeuDictee,
+  figures: jeuFigures,
+  diagonales: jeuDiagonales,
 };
 
 function demanderPause() {
@@ -1258,6 +1419,7 @@ async function verifier(q) {
   }
   $("#quitter").disabled = true;
   $("#verifier").disabled = true;
+  $("#reponse").inert = true;
   document.querySelectorAll("#reponse button, #reponse input").forEach((el) => (el.disabled = true));
   let r;
   try {
@@ -1265,6 +1427,7 @@ async function verifier(q) {
   } catch (erreur) {
     if (revision !== revisionEcran) return;
     mission.verrou = false;
+    $("#reponse").inert = false;
     document
       .querySelectorAll("#reponse button, #reponse input, #verifier, #quitter")
       .forEach((el) => (el.disabled = false));
@@ -1283,11 +1446,12 @@ async function verifier(q) {
     mission.file.shift();
     mission.faites++;
     mission.serie++;
-    mission.etoiles++;
+    const gagneEtoile = r.etoile_gagnee && !mission.quete.revision;
+    if (gagneEtoile) mission.etoiles++;
     el?.classList.remove("choisie");
     el?.classList.add("bonne");
     titre = mission.serie >= 3 ? `${mission.serie} d'affilée !` : auHasard(BRAVOS);
-    detail = phraseProgres(themeMission(mission.quete));
+    detail = r.explication || phraseProgres(themeMission(mission.quete));
     pied.className = "pied bravo";
     rond = ic("check");
     bouton = '<button class="btn" id="continuer">Continuer</button>';
@@ -1302,11 +1466,12 @@ async function verifier(q) {
     barre.classList.remove("vide");
     barre.firstElementChild.style.width = `${Math.round((mission.faites / mission.total) * 100)}%`;
     const compteur = $("#compteur");
-    etoileVole(el, compteur, () => {
-      compteur.querySelector("b").textContent = mission.etoiles;
-      bump(compteur);
-      son("etoile");
-    });
+    if (gagneEtoile)
+      etoileVole(el, compteur, () => {
+        compteur.querySelector("b").textContent = mission.etoiles;
+        bump(compteur);
+        son("etoile");
+      });
   } else {
     mission.serie = 0;
     $(".scene .serie")?.remove(); // la série s'arrête sans bruit : pas de « série perdue »
@@ -1323,15 +1488,17 @@ async function verifier(q) {
       rond = ic("refaire");
       titre = r.presque ? "Presque !" : "Pas grave !";
       detail = r.presque
-        ? "C'est presque ça, regarde bien les accents. On la refait tout à l'heure."
-        : "On la refera tout à l'heure.";
+        ? "C’est presque ça, regarde bien les accents."
+        : "On cherche avec un petit indice : " + accompagnement(q).indice;
+      montrerAide(q, 1);
     } else {
       // Deuxième essai : Milo montre la réponse, et on avance quand même.
       mission.file.shift();
       mission.faites++;
       rond = ic("check");
       titre = "On apprend ensemble";
-      detail = `La réponse, c'est « ${r.bonne_reponse} ». Maintenant tu la connais !`;
+      detail = `La réponse, c’est « ${r.bonne_reponse} ». ${r.explication || "Tu peux relire tes petits repères, puis en reparler avec un adulte si tu en as besoin."}`;
+      if (q.illustration) montrerCorrectionGeometrique($("#reponse"), q, r.bonne_reponse);
       document.querySelectorAll("#reponse .tuile").forEach((t) => {
         if (t.textContent === r.bonne_reponse) t.classList.add("revelee");
       });
@@ -1432,6 +1599,7 @@ async function ecranChezPip(_finies, onglet) {
       identifiantReponse,
       retour: ecranAccueil,
       souvenirs: ecranAncienneChambre,
+      navigation: () => installerNavigation("maison"),
       pipSvg,
       son,
     },

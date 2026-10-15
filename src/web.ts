@@ -22,6 +22,7 @@ import { adressePublique, traiterMcp } from "./mcp-http.ts";
 import { traiterParent } from "./parent-web.ts";
 import { lireMonde, agirMonde } from "./monde.ts";
 import { choisirRythme } from "./rendez-vous.ts";
+import { lireReperesVoix } from "./reperes-voix.ts";
 
 const PORT = Number(process.env.PORT ?? 4321);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error("PORT invalide");
@@ -125,6 +126,11 @@ async function api(req: IncomingMessage, res: ServerResponse, chemin: string) {
   }
 
   // Voix de Milo (ElevenLabs). Un fichier absent est signalé sans changer de voix.
+  if (req.method === "POST" && chemin === "/api/voix/reperes") {
+    const { texte, voix } = schemaVoix.parse(await lireJson(req));
+    if (voix && !voixAutorisee(voix)) return json(res, 403, { erreur: "Voix non autorisée" });
+    return json(res, 200, await lireReperesVoix(texte, voix));
+  }
   if (req.method === "POST" && chemin === "/api/voix") {
     if (!voixDisponible()) return json(res, 503, { erreur: "Voix non configurée" });
     const { texte, voix } = schemaVoix.parse(await lireJson(req));

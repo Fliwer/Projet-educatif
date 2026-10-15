@@ -84,11 +84,15 @@ const motifs = z
   .max(12);
 const commun = { version: z.number().int().nonnegative().safe(), requete_id: z.string().uuid() };
 export const schemaCommandeMonde = z.discriminatedUnion("action", [
+  z
+    .object({ ...commun, action: z.literal("univers"), aventure: z.enum(["espace", "medieval", "jardin"]) })
+    .strict(),
   z.object({ ...commun, action: z.literal("avatar"), avatar }).strict(),
   z.object({ ...commun, action: z.literal("debloquer"), cadeau: badge }).strict(),
 ]);
 const schemaEtat = z
   .object({
+    aventure: z.enum(["espace", "medieval", "jardin"]).default("espace"),
     avatar: avatar.default({ couleur: "violet", badge: "aucun" }),
     creations: z
       .array(
@@ -106,6 +110,7 @@ const schemaEtat = z
   .passthrough(); // Conserver les anciens champs stockés, sans les interpréter ni les exposer.
 type Etat = z.infer<typeof schemaEtat>;
 const neuf = (): Etat => ({
+  aventure: "espace",
   avatar: { couleur: "violet", badge: "aucun" },
   creations: [],
 });
@@ -158,6 +163,7 @@ function vue(db: DatabaseSync, enfantId: number) {
   const prenom = String(db.prepare("SELECT prenom FROM enfants WHERE id = ?").get(enfantId)!.prenom);
   return {
     version,
+    aventure: etat.aventure,
     avatar: etat.avatar,
     creations: etat.creations,
     prenom,
@@ -227,6 +233,15 @@ export function agirMonde(db: DatabaseSync, enfantId: number, entree: unknown) {
     };
     let message = "";
     switch (commande.action) {
+      case "univers":
+        etat.aventure = commande.aventure;
+        message =
+          commande.aventure === "espace"
+            ? "En route pour les étoiles !"
+            : commande.aventure === "jardin"
+              ? "Bienvenue dans le jardin de Milo !"
+              : "Bienvenue dans le royaume de Milo !";
+        break;
       case "avatar":
         exiger(
           commande.avatar.badge === "aucun" || objets.includes(commande.avatar.badge),

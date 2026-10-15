@@ -3,10 +3,10 @@ import { db, transaction } from "./db.ts";
 import { randomInt } from "node:crypto";
 import { FUSEAU } from "./config.ts";
 import { ErreurMetier } from "./erreurs.ts";
-import { schemaQuetes } from "./formats.ts";
+import { schemaQuetes, type Illustration } from "./formats.ts";
 import { type TypeQuestion } from "./types-jeux.ts";
 import { lireParcours } from "./parcours.ts";
-import { attribuerCadeau } from "./monde.ts";
+import { attribuerCadeau, lireMonde } from "./monde.ts";
 import { lireRendezVous, enregistrerSeance } from "./rendez-vous.ts";
 export { TYPES_QUESTION } from "./types-jeux.ts";
 export type { TypeQuestion } from "./types-jeux.ts";
@@ -23,11 +23,18 @@ export type Enfant = {
   quetes_finies: number;
   soirs: number;
   dernier_jour: string | null;
+  niveau_scolaire?: string | null;
+  pays?: string | null;
+  aides?: string | null;
 };
 
 export type QuestionEntree = {
   type: TypeQuestion;
   consigne: string;
+  illustration?: Illustration;
+  indice?: string;
+  aide?: string;
+  explication?: string;
   choix?: string[]; // choix : 2 à 4 réponses proposées
   elements?: string[]; // ordre : les morceaux dans le BON ordre (l'app les mélange)
   paires?: [string, string][]; // associer : paires à relier (gauche, droite)
@@ -37,6 +44,7 @@ export type QuestionEntree = {
 const SEPARATEUR = " ‖ "; // sépare les morceaux et les paires dans une réponse enregistrée
 
 export type QueteEntree = {
+  resume?: string;
   notion?: string;
   titre: string;
   matiere: string;
@@ -162,7 +170,40 @@ export function verifierQuetes(quetes: QueteEntree[]): string[] {
     q.questions.forEach((qu, j) => {
       const ou = `Quête ${i + 1}, question ${j + 1} (${qu.type})`;
       const bonne = qu.bonne_reponse ?? "";
+      const figures = qu.illustration?.figures ?? [];
+      if (new Set(figures.map((f) => f.id)).size !== figures.length)
+        erreurs.push(`${ou} : les identifiants des figures doivent être uniques.`);
+      for (const f of figures) {
+        if (
+          (f.diagonales || f.codage_cotes || f.codage_diagonales || f.angles_droits || f.sommets) &&
+          f.points.length !== 4
+        )
+          erreurs.push(`${ou} : le codage et les diagonales demandent un quadrilatère.`);
+      }
       switch (qu.type) {
+        case "figures": {
+          const ids = bonne.split(SEPARATEUR);
+          if (
+            !figures.length ||
+            !bonne ||
+            ids.some((id) => !figures.some((f) => f.id === id)) ||
+            new Set(ids).size !== ids.length
+          )
+            erreurs.push(`${ou} : sélectionner des identifiants uniques présents dans l’illustration.`);
+          break;
+        }
+        case "diagonales":
+          if (
+            figures.length !== 1 ||
+            figures[0].points.length !== 4 ||
+            figures[0].diagonales ||
+            figures[0].codage_diagonales ||
+            bonne !== "AC ‖ BD"
+          )
+            erreurs.push(
+              `${ou} : un quadrilatère sans diagonales déjà tracées et la réponse « AC ‖ BD » sont requis.`,
+            );
+          break;
         case "choix": {
           const choix = qu.choix ?? [];
           if (choix.length < 2 || choix.length > 4) erreurs.push(`${ou} : il faut 2 à 4 choix.`);
@@ -218,14 +259,14 @@ export function creerQuetes(enfant: Enfant, quetes: QueteEntree[]) {
   return transaction(() => {
     const cree = maintenant();
     const ajoutQuete = db.prepare(
-      "INSERT INTO quetes (enfant_id, titre, matiere, cree_le, notion, recompense_cle) VALUES (?, ?, ?, ?, ?, lower(hex(randomblob(16))))",
+      "INSERT INTO quetes (enfant_id, titre, matiere, cree_le, notion, resume, recompense_cle) VALUES (?, ?, ?, ?, ?, ?, lower(hex(randomblob(16))))",
     );
     const ajoutQuestion = db.prepare(
-      "INSERT INTO questions (quete_id, ordre, type, consigne, choix, bonne) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO questions (quete_id, ordre, type, consigne, choix, bonne, illustration, indice, aide, explication) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     );
     const creees: { id: number; titre: string; questions: number }[] = [];
     for (const q of quetes) {
-      const r = ajoutQuete.run(enfant.id, q.titre, q.matiere, cree, q.notion ?? null);
+      const r = ajoutQuete.run(enfant.id, q.titre, q.matiere, cree, q.notion ?? null, q.resume ?? null);
       const queteId = Number(r.lastInsertRowid);
       q.questions.forEach((qu, ordre) => {
         const donnees =
@@ -245,6 +286,10 @@ export function creerQuetes(enfant: Enfant, quetes: QueteEntree[]) {
           qu.consigne,
           donnees ? JSON.stringify(donnees) : null,
           bonneReponse(qu),
+          qu.illustration ? JSON.stringify(qu.illustration) : null,
+          qu.indice ?? null,
+          qu.aide ?? null,
+          qu.explication ?? null,
         );
       });
       creees.push({ id: queteId, titre: q.titre, questions: q.questions.length });
@@ -277,6 +322,7 @@ export function etatEnfant(enfant: Enfant) {
     prenom: enfant.prenom,
     rendez_vous: lireRendezVous(db, enfant.id),
     univers: enfant.univers,
+    aventure: lireMonde(db, enfant.id).aventure,
     soirs: enfant.soirs,
     etoiles,
     ...niveau(enfant),
@@ -291,9 +337,15 @@ function questionPourEnfant(q: {
   consigne: string;
   choix: string | null;
   bonne: string;
+  illustration?: string | null;
 }) {
   const donnees = q.choix ? JSON.parse(q.choix) : null;
-  const base = { id: q.id, type: q.type, consigne: q.consigne };
+  const base = {
+    id: q.id,
+    type: q.type,
+    consigne: q.consigne,
+    ...(q.illustration ? { illustration: JSON.parse(q.illustration) as Illustration } : {}),
+  };
   switch (q.type) {
     case "choix":
     case "vrai_faux":
@@ -317,20 +369,32 @@ export function questionsQuete(enfant: Enfant, queteId: number) {
   const quete = db
     .prepare("SELECT * FROM quetes WHERE id = ? AND enfant_id = ? AND archivee=0")
     .get(queteId, enfant.id) as
-    | { id: number; titre: string; matiere: string; statut: string; origine_id: number | null }
+    | {
+        id: number;
+        titre: string;
+        matiere: string;
+        statut: string;
+        origine_id: number | null;
+        resume: string | null;
+      }
     | undefined;
   if (!quete) return undefined;
   if (quete.statut === "a_faire")
     db.prepare("UPDATE quetes SET statut = 'en_cours' WHERE id = ?").run(queteId);
   const questions = (
     db
-      .prepare("SELECT id, type, consigne, choix, bonne FROM questions WHERE quete_id = ? ORDER BY ordre")
+      .prepare(
+        "SELECT id, type, consigne, choix, bonne, illustration, indice, aide FROM questions WHERE quete_id = ? ORDER BY ordre",
+      )
       .all(queteId) as {
       id: number;
       type: string;
       consigne: string;
       choix: string | null;
       bonne: string;
+      illustration: string | null;
+      indice: string | null;
+      aide: string | null;
     }[]
   ).map((q) => {
     const bilan = db
@@ -340,6 +404,8 @@ export function questionsQuete(enfant: Enfant, queteId: number) {
       .get(q.id)!;
     return {
       ...questionPourEnfant(q),
+      indice: q.indice,
+      aide: q.aide,
       essais: Number(bilan.essais),
       terminee: Boolean(bilan.reussie) || Number(bilan.essais) >= 2,
       reussie: Boolean(bilan.reussie),
@@ -349,7 +415,9 @@ export function questionsQuete(enfant: Enfant, queteId: number) {
     id: quete.id,
     titre: quete.titre,
     matiere: quete.matiere,
+    resume: quete.resume,
     univers: enfant.univers,
+    aventure: lireMonde(db, enfant.id).aventure,
     revision: quete.origine_id !== null,
     questions,
   };
@@ -363,10 +431,12 @@ export function enregistrerReponse(enfant: Enfant, questionId: number, valeur: s
   return transaction(() => {
     const q = db
       .prepare(
-        `SELECT qu.bonne, qu.type, qe.statut FROM questions qu JOIN quetes qe ON qe.id = qu.quete_id
+        `SELECT qu.bonne, qu.type, qu.explication, qe.statut, qe.origine_id FROM questions qu JOIN quetes qe ON qe.id = qu.quete_id
       WHERE qu.id = ? AND qe.enfant_id = ? AND qe.archivee=0`,
       )
-      .get(questionId, enfant.id) as { bonne: string; type: string; statut: string } | undefined;
+      .get(questionId, enfant.id) as
+      | { bonne: string; type: string; explication: string | null; statut: string; origine_id: number | null }
+      | undefined;
     if (!q) return undefined;
     const precedent = requeteId
       ? db.prepare("SELECT * FROM reponses WHERE requete_id = ?").get(requeteId)
@@ -382,8 +452,9 @@ export function enregistrerReponse(enfant: Enfant, questionId: number, valeur: s
       throw new ErreurMetier("Cette question est déjà terminée.", 409);
     const comparer = q.type === "dictee" ? normaliserDictee : normaliser;
     const trier = (s: string) => JSON.stringify(s.split(SEPARATEUR).map(normaliser).sort());
-    const correcte =
-      q.type === "associer" ? trier(valeur) === trier(q.bonne) : comparer(valeur) === comparer(q.bonne);
+    const correcte = ["associer", "figures", "diagonales"].includes(q.type)
+      ? trier(valeur) === trier(q.bonne)
+      : comparer(valeur) === comparer(q.bonne);
     const presque = q.type === "dictee" && !correcte && normaliser(valeur) === normaliser(q.bonne);
     if (!precedent)
       db.prepare(
@@ -409,8 +480,8 @@ export function enregistrerReponse(enfant: Enfant, questionId: number, valeur: s
       presque,
       essais,
       terminee,
-      etoile_gagnee: correcte,
-      ...(terminee ? { bonne_reponse: lisible } : {}),
+      etoile_gagnee: correcte && q.origine_id === null,
+      ...(terminee ? { bonne_reponse: lisible, explication: q.explication } : {}),
     };
   });
 }

@@ -1,0 +1,14 @@
+export const preparationLecon = `
+<section id="preparer">
+  <p class="eyebrow">Le pilote · Photo dans votre assistant</p><h2 tabindex="-1">Une photo, puis des exercices à vérifier.</h2>
+  <ol class="etapes-assistant"><li><strong>Connectez Lumo une seule fois.</strong><span>Utilisez votre invitation privée pour configurer votre assistant. Le parcours d’invitation est prévu pour Claude ; la connexion distante à ChatGPT reste à valider.</span></li><li><strong>Joignez la photo dans votre assistant.</strong><span>Prenez la photo depuis la conversation ou choisissez une image existante, puis collez le message ci-dessous.</span></li><li><strong>Ouvrez le brouillon dans Lumo.</strong><span>Vérifiez les exercices et leurs réponses, puis validez ceux à envoyer à votre enfant.</span></li></ol>
+  <p id="profil-demande-resume">Votre assistant connecté retrouvera les profils de votre famille. Il vous demandera les repères scolaires s’ils manquent.</p>
+  <button type="button" class="bouton-secondaire" id="completer-profil" data-vue="profils" hidden>Compléter le profil de l’enfant</button>
+  <form id="preparer-demande">
+    <input id="enfant-parent" name="enfant" type="hidden"><input id="classe-parent" name="classe" type="hidden"><input id="pays-parent" name="pays" type="hidden"><input id="aides-parent" name="aides" type="hidden">
+    <label for="contexte-photo">Une consigne ou un objectif à préciser ? <span class="discret">Facultatif</span><textarea id="contexte-photo" name="contexte_photo" rows="2" maxlength="600" placeholder="Par exemple : reconnaître les parties de cette plante, pour la leçon de sciences."></textarea></label>
+    <p id="erreur-demande" role="alert"></p><button type="submit">Préparer le message pour l’assistant</button>
+  </form>
+  <div id="demande-prete" hidden><h3 id="titre-message-pret" tabindex="-1">Joignez la photo dans votre assistant</h3><p id="instruction-message-pret">Joignez la photo à votre conversation avec Lumo, puis copiez ce message :</p><details class="detail-message-assistant"><summary>Voir le message préparé</summary><label for="message-lumo">Message pour l’assistant</label><textarea id="message-lumo" readonly rows="8"></textarea></details><button id="copier-message" type="button" hidden>Copier le message</button><p id="copie-statut" role="status" aria-live="polite"></p><a class="bouton-secondaire" href="https://claude.ai/" target="_blank" rel="noopener noreferrer">Ouvrir Claude ↗</a><p class="discret">Le bouton ouvre Claude. Il ne joint pas la photo et ne configure pas le connecteur à votre place.</p><p>Ouvrez ensuite le lien donné par votre assistant pour vérifier les exercices. Aucune mission n’est envoyée à l’enfant avant votre validation.</p></div>
+  <noscript><p>Activez JavaScript pour préparer le message à partir du profil enfant.</p></noscript>
+</section>`;
